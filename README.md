@@ -2,7 +2,7 @@
 
 This is a plugin for Obsidian.md that displays all your notes as cards for better visual navigation and revision of the notes.
 
-![Thumbnail](./assets/Thumbnail.png)
+![Thumbnail](./assets/Thumbnail2.png)
 
 ## Features
 
