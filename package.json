@@ -1,6 +1,6 @@
 {
   "name": "cards-view-beta",
-  "version": "1.12.0",
+  "version": "1.12.1",
   "description": "Plugin for Obsidian.md. View all your notes in a form of cards for visual understanding.",
   "main": "main.js",
   "scripts": {
