@@ -5,6 +5,7 @@ import "../styles.css";
 import { ItemView, TAbstractFile, TFile, WorkspaceLeaf } from "obsidian";
 import store, { Sort } from "./components/store";
 
+import type CardsViewPlugin from "main";
 import type { CardsViewSettings } from "./settings";
 import Root from "./components/Root.svelte";
 import { get } from "svelte/store";
@@ -14,9 +15,11 @@ export const VIEW_TYPE = "cards-view";
 export class CardsViewPluginView extends ItemView {
   private settings: CardsViewSettings;
   private svelteRoot?: Root;
+  private plugin: CardsViewPlugin;
 
-  constructor(settings: CardsViewSettings, leaf: WorkspaceLeaf) {
+  constructor(plugin: CardsViewPlugin, settings: CardsViewSettings, leaf: WorkspaceLeaf) {
     super(leaf);
+    this.plugin = plugin;
     this.settings = settings;
   }
 
