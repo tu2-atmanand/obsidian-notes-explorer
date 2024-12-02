@@ -30,6 +30,9 @@
   const sortIcon = (element: HTMLElement) => {
     setIcon(element, "arrow-down-wide-narrow");
   };
+  const refreshIcon = (element: HTMLElement) => {
+    setIcon(element, "refresh-ccw");
+  };
 
   const searchInput = (element: HTMLElement) => {
     const searchInput = new SearchComponent(element);
@@ -98,7 +101,18 @@
 </script>
 
 <div class="action-bar" bind:this={viewContent}>
-  <button class="clickable-icon sort-button" use:sortIcon on:click={sortMenu} />
+  <div class="buttons-area">
+    <button
+      class="clickable-icon refresh-button"
+      use:refreshIcon
+      on:click={() => notesGrid.layout()}
+    />
+    <button
+      class="clickable-icon sort-button"
+      use:sortIcon
+      on:click={sortMenu}
+    />
+  </div>
   <div class="action-bar__search" use:searchInput />
   <div class="action-bar__tags">
     <div class="action-bar__tags__list">
