@@ -1,15 +1,9 @@
 <!-- ./src/components/Root.svelte -->
 
 <script lang="ts">
-  import {
-    debounce,
-    Menu,
-    SearchComponent,
-    setIcon,
-  } from "obsidian";
+  import { debounce, Menu, SearchComponent, setIcon } from "obsidian";
   import { afterUpdate, onMount } from "svelte";
   import MiniMasonry from "minimasonry";
-
   import Card from "./Card.svelte";
   import {
     tags,
@@ -20,6 +14,7 @@
     sort,
     viewIsVisible,
     settings,
+    refreshSignal,
   } from "./store";
 
   let notesGrid: MiniMasonry;
@@ -96,6 +91,11 @@
 
       notesGrid.layout();
       $skipNextTransition = false;
+
+      if($refreshSignal) {
+        notesGrid.layout();
+        $refreshSignal = false;
+      }
     }),
   );
 </script>

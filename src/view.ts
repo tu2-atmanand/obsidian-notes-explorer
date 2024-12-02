@@ -3,7 +3,7 @@
 import "../styles.css";
 
 import { ItemView, TAbstractFile, TFile, WorkspaceLeaf } from "obsidian";
-import store, { Sort, view } from "./components/store";
+import store, { Sort } from "./components/store";
 
 import type { CardsViewSettings } from "./settings";
 import Root from "./components/Root.svelte";
@@ -73,6 +73,10 @@ export class CardsViewPluginView extends ItemView {
         }
       )
     );
+
+    this.app.workspace.on("resize", () => {
+      store.refreshSignal.set(true);
+    });
 
     this.svelteRoot = new Root({
       target: viewContent,

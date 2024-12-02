@@ -125,6 +125,7 @@ export const displayedFiles = derived(
 
 export const viewIsVisible = writable(false);
 export const skipNextTransition = writable(true);
+export const refreshSignal = writable<boolean>(false);
 
 export const tags = derived(
   [displayedFiles, appCache],
@@ -157,6 +158,7 @@ export default {
   displayedFiles,
   viewIsVisible,
   skipNextTransition,
+  refreshSignal,
   tags,
   app,
   view,
