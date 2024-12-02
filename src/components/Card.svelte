@@ -155,19 +155,15 @@
       //   getFrontMatterInfo(await file.vault.cachedRead(file)),
       // );
       // console.log("What is the value of frontmatter :", frontmatter);
-
       // contentDiv.getElementsByClassName('token key atrule')
       // const frontmatter = getFrontMatterInfo()
-
       // Get frontmatter data from the file
       // const frontmatter = metadataCache.getFileCache(file)?.frontmatter;
       // console.log("Following is the frontmatter I got now :", frontmatter, " | For the file :", file.path);
-
       // if (frontmatter && frontmatter.tags) {
       //   const frontmatterTags = Array.isArray(frontmatter.tags)
       //     ? frontmatter.tags // If tags are in an array format
       //     : [frontmatter.tags]; // If tags are a single string
-
       //   for (let tag of $settings.tagColors) {
       //     if (frontmatterTags.includes(tag.name)) {
       //       backgroundColor = tag.color;
@@ -211,9 +207,11 @@
   role="link"
   tabindex="0"
 >
-  <div class="top-bar">
-    {#if displayFilename}<div>{file.basename}</div>{/if}
-  </div>
+  {#if displayFilename}
+    <div class="top-bar">
+      <div>{file.basename}</div>
+    </div>
+  {/if}
 
   <div
     class="card-content"
