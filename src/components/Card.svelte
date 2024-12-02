@@ -9,7 +9,12 @@
     TFile,
   } from "obsidian";
   import { afterUpdate, createEventDispatcher, onMount } from "svelte";
-  import { skipNextTransition, app, view, settings, tags } from "./store";
+  import {
+    skipNextTransition,
+    app,
+    view,
+    settings,
+  } from "./store";
   import { TitleDisplayMode } from "../settings";
   import type { Child } from "svelte-eslint-parser/lib/parser/compat";
 
@@ -151,26 +156,25 @@
         }
       }
     } else {
-      // const frontmatter = parseFrontMatterTags(
-      //   getFrontMatterInfo(await file.vault.cachedRead(file)),
-      // );
-      // console.log("What is the value of frontmatter :", frontmatter);
-      // contentDiv.getElementsByClassName('token key atrule')
-      // const frontmatter = getFrontMatterInfo()
-      // Get frontmatter data from the file
-      // const frontmatter = metadataCache.getFileCache(file)?.frontmatter;
-      // console.log("Following is the frontmatter I got now :", frontmatter, " | For the file :", file.path);
-      // if (frontmatter && frontmatter.tags) {
-      //   const frontmatterTags = Array.isArray(frontmatter.tags)
-      //     ? frontmatter.tags // If tags are in an array format
-      //     : [frontmatter.tags]; // If tags are a single string
-      //   for (let tag of $settings.tagColors) {
-      //     if (frontmatterTags.includes(tag.name)) {
-      //       backgroundColor = tag.color;
-      //       break;
-      //     }
-      //   }
-      // }
+      const frontmatter = $app.metadataCache.getFileCache(file)?.frontmatter;
+
+      if (!frontmatter || !frontmatter.tags) return;
+
+      const tags = Array.isArray(frontmatter.tags)
+        ? frontmatter.tags
+        : [frontmatter.tags];
+
+      for (const tag of tags) {
+        // Case-insensitive matching of tags with $settings.tagColors
+        const matchingTag = $settings.tagColors.find(
+          (tagColor) => tagColor.name.toLowerCase() === tag.toLowerCase(),
+        );
+
+        if (matchingTag) {
+          backgroundColor = matchingTag.color;
+          break; // Exit once a match is found
+        }
+      }
     }
   };
 
@@ -188,7 +192,8 @@
   const folderIcon = (element: HTMLElement) => setIcon(element, "folder");
   const blankIcon = (element: HTMLElement) => setIcon(element, "blank");
   const vaultIcon = (element: HTMLElement) => setIcon(element, "vault");
-  const pinnedIcon = (element: HTMLElement) => setIcon(element, "square-arrow-down-left");
+  const pinnedIcon = (element: HTMLElement) =>
+    setIcon(element, "square-arrow-down-left");
 
   const dispatch = createEventDispatcher();
   onMount(async () => {

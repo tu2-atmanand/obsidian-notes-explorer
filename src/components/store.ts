@@ -24,8 +24,6 @@ export const settings = writable<CardsViewSettings>();
 export const appCache = writable<MetadataCache>();
 export const files = writable<TFile[]>([]);
 
-// export const metadataCache = new MetadataCache();
-
 export const sort = writable<Sort>(Sort.Modified);
 export const sortedFiles = derived(
   [sort, files, settings],
