@@ -12,6 +12,9 @@ import "./styles.css";
 export default class CardsViewPlugin extends Plugin {
   settings: CardsViewSettings = Object.assign({}, DEFAULT_SETTINGS);
   async onload() {
+
+    console.log("Cards View (Beta) : Loading plugin ...");
+
     this.settings = Object.assign(this.settings, await this.loadData());
     store.settings.subscribe(async () => await this.saveSettings());
     store.app.set(this.app);
@@ -48,7 +51,9 @@ export default class CardsViewPlugin extends Plugin {
     });
   }
 
-  onunload() {}
+  onunload() {
+    console.log("Cards View (Beta) : Unloading plugin ...");
+  }
 
   async activateView() {
     const { workspace } = this.app;
