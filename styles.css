@@ -103,6 +103,23 @@
     --card-gutter: var(--size-4-5);
 }
 
+.buttons-area {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+}
+
+.refresh-button {
+    border: none;
+    border-radius: 4px;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.refresh-button:hover {
+    background-color: var(--interactive-accent-hover);
+}
+
 /* Card.svelte */
 
 .card {
@@ -217,7 +234,7 @@
 .card-content {
     /* flex-grow: 1; */
     /* Allow contentDiv to take remaining space */
-    /* overflow-y: auto; */
+    overflow-y: auto;
     /* Make contentDiv scrollable if content overflows */
     padding-inline: 8px;
 }

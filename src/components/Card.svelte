@@ -188,6 +188,7 @@
   const folderIcon = (element: HTMLElement) => setIcon(element, "folder");
   const blankIcon = (element: HTMLElement) => setIcon(element, "blank");
   const vaultIcon = (element: HTMLElement) => setIcon(element, "vault");
+  const pinnedIcon = (element: HTMLElement) => setIcon(element, "square-arrow-down-left");
 
   const dispatch = createEventDispatcher();
   onMount(async () => {
@@ -222,12 +223,21 @@
   ></div>
 
   <div class="card-info">
-    <button
-      class="clickable-icon"
-      class:is-active={pinned}
-      use:pinButton
-      on:click|stopPropagation={togglePin}
-    />
+    {#if pinned}
+      <button
+        class="clickable-icon"
+        class:is-active={pinned}
+        use:pinnedIcon
+        on:click|stopPropagation={togglePin}
+      />
+    {:else}
+      <button
+        class="clickable-icon"
+        class:is-active={pinned}
+        use:pinButton
+        on:click|stopPropagation={togglePin}
+      />
+    {/if}
     {#if file.parent != null && file.parent.path !== "/"}
       <div class={folderIconClass}>
         <span use:folderIcon />{file.parent.path}
