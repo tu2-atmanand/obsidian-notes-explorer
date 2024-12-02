@@ -92,7 +92,7 @@
       notesGrid.layout();
       $skipNextTransition = false;
 
-      if($refreshSignal) {
+      if ($refreshSignal) {
         notesGrid.layout();
         $refreshSignal = false;
       }
@@ -101,19 +101,19 @@
 </script>
 
 <div class="action-bar" bind:this={viewContent}>
-  <div class="buttons-area">
-    <button
-      class="clickable-icon refresh-button"
-      use:refreshIcon
-      on:click={() => notesGrid.layout()}
-    />
+  <button
+    class="clickable-icon refresh-button"
+    use:refreshIcon
+    on:click={() => notesGrid.layout()}
+  />
+  <div class="search-component">
+    <div class="action-bar__search" use:searchInput />
     <button
       class="clickable-icon sort-button"
       use:sortIcon
       on:click={sortMenu}
     />
   </div>
-  <div class="action-bar__search" use:searchInput />
   <div class="action-bar__tags">
     <div class="action-bar__tags__list">
       {#each $tags as tag}

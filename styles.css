@@ -103,10 +103,10 @@
     --card-gutter: var(--size-4-5);
 }
 
-.buttons-area {
+.search-component{
     display: flex;
     flex-direction: row;
-    gap: 1em;
+    gap: 0.5rem;
 }
 
 .refresh-button {
