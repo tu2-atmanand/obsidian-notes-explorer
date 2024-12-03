@@ -1,7 +1,6 @@
 import {
   Notice,
   Plugin,
-  TAbstractFile,
   TFile,
   TFolder,
   WorkspaceLeaf,
@@ -31,31 +30,22 @@ export default class CardsViewPlugin extends Plugin {
     store.settings.set(this.settings);
     store.appCache.set(this.app.metadataCache);
 
-    this.registerEvent(
-      this.app.metadataCache.on("resolved", async () =>
-        store.appCache.update(() => this.app.metadataCache)
-      )
-    );
-
-    this.addSettingTab(new CardsViewSettingsTab(this.app, this));
-    this.addRibbonIcon("align-start-horizontal", "Card view", () => {
-      this.activateView();
-    });
-
-    this.addCommand({
-      id: "cards-view-plugin",
-      name: "Open card view",
-      callback: () => {
-        this.activateView();
-      },
-    });
-
-    this.registerView(
-      VIEW_TYPE,
-      (leaf) => new CardsViewPluginView(this, this.settings, leaf)
-    );
-
     this.app.workspace.onLayoutReady(() => {
+      this.registerPluginEvents();
+
+      this.createFileMenu();
+
+      this.registerCommands();
+
+      this.addSettingTab(new CardsViewSettingsTab(this.app, this));
+
+      this.registerPluginRibbonIcon();
+
+      this.registerView(
+        VIEW_TYPE,
+        (leaf) => new CardsViewPluginView(this, this.settings, leaf)
+      );
+
       if (this.settings.launchOnStart) {
         this.activateView();
       }
@@ -86,18 +76,11 @@ export default class CardsViewPlugin extends Plugin {
     store.viewIsVisible.set(true);
   }
 
-  async createFileMenu() {
+  private registerPluginEvents() {
     this.registerEvent(
-      this.app.workspace.on("file-menu", (menu, file) => {
-        if (file instanceof TFolder) {
-          menu.addItem((item) => {
-            item
-              .setTitle("Open folder in Cards View")
-              .setIcon("documents")
-              .onClick(() => this.openAllFilesInFolder(file));
-          });
-        }
-      })
+      this.app.metadataCache.on("resolved", async () =>
+        store.appCache.update(() => this.app.metadataCache)
+      )
     );
 
     this.registerDomEvent(document, "click", (evt: MouseEvent) => {
@@ -143,6 +126,39 @@ export default class CardsViewPlugin extends Plugin {
           this.openAllFilesInFolder(Tfolder);
         }
       }
+    });
+  }
+
+  async createFileMenu() {
+    this.registerEvent(
+      this.app.workspace.on("file-menu", (menu, file, source, leaf) => {
+        if (source === "link-context-menu") return;
+
+        if (file instanceof TFolder) {
+          menu.addItem((item) => {
+            item
+              .setTitle("Open folder in Cards View")
+              .setIcon("documents")
+              .onClick(() => this.openAllFilesInFolder(file));
+          });
+        }
+      })
+    );
+  }
+
+  private registerCommands() {
+    this.addCommand({
+      id: "cards-view-plugin",
+      name: "Open card view",
+      callback: () => {
+        this.activateView();
+      },
+    });
+  }
+
+  private registerPluginRibbonIcon() {
+    this.addRibbonIcon("align-start-horizontal", "Cards view (Beta)", () => {
+      this.activateView();
     });
   }
 
