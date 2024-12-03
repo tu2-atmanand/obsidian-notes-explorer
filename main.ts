@@ -1,10 +1,4 @@
-import {
-  Notice,
-  Plugin,
-  TFile,
-  TFolder,
-  WorkspaceLeaf,
-} from "obsidian";
+import { Notice, Plugin, TFile, TFolder, WorkspaceLeaf } from "obsidian";
 
 import {
   type CardsViewSettings,
@@ -13,7 +7,7 @@ import {
   Sort,
 } from "./src/settings";
 import { CardsViewPluginView, VIEW_TYPE } from "./src/view";
-import store from "./src/components/store";
+import store, { plugin, pluginIcon } from "./src/components/store";
 import "./styles.css";
 
 export default class CardsViewPlugin extends Plugin {
@@ -93,7 +87,7 @@ export default class CardsViewPlugin extends Plugin {
           if (textElement) {
             const tagName = textElement.textContent?.trim();
             if (tagName) {
-              this.openTagInCardsView(tagName);
+              // this.openTagInCardsView(tagName);
               evt.preventDefault();
             }
           }
@@ -109,7 +103,7 @@ export default class CardsViewPlugin extends Plugin {
         ) {
           const tagName = target.textContent?.trim();
           if (tagName) {
-            this.openTagInCardsView(tagName);
+            // this.openTagInCardsView(tagName);
             evt.preventDefault();
           }
         }
@@ -123,7 +117,8 @@ export default class CardsViewPlugin extends Plugin {
 
         // open it
         if (Tfolder && Tfolder instanceof TFolder) {
-          this.openAllFilesInFolder(Tfolder);
+          // this.openAllFilesInFolder(Tfolder);
+          store.folderName.set(Tfolder.name);
         }
       }
     });
@@ -135,6 +130,7 @@ export default class CardsViewPlugin extends Plugin {
         if (source === "link-context-menu") return;
 
         if (file instanceof TFolder) {
+          console.log("The value :", file.children);
           menu.addItem((item) => {
             item
               .setTitle("Open folder in Cards View")
@@ -217,9 +213,9 @@ export default class CardsViewPlugin extends Plugin {
       } else {
         // Only fetch files in the current folder
         files = folder.children.filter(
-      (child): child is TFile =>
-        child instanceof TFile && child.extension === "md"
-    );
+          (child): child is TFile =>
+            child instanceof TFile && child.extension === "md"
+        );
       }
 
       store.files.set(files);
@@ -227,48 +223,46 @@ export default class CardsViewPlugin extends Plugin {
     }
 
     await this.activateView();
-    }
   }
 
-  async openTagInCardsView(tagName: string) {
-    try {
-      const files = await this.getFilesWithTag(tagName);
-      await this.activateView();
-      const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
-      if (leaves.length > 0) {
-        const cardsView = leaves[0].view as CardsViewPluginView;
-        this.updateFiles(files, Sort.CreatedDesc);
-      } else {
-        new Notice("无法打开卡片视图");
-      }
-    } catch (error) {
-      console.error("打开标签卡片视图时出错:", tagName, error);
-      new Notice(`打开卡片视图时出错: ${this.getErrorMessage(error)}`);
-    }
-  }
+  // async openTagInCardsView(tagName: string) {
+  //   try {
+  //     const files = await this.getFilesWithTag(tagName);
+  //     await this.activateView();
+  //     const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
+  //     if (leaves.length > 0) {
+  //       this.updateFiles(files, Sort.CreatedDesc);
+  //     } else {
+  //       new Notice("无法打开卡片视图");
+  //     }
+  //   } catch (error) {
+  //     console.error("打开标签卡片视图时出错:", tagName, error);
+  //     new Notice(`打开卡片视图时出错: ${this.getErrorMessage(error)}`);
+  //   }
+  // }
 
-  private async getFilesWithTag(tagName: string): Promise<TFile[]> {
-    const files: TFile[] = [];
-    for (const file of this.app.vault.getMarkdownFiles()) {
-      const cache = this.app.metadataCache.getFileCache(file);
-      if (cache?.tags?.some((tag) => tag.tag === `#${tagName}`)) {
-        files.push(file);
-      }
-    }
-    return files;
-  }
+  // private async getFilesWithTag(tagName: string): Promise<TFile[]> {
+  //   const files: TFile[] = [];
+  //   for (const file of this.app.vault.getMarkdownFiles()) {
+  //     const cache = this.app.metadataCache.getFileCache(file);
+  //     if (cache?.tags?.some((tag) => tag.tag === `#${tagName}`)) {
+  //       files.push(file);
+  //     }
+  //   }
+  //   return files;
+  // }
+
+  // private updateFiles(file: TFolder, sortType: Sort = this.settings.defaultSort) {
+  //   // store.files.set(files);
+  //   store.folders.set([..., file]);
+  //   store.displayedCount.set(50);
+  //   store.sort.set(sortType);
+  // }
 
   private getErrorMessage(error: unknown): string {
     if (error instanceof Error) {
       return error.message;
     }
     return String(error);
-  }
-
-  private updateFiles(files: TFile[], sortType: Sort = Sort.EditedDesc) {
-    store.files.set(files);
-    store.displayedCount.set(50);
-    store.searchQuery.set("");
-    store.sort.set(sortType);
   }
 }
