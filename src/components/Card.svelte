@@ -198,6 +198,7 @@
   const dispatch = createEventDispatcher();
   onMount(async () => {
     await renderFile(contentDiv);
+    updateBackgroundColor();
     dispatch("loaded");
   });
 
