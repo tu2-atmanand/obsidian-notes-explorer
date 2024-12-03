@@ -138,7 +138,7 @@ export default class CardsViewPlugin extends Plugin {
           menu.addItem((item) => {
             item
               .setTitle("Open folder in Cards View")
-              .setIcon("documents")
+              .setIcon(pluginIcon)
               .onClick(() => this.openAllFilesInFolder(file));
           });
         }
@@ -157,7 +157,7 @@ export default class CardsViewPlugin extends Plugin {
   }
 
   private registerPluginRibbonIcon() {
-    this.addRibbonIcon("align-start-horizontal", "Cards view (Beta)", () => {
+    this.addRibbonIcon(pluginIcon, "Cards view (Beta)", () => {
       this.activateView();
     });
   }
