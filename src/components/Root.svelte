@@ -159,9 +159,10 @@
       notesGrid.layout();
       $skipNextTransition = false;
 
-      if ($refreshSignal) {
+      if ($refreshOnResize) {
+        console.log("I hope this is running when I am resizing...");
         notesGrid.layout();
-        $refreshSignal = false;
+        $refreshOnResize = false;
       }
     }),
   );
