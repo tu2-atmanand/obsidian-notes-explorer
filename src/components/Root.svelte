@@ -5,7 +5,7 @@
   import { afterUpdate, onMount } from "svelte";
   import MiniMasonry from "minimasonry";
   import Card from "./Card.svelte";
-  import {
+  import store, {
     tags,
     displayedFiles,
     searchQuery,
@@ -16,8 +16,14 @@
     refreshSignal,
     app,
     plugin,
+    folderName,
+    filteredFiles,
+    allAllowedFiles,
+    refreshOnResize,
   } from "./store";
-    import { Sort } from "src/settings";
+  import { Sort } from "src/settings";
+  import { get } from "http";
+  import { isString } from "util";
 
   let notesGrid: MiniMasonry;
   let viewContent: HTMLElement;
@@ -29,6 +35,9 @@
   };
   const refreshIcon = (element: HTMLElement) => {
     setIcon(element, "refresh-ccw");
+  };
+  const closeIcon = (element: HTMLElement) => {
+    setIcon(element, "x");
   };
 
   const searchInput = (element: HTMLElement) => {
@@ -141,9 +150,19 @@
     sortMenu.showAtMouseEvent(event);
   }
 
+  function clearFolderFilter(event: MouseEvent) {
+    console.log(
+      "clearFolderFilter : Is this even running... :",
+      $filteredFiles,
+    );
+    store.folderName.set("");
+    store.files.set($allAllowedFiles);
+    notesGrid.layout();
+  }
+
   onMount(() => {
     $sort = $settings.defaultSort;
-    columns = Math.floor(viewContent.clientWidth / $settings.minCardWidth);
+    columns = Math.floor(viewContent.clientWidth / $settings.minCardWidth) + 1;
     notesGrid = new MiniMasonry({
       container: cardsContainer,
       baseWidth: $settings.minCardWidth,
@@ -202,6 +221,16 @@
       {/each}
     </div>
   </div>
+  {#if $folderName}
+    <div class="action-bar_folder">
+      <div>{$folderName}</div>
+      <button
+        class="clickable-icon folder-close-button"
+        use:closeIcon
+        on:click={clearFolderFilter}
+      />
+    </div>
+  {/if}
 </div>
 <div
   bind:this={cardsContainer}
