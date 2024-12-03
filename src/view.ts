@@ -2,13 +2,19 @@
 
 import "../styles.css";
 
-import { ItemView, TAbstractFile, TFile, WorkspaceLeaf } from "obsidian";
+import {
+  ItemView,
+  TAbstractFile,
+  TFile,
+  TFolder,
+  WorkspaceLeaf,
+} from "obsidian";
 
 import type CardsViewPlugin from "main";
 import { Sort, type CardsViewSettings } from "./settings";
 import Root from "./components/Root.svelte";
-import { get } from "svelte/store";
-import store from "./components/store";
+import { get, readable } from "svelte/store";
+import store, { allAllowedFiles, folderName } from "./components/store";
 
 export const VIEW_TYPE = "cards-view";
 
@@ -16,6 +22,7 @@ export class CardsViewPluginView extends ItemView {
   private settings: CardsViewSettings;
   private svelteRoot: Root | null = null;
   private plugin: CardsViewPlugin;
+  private viewContent: Element;
 
   constructor(
     plugin: CardsViewPlugin,
@@ -25,6 +32,7 @@ export class CardsViewPluginView extends ItemView {
     super(leaf);
     this.plugin = plugin;
     this.settings = settings;
+    this.viewContent = this.containerEl.children[1];
   }
 
   getViewType() {
@@ -36,56 +44,27 @@ export class CardsViewPluginView extends ItemView {
   }
 
   async onOpen() {
-    const viewContent = this.containerEl.children[1];
+    // const this.viewContent = this.containerEl.children[1];
     store.view.set(this);
-
-    store.files.set(this.app.vault.getMarkdownFiles());
 
     this.registerAllEvent();
 
+    this.getAllFiles();
+
     this.svelteRoot = new Root({
-      target: viewContent,
+      target: this.viewContent,
     });
 
-    // Obtain a reference to the cards-container via Svelte component instance
-    // const rootInstance = this.svelteRoot as Root; // Assuming Root has cardsContainer defined
-    // const cardsContainer = await rootInstance.cardsContainer;
-    const cardsContainer = viewContent.children[1];
-    // Apply the scroll event to cardsContainer
-    if (cardsContainer) {
-      cardsContainer.addEventListener("scroll", async () => {
-        if (
-          cardsContainer.scrollTop + cardsContainer.clientHeight >
-          cardsContainer.scrollHeight - 100
-        ) {
-          store.skipNextTransition.set(true);
-          store.displayedCount.set(get(store.displayedFiles).length + 50);
-        }
-      });
-    } else {
-      console.error("cardsContainer is undefined");
-    }
-
-    // // On scroll 80% of viewContent, load more cards
-    // viewContent.addEventListener("scroll", async () => {
-    //   if (
-    //     viewContent.scrollTop + viewContent.clientHeight >
-    //     viewContent.scrollHeight - 500
-    //   ) {
-    //     store.skipNextTransition.set(true);
-    //     store.displayedCount.set(get(store.displayedFiles).length + 50);
-    //   }
-    // });
+    this.renderMoreOnScroll();
   }
 
   async onClose() {
     store.viewIsVisible.set(false);
     store.searchQuery.set("");
     store.displayedCount.set(50);
-    store.sort.set(Sort.EditedDesc);
   }
 
-  registerAllEvent() {
+  private registerAllEvent() {
     this.registerEvent(
       this.app.vault.on("create", async (file: TAbstractFile) => {
         if (!this.app.workspace.layoutReady) {
@@ -128,7 +107,7 @@ export class CardsViewPluginView extends ItemView {
     );
 
     this.app.workspace.on("resize", () => {
-      store.refreshSignal.set(true);
+      store.refreshOnResize.set(true);
     });
 
     this.app.workspace.on("active-leaf-change", () => {
@@ -138,5 +117,48 @@ export class CardsViewPluginView extends ItemView {
       );
       store.viewIsVisible.set(rootLeaf?.view?.getViewType() === VIEW_TYPE);
     });
+  }
+
+  private getAllFiles() {
+    const onlyFolder = get(folderName);
+
+    if (onlyFolder !== '') {
+      console.log("1");
+      return;
+    } else {
+      store.files.set(get(allAllowedFiles));
+    }
+  }
+
+  private renderMoreOnScroll() {
+    // Obtain a reference to the cards-container via Svelte component instance
+    // const rootInstance = this.svelteRoot as Root; // Assuming Root has cardsContainer defined
+    // const cardsContainer = await rootInstance.cardsContainer;
+    const cardsContainer = this.viewContent.children[1];
+    // Apply the scroll event to cardsContainer
+    if (cardsContainer) {
+      cardsContainer.addEventListener("scroll", async () => {
+        if (
+          cardsContainer.scrollTop + cardsContainer.clientHeight >
+          cardsContainer.scrollHeight - 100
+        ) {
+          store.skipNextTransition.set(true);
+          store.displayedCount.set(get(store.displayedFiles).length + 50);
+        }
+      });
+    } else {
+      console.error("cardsContainer is undefined");
+    }
+
+    // // On scroll 80% of viewContent, load more cards
+    // viewContent.addEventListener("scroll", async () => {
+    //   if (
+    //     viewContent.scrollTop + viewContent.clientHeight >
+    //     viewContent.scrollHeight - 500
+    //   ) {
+    //     store.skipNextTransition.set(true);
+    //     store.displayedCount.set(get(store.displayedFiles).length + 50);
+    //   }
+    // });
   }
 }
