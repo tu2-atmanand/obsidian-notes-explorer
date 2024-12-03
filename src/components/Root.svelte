@@ -114,6 +114,21 @@
       });
     });
 
+    sortMenu.addSeparator();
+    sortMenu.addItem((item) => {
+      item.setTitle("Folder filters");
+      item.setIcon("folder-tree");
+      item.setIsLabel(true);
+    });
+
+    sortMenu.addItem((item) => {
+      item.setTitle("Read sub-folders");
+      item.setChecked($settings.showSubFolders);
+      item.onClick(async () => {
+        $settings.showSubFolders = !$settings.showSubFolders;
+      });
+    });
+
     sortMenu.showAtMouseEvent(event);
   }
 

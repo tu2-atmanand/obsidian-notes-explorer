@@ -47,6 +47,7 @@ export interface CardsViewSettings {
   showDeleteButton: boolean;
   displayTitle: TitleDisplayMode;
   showEmptyNotes: boolean;
+  showSubFolders: boolean;
   showParentFolder: boolean;
   toSystemTrash: DeleteFileMode;
   openNoteLayout: NoteOpenLayout;
@@ -66,6 +67,7 @@ export const DEFAULT_SETTINGS: CardsViewSettings = {
   showDeleteButton: true,
   displayTitle: TitleDisplayMode.Both,
   showEmptyNotes: false,
+  showSubFolders: false,
   showParentFolder: true,
   toSystemTrash: DeleteFileMode.System,
   openNoteLayout: NoteOpenLayout.Right,

@@ -197,14 +197,36 @@ export default class CardsViewPlugin extends Plugin {
   }
 
   async openAllFilesInFolder(folder: TFolder) {
-    const files = folder.children.filter(
+    if (folder instanceof TFolder) {
+      let files: TFile[] = [];
+
+      if (this.settings.showSubFolders) {
+        // Helper function to recursively fetch files
+        const collectFiles = (currentFolder: TFolder) => {
+          currentFolder.children.forEach((child) => {
+            if (child instanceof TFile && child.extension === "md") {
+              files.push(child);
+            } else if (child instanceof TFolder) {
+              console.log("openAllFilesInFolder : This is subFolder :", child.name);
+              collectFiles(child); // Recursively process subfolder
+            }
+          });
+        };
+
+        collectFiles(folder);
+      } else {
+        // Only fetch files in the current folder
+        files = folder.children.filter(
       (child): child is TFile =>
         child instanceof TFile && child.extension === "md"
     );
+      }
+
+      store.files.set(files);
+      store.folderName.set(folder.name);
+    }
+
     await this.activateView();
-    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
-    if (leaves.length > 0) {
-      this.updateFiles(files, Sort.CreatedDesc);
     }
   }
 
