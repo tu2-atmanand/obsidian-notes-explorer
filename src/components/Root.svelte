@@ -45,6 +45,11 @@
     const sortMenu = new Menu();
 
     sortMenu.addItem((item) => {
+      item.setTitle("Sorting filters");
+      item.setIcon("clock-arrow-down");
+      item.setIsLabel(true);
+    });
+    sortMenu.addItem((item) => {
       item.setTitle("Title (A-Z)");
       item.setChecked($sort == Sort.NameAsc);
       item.onClick(async () => {
@@ -84,7 +89,6 @@
       });
     });
     sortMenu.addSeparator();
-    // 创建时间排序
     sortMenu.addItem((item) => {
       item.setTitle("Created (Newest First)");
       item.setChecked($sort == Sort.CreatedDesc);
@@ -105,6 +109,11 @@
     });
 
     sortMenu.addSeparator();
+    sortMenu.addItem((item) => {
+      item.setTitle("File filters");
+      item.setIcon("file-question");
+      item.setIsLabel(true);
+    });
 
     sortMenu.addItem((item) => {
       item.setTitle("Show empty notes");
