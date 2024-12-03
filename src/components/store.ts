@@ -39,7 +39,9 @@ export const sort = writable<Sort>(Sort.EditedAsc);
 // );
 
 export const sortedFiles = derived([sort, files], ([$sort, $files]) =>
-  [...$files].sort((a: TFile, b: TFile) => {
+  [...$files]
+    .filter((file: TFile) => !file.path.endsWith(".excalidraw.md"))
+    .sort((a: TFile, b: TFile) => {
     switch ($sort) {
       case Sort.NameAsc:
         return a.basename.localeCompare(b.basename);
