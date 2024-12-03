@@ -9,6 +9,7 @@ import {
   prepareFuzzySearch,
   TFile,
   getFrontMatterInfo,
+  TAbstractFile,
 } from "obsidian";
 import { derived, get, readable, writable } from "svelte/store";
 import { Sort, type CardsViewSettings } from "../settings";
@@ -56,8 +57,8 @@ export const allAllowedFiles = derived(
     $refreshSignal = !($refreshSignal);
     const allFiles = get(app).vault.getMarkdownFiles();
     const filteredFiles = allFiles.filter((file) => {
-      return !$settings.excludedFolders.some((excludeFolder) =>
-        file.path.startsWith(excludeFolder),
+      return !$settings.excludedFolders.some(
+        (excludeFolder) => file.path.startsWith(excludeFolder), // TODO : I know I am going to get error here and the fix is, I have to march whether file.parentFolderName is there in excludeFolder or not.
       );
     });
     return filteredFiles;
@@ -82,23 +83,23 @@ export const sortedFiles = derived([sort, files], ([$sort, $files]) =>
   [...$files]
     .filter((file: TFile) => !file.path.endsWith(".excalidraw.md"))
     .sort((a: TFile, b: TFile) => {
-    switch ($sort) {
-      case Sort.NameAsc:
-        return a.basename.localeCompare(b.basename);
-      case Sort.NameDesc:
-        return b.basename.localeCompare(a.basename);
-      case Sort.EditedDesc:
-        return b.stat.mtime - a.stat.mtime;
-      case Sort.EditedAsc:
-        return a.stat.mtime - b.stat.mtime;
-      case Sort.CreatedDesc:
-        return b.stat.ctime - a.stat.ctime;
-      case Sort.CreatedAsc:
-        return a.stat.ctime - b.stat.ctime;
-      default:
-        return 0;
-    }
-  }),
+      switch ($sort) {
+        case Sort.NameAsc:
+          return a.basename.localeCompare(b.basename);
+        case Sort.NameDesc:
+          return b.basename.localeCompare(a.basename);
+        case Sort.EditedDesc:
+          return b.stat.mtime - a.stat.mtime;
+        case Sort.EditedAsc:
+          return a.stat.mtime - b.stat.mtime;
+        case Sort.CreatedDesc:
+          return b.stat.ctime - a.stat.ctime;
+        case Sort.CreatedAsc:
+          return a.stat.ctime - b.stat.ctime;
+        default:
+          return 0;
+      }
+    }),
 );
 
 export const searchQuery = writable<string>("");
@@ -158,7 +159,7 @@ const createFilteredFiles = () =>
       const $settings = get(settings);
       const nonEmptyFiles = [];
       for (const file of $sortedFiles) {
-        const emptiness = (await isEmptyFile(file));
+        const emptiness = await isEmptyFile(file);
         if ($settings.showEmptyNotes || !emptiness) {
           nonEmptyFiles.push(file);
         }
@@ -182,10 +183,6 @@ export const displayedFiles = derived(
 
 // displayedCount.subscribe((count) => console.log("Displayed Count:", count));
 // displayedFiles.subscribe((files) => console.log("Displayed Files:", files));
-
-export const viewIsVisible = writable(false);
-export const skipNextTransition = writable(true);
-export const refreshSignal = writable<boolean>(false);
 
 export const tags = derived(
   [displayedFiles, appCache],
@@ -212,14 +209,18 @@ export const tags = derived(
 export default {
   plugin,
   files,
+  allAllowedFiles,
+  folderName,
   sort,
   searchQuery,
   searchResultFiles,
   displayedCount,
   displayedFiles,
+  filteredFiles,
   viewIsVisible,
   skipNextTransition,
   refreshSignal,
+  refreshOnResize,
   tags,
   app,
   view,
