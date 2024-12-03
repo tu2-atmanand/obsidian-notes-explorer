@@ -10,12 +10,14 @@
     displayedFiles,
     searchQuery,
     skipNextTransition,
-    Sort,
     sort,
     viewIsVisible,
     settings,
     refreshSignal,
+    app,
+    plugin,
   } from "./store";
+    import { Sort } from "src/settings";
 
   let notesGrid: MiniMasonry;
   let viewContent: HTMLElement;
@@ -41,21 +43,69 @@
 
   function sortMenu(event: MouseEvent) {
     const sortMenu = new Menu();
+
     sortMenu.addItem((item) => {
-      item.setTitle("Last created");
-      item.setChecked($sort == Sort.Created);
+      item.setTitle("Title (A-Z)");
+      item.setChecked($sort == Sort.NameAsc);
       item.onClick(async () => {
-        $sort = Sort.Created;
+        $sort = Sort.NameAsc;
+        $settings.defaultSort = Sort.NameAsc;
+        await $plugin.saveSettings();
       });
     });
     sortMenu.addItem((item) => {
-      item.setTitle("Last modified");
-      item.setChecked($sort == Sort.Modified);
+      item.setTitle("Title (Z-A)");
+      item.setChecked($sort == Sort.NameDesc);
       item.onClick(async () => {
-        $sort = Sort.Modified;
+        $sort = Sort.NameDesc;
+        $settings.defaultSort = Sort.NameDesc;
+        await $plugin.saveSettings();
+      });
+    });
+
+    sortMenu.addSeparator();
+
+    sortMenu.addItem((item) => {
+      item.setTitle("Edited (Newest First)");
+      item.setChecked($sort == Sort.EditedDesc);
+      item.onClick(async () => {
+        $sort = Sort.EditedDesc;
+        $settings.defaultSort = Sort.EditedDesc;
+        await $plugin.saveSettings();
+      });
+    });
+    sortMenu.addItem((item) => {
+      item.setTitle("Edited (Oldest First)");
+      item.setChecked($sort == Sort.EditedAsc);
+      item.onClick(async () => {
+        $sort = Sort.EditedAsc;
+        $settings.defaultSort = Sort.EditedAsc;
+        await $plugin.saveSettings();
       });
     });
     sortMenu.addSeparator();
+    // 创建时间排序
+    sortMenu.addItem((item) => {
+      item.setTitle("Created (Newest First)");
+      item.setChecked($sort == Sort.CreatedDesc);
+      item.onClick(async () => {
+        $sort = Sort.CreatedDesc;
+        $settings.defaultSort = Sort.CreatedDesc;
+        await $plugin.saveSettings();
+      });
+    });
+    sortMenu.addItem((item) => {
+      item.setTitle("Created (Oldest First)");
+      item.setChecked($sort == Sort.CreatedAsc);
+      item.onClick(async () => {
+        $sort = Sort.CreatedAsc;
+        $settings.defaultSort = Sort.CreatedAsc;
+        await $plugin.saveSettings();
+      });
+    });
+
+    sortMenu.addSeparator();
+
     sortMenu.addItem((item) => {
       item.setTitle("Show empty notes");
       item.setChecked($settings.showEmptyNotes);
@@ -63,10 +113,12 @@
         $settings.showEmptyNotes = !$settings.showEmptyNotes;
       });
     });
+
     sortMenu.showAtMouseEvent(event);
   }
 
   onMount(() => {
+    $sort = $settings.defaultSort;
     columns = Math.floor(viewContent.clientWidth / $settings.minCardWidth);
     notesGrid = new MiniMasonry({
       container: cardsContainer,

@@ -23,13 +23,21 @@ export enum NoteOpenLayout {
 }
 
 export enum TagPostionForCardColor {
-  frontmatter = "front",
+  frontmatter = "frontmatter",
   content = "content",
 }
 
 export interface TagSetting {
   name: string;
   color: string;
+}
+export enum Sort {
+  NameAsc = "Title (A-Z)",
+  NameDesc = "Title (Z-A)",
+  EditedDesc = "Edited (Newest First)",
+  EditedAsc = "Edited (Oldest First)",
+  CreatedDesc = "Created (Newest First)",
+  CreatedAsc = "Created (Oldest First)",
 }
 
 export interface CardsViewSettings {
@@ -45,6 +53,10 @@ export interface CardsViewSettings {
   tagPositionForCardColor: TagPostionForCardColor;
   pinnedFiles: string[];
   tagColors: TagSetting[];
+  defaultSort: Sort;
+  openViewOnTagTreeClick: boolean;
+  openViewOnInlineTagClick: boolean;
+  openViewOnFolderClick: boolean;
 }
 
 export const DEFAULT_SETTINGS: CardsViewSettings = {
@@ -60,6 +72,10 @@ export const DEFAULT_SETTINGS: CardsViewSettings = {
   tagPositionForCardColor: TagPostionForCardColor.content,
   pinnedFiles: [],
   tagColors: [],
+  defaultSort: Sort.EditedDesc,
+  openViewOnTagTreeClick: false,
+  openViewOnInlineTagClick: false,
+  openViewOnFolderClick: false,
 };
 
 export class CardsViewSettingsTab extends PluginSettingTab {

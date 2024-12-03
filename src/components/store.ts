@@ -11,32 +11,50 @@ import {
   getFrontMatterInfo,
 } from "obsidian";
 import { derived, get, readable, writable } from "svelte/store";
-import type { CardsViewSettings } from "../settings";
+import { Sort, type CardsViewSettings } from "../settings";
+import CardsViewPlugin from "main";
 
-export enum Sort {
-  Created = "ctime",
-  Modified = "mtime",
-}
-
+export const plugin = writable<CardsViewPlugin>();
 export const app = writable<App>();
 export const view = writable<ItemView>();
 export const settings = writable<CardsViewSettings>();
 export const appCache = writable<MetadataCache>();
 export const files = writable<TFile[]>([]);
 
-export const sort = writable<Sort>(Sort.Modified);
-export const sortedFiles = derived(
-  [sort, files, settings],
-  ([$sort, $files, $settings]) =>
-    [...$files]
-      .filter((file: TFile) => !file.path.endsWith(".excalidraw.md"))
-      .sort(
-        (a: TFile, b: TFile) =>
-          ($settings.pinnedFiles.includes(b.path) ? 1 : 0) -
-            ($settings.pinnedFiles.includes(a.path) ? 1 : 0) ||
-          b.stat[$sort] - a.stat[$sort],
-      ),
-  [] as TFile[],
+export const sort = writable<Sort>(Sort.EditedAsc);
+// export const sortedFiles = derived(
+//   [sort, files, settings],
+//   ([$sort, $files, $settings]) =>
+//     [...$files]
+//       .filter((file: TFile) => !file.path.endsWith(".excalidraw.md"))
+//       .sort(
+//         (a: TFile, b: TFile) =>
+//           ($settings.pinnedFiles.includes(b.path) ? 1 : 0) -
+//             ($settings.pinnedFiles.includes(a.path) ? 1 : 0) ||
+//           b.stat[$sort] - a.stat[$sort],
+//       ),
+//   [] as TFile[],
+// );
+
+export const sortedFiles = derived([sort, files], ([$sort, $files]) =>
+  [...$files].sort((a: TFile, b: TFile) => {
+    switch ($sort) {
+      case Sort.NameAsc:
+        return a.basename.localeCompare(b.basename);
+      case Sort.NameDesc:
+        return b.basename.localeCompare(a.basename);
+      case Sort.EditedDesc:
+        return b.stat.mtime - a.stat.mtime;
+      case Sort.EditedAsc:
+        return a.stat.mtime - b.stat.mtime;
+      case Sort.CreatedDesc:
+        return b.stat.ctime - a.stat.ctime;
+      case Sort.CreatedAsc:
+        return a.stat.ctime - b.stat.ctime;
+      default:
+        return 0;
+    }
+  }),
 );
 
 export const searchQuery = writable<string>("");
@@ -148,6 +166,7 @@ export const tags = derived(
 );
 
 export default {
+  plugin,
   files,
   sort,
   searchQuery,

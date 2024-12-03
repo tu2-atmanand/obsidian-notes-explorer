@@ -3,21 +3,25 @@
 import "../styles.css";
 
 import { ItemView, TAbstractFile, TFile, WorkspaceLeaf } from "obsidian";
-import store, { Sort } from "./components/store";
 
 import type CardsViewPlugin from "main";
-import type { CardsViewSettings } from "./settings";
+import { Sort, type CardsViewSettings } from "./settings";
 import Root from "./components/Root.svelte";
 import { get } from "svelte/store";
+import store from "./components/store";
 
 export const VIEW_TYPE = "cards-view";
 
 export class CardsViewPluginView extends ItemView {
   private settings: CardsViewSettings;
-  private svelteRoot?: Root;
+  private svelteRoot: Root | null = null;
   private plugin: CardsViewPlugin;
 
-  constructor(plugin: CardsViewPlugin, settings: CardsViewSettings, leaf: WorkspaceLeaf) {
+  constructor(
+    plugin: CardsViewPlugin,
+    settings: CardsViewSettings,
+    leaf: WorkspaceLeaf
+  ) {
     super(leaf);
     this.plugin = plugin;
     this.settings = settings;
@@ -36,6 +40,52 @@ export class CardsViewPluginView extends ItemView {
     store.view.set(this);
 
     store.files.set(this.app.vault.getMarkdownFiles());
+
+    this.registerAllEvent();
+
+    this.svelteRoot = new Root({
+      target: viewContent,
+    });
+
+    // Obtain a reference to the cards-container via Svelte component instance
+    // const rootInstance = this.svelteRoot as Root; // Assuming Root has cardsContainer defined
+    // const cardsContainer = await rootInstance.cardsContainer;
+    const cardsContainer = viewContent.children[1];
+    // Apply the scroll event to cardsContainer
+    if (cardsContainer) {
+      cardsContainer.addEventListener("scroll", async () => {
+        if (
+          cardsContainer.scrollTop + cardsContainer.clientHeight >
+          cardsContainer.scrollHeight - 100
+        ) {
+          store.skipNextTransition.set(true);
+          store.displayedCount.set(get(store.displayedFiles).length + 50);
+        }
+      });
+    } else {
+      console.error("cardsContainer is undefined");
+    }
+
+    // // On scroll 80% of viewContent, load more cards
+    // viewContent.addEventListener("scroll", async () => {
+    //   if (
+    //     viewContent.scrollTop + viewContent.clientHeight >
+    //     viewContent.scrollHeight - 500
+    //   ) {
+    //     store.skipNextTransition.set(true);
+    //     store.displayedCount.set(get(store.displayedFiles).length + 50);
+    //   }
+    // });
+  }
+
+  async onClose() {
+    store.viewIsVisible.set(false);
+    store.searchQuery.set("");
+    store.displayedCount.set(50);
+    store.sort.set(Sort.EditedDesc);
+  }
+
+  registerAllEvent() {
     this.registerEvent(
       this.app.vault.on("create", async (file: TAbstractFile) => {
         if (!this.app.workspace.layoutReady) {
@@ -81,40 +131,6 @@ export class CardsViewPluginView extends ItemView {
       store.refreshSignal.set(true);
     });
 
-    this.svelteRoot = new Root({
-      target: viewContent,
-    });
-
-    // Obtain a reference to the cards-container via Svelte component instance
-    // const rootInstance = this.svelteRoot as Root; // Assuming Root has cardsContainer defined
-    // const cardsContainer = await rootInstance.cardsContainer;
-    const cardsContainer = viewContent.children[1];
-    // Apply the scroll event to cardsContainer
-    if (cardsContainer) {
-      cardsContainer.addEventListener("scroll", async () => {
-        if (
-          cardsContainer.scrollTop + cardsContainer.clientHeight >
-          cardsContainer.scrollHeight - 100
-        ) {
-          store.skipNextTransition.set(true);
-          store.displayedCount.set(get(store.displayedFiles).length + 50);
-        }
-      });
-    } else {
-      console.error("cardsContainer is undefined");
-    }
-
-    // // On scroll 80% of viewContent, load more cards
-    // viewContent.addEventListener("scroll", async () => {
-    //   if (
-    //     viewContent.scrollTop + viewContent.clientHeight >
-    //     viewContent.scrollHeight - 500
-    //   ) {
-    //     store.skipNextTransition.set(true);
-    //     store.displayedCount.set(get(store.displayedFiles).length + 50);
-    //   }
-    // });
-
     this.app.workspace.on("active-leaf-change", () => {
       // check our leaf is visible
       const rootLeaf = this.app.workspace.getMostRecentLeaf(
@@ -122,12 +138,5 @@ export class CardsViewPluginView extends ItemView {
       );
       store.viewIsVisible.set(rootLeaf?.view?.getViewType() === VIEW_TYPE);
     });
-  }
-
-  async onClose() {
-    store.viewIsVisible.set(false);
-    store.searchQuery.set("");
-    store.displayedCount.set(50);
-    store.sort.set(Sort.Modified);
   }
 }
