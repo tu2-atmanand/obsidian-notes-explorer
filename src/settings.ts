@@ -1,6 +1,6 @@
 // ./src/settings.ts
 
-import { App, Notice, PluginSettingTab, Setting } from "obsidian";
+import { App, Notice, PluginSettingTab, Setting, normalizePath } from "obsidian";
 
 import CardsViewPlugin from "../main";
 
@@ -58,6 +58,7 @@ export interface CardsViewSettings {
   openViewOnTagTreeClick: boolean;
   openViewOnInlineTagClick: boolean;
   openViewOnFolderClick: boolean;
+  excludedFolders: string[];
 }
 
 export const DEFAULT_SETTINGS: CardsViewSettings = {
@@ -78,14 +79,17 @@ export const DEFAULT_SETTINGS: CardsViewSettings = {
   openViewOnTagTreeClick: false,
   openViewOnInlineTagClick: false,
   openViewOnFolderClick: false,
+  excludedFolders: [],
 };
 
 export class CardsViewSettingsTab extends PluginSettingTab {
   plugin: CardsViewPlugin;
+  tempFolderName: string;
 
   constructor(app: App, plugin: CardsViewPlugin) {
     super(app, plugin);
     this.plugin = plugin;
+    this.tempFolderName = '';
   }
 
   display(): void {
@@ -287,6 +291,43 @@ export class CardsViewSettingsTab extends PluginSettingTab {
           this.display();
         })
     );
+
+    new Setting(containerEl)
+      .setName("Exclude Folders")
+      .setDesc("Add folders to exclude from the board")
+      .addText((text) =>
+        text.setPlaceholder("Enter folder path").onChange((value) => {
+          this.tempFolderName = value; // Temporary field to hold input
+        })
+      )
+      .addButton((button) =>
+        button
+          .setButtonText("Add")
+          .setCta()
+          .onClick(() => {
+            const folderInput = normalizePath(this.tempFolderName);
+            if (
+              folderInput &&
+              !this.plugin.settings.excludedFolders.includes(folderInput)
+            ) {
+              this.plugin.settings.excludedFolders.push(folderInput);
+              this.plugin.saveSettings();
+              this.display();
+            }
+          })
+      );
+
+    containerEl.createEl("ul", { cls: "exclude-folders-list" });
+    this.plugin.settings.excludedFolders.forEach((folder) => {
+      const li = containerEl.createEl("li", { text: folder });
+      const deleteButton = li.createEl("button", { text: "Remove" });
+      deleteButton.addEventListener("click", () => {
+        this.plugin.settings.excludedFolders =
+          this.plugin.settings.excludedFolders.filter((f) => f !== folder);
+        this.plugin.saveSettings();
+        this.display(); // Refresh UI
+      });
+    });
 
     new Setting(containerEl)
       .setName("Reset settings")

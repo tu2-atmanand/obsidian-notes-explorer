@@ -22,8 +22,48 @@ export const view = writable<ItemView>();
 export const settings = writable<CardsViewSettings>();
 export const appCache = writable<MetadataCache>();
 export const files = writable<TFile[]>([]);
+export const folderName = writable<string>("");
+export const viewIsVisible = writable(false);
+export const skipNextTransition = writable(true);
+export const refreshSignal = writable<boolean>(false);
+export const refreshOnResize = writable<boolean>(false);
 
-export const sort = writable<Sort>(Sort.EditedAsc);
+export const sort = writable<Sort>();
+
+// export const allAllowedFiles = readable<TFile[]>([], (set) => {
+//   const unsubscribe = settings.subscribe(($settings) => {
+//     console.log(
+//       "allAllowedFiles : This function should run as just now settings changed",
+//     );
+//     const allFiles = get(app).vault.getMarkdownFiles();
+//     const filteredFiles = allFiles.filter((file) => {
+//       return !$settings.excludedFolders.some((excludeFolder) =>
+//         file.path.startsWith(excludeFolder),
+//       );
+//     });
+//     set(filteredFiles);
+//   });
+
+//   return unsubscribe;
+// });
+
+export const allAllowedFiles = derived(
+  [settings, refreshSignal],
+  ([$settings, $refreshSignal]) => {
+    console.log(
+      "allAllowedFiles : This function should NOT run on resizing events",
+    );
+    $refreshSignal = !($refreshSignal);
+    const allFiles = get(app).vault.getMarkdownFiles();
+    const filteredFiles = allFiles.filter((file) => {
+      return !$settings.excludedFolders.some((excludeFolder) =>
+        file.path.startsWith(excludeFolder),
+      );
+    });
+    return filteredFiles;
+  },
+);
+
 // export const sortedFiles = derived(
 //   [sort, files, settings],
 //   ([$sort, $files, $settings]) =>
