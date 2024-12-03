@@ -171,7 +171,9 @@
   <button
     class="clickable-icon refresh-button"
     use:refreshIcon
-    on:click={() => notesGrid.layout()}
+    on:click={() => {
+      store.refreshSignal.set(!$refreshSignal);
+    }}
   />
   <div class="search-component">
     <div class="action-bar__search" use:searchInput />
