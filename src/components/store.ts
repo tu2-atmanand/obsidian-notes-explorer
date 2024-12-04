@@ -9,7 +9,7 @@ import {
   prepareFuzzySearch,
   TFile,
   getFrontMatterInfo,
-  TAbstractFile,
+  TFolder,
 } from "obsidian";
 import { derived, get, readable, writable } from "svelte/store";
 import { Sort, type CardsViewSettings } from "../settings";
@@ -31,18 +31,67 @@ export const refreshOnResize = writable<boolean>(false);
 
 export const sort = writable<Sort>();
 
+// export const allAllowedFiles = derived(
+//   [settings, refreshSignal, folderName],
+//   ([$settings, $refreshSignal, $folderName]) => {
+//     console.log(
+//       "allAllowedFiles : Setting or Refresh signal, reading all files again.\nThis function should NOT run on resizing events",
+//     );
+//     const allFiles = get(app).vault.getMarkdownFiles();
+//     const filteredFiles = allFiles.filter((file) => {
+//       return !$settings.excludedFolders.some(
+//         (excludeFolder) => file.path.startsWith(excludeFolder), // TODO : I know I am going to get error here and the fix is, I have to march whether file.parentFolderName is there in excludeFolder or not.
+//       );
+//     });
+//     return filteredFiles;
+//   },
+// );
+
 export const allAllowedFiles = derived(
-  [settings, refreshSignal],
-  ([$settings, $refreshSignal]) => {
+  [settings, refreshSignal, folderName],
+  ([$settings, $refreshSignal, $folderName]) => {
     console.log(
       "allAllowedFiles : Setting or Refresh signal, reading all files again.\nThis function should NOT run on resizing events",
     );
-    const allFiles = get(app).vault.getMarkdownFiles();
+    let allFiles: TFile[] = [];
+
+    if ($folderName === "") {
+      // If no folder is specified, get all markdown files in the vault
+      allFiles = get(app).vault.getMarkdownFiles();
+    } else {
+      // Fetch files from the specified folder
+      const folder = get(app).vault.getAbstractFileByPath($folderName);
+
+      if (folder instanceof TFolder) {
+        if ($settings.showSubFolders) {
+          // Helper function to recursively fetch files
+          const collectFiles = (currentFolder: TFolder) => {
+            currentFolder.children.forEach((child) => {
+              if (child instanceof TFile && child.extension === "md") {
+                allFiles.push(child);
+              } else if (child instanceof TFolder) {
+                collectFiles(child); // Recursively process subfolder
+              }
+            });
+          };
+          collectFiles(folder);
+        } else {
+          // Only fetch files in the current folder
+          allFiles = folder.children.filter(
+            (child): child is TFile =>
+              child instanceof TFile && child.extension === "md",
+          );
+        }
+      }
+    }
+
+    // Exclude files in the excluded folders
     const filteredFiles = allFiles.filter((file) => {
       return !$settings.excludedFolders.some(
         (excludeFolder) => file.path.startsWith(excludeFolder), // TODO : I know I am going to get error here and the fix is, I have to march whether file.parentFolderName is there in excludeFolder or not.
       );
     });
+
     return filteredFiles;
   },
 );
@@ -116,10 +165,18 @@ export const searchResultFiles = derived(
 // Helper function to determine if a file is empty
 const isEmptyFile = async (file: TFile) => {
   const content = await file.vault.cachedRead(file);
+  // console.log("Content with frontmatter :\n", content);
   const frontMatter = getFrontMatterInfo(content).exists
     ? getFrontMatterInfo(content).frontmatter
     : "";
-  return content.replace(`---\n${frontMatter}\n---`, "").trim().length === 0;
+  const contentWfrontmatter = content
+    .replace(`---\n${frontMatter}\n---`, "")
+    .trim().length;
+  // console.log(
+  //   "Only frontmatter :\n",frontMatter,
+  //   "\nContent without frontmatter :\n",contentWfrontmatter,
+  // );
+  return contentWfrontmatter === 0;
 };
 
 // Async filter for non-empty files
