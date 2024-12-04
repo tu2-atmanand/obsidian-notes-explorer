@@ -50,9 +50,9 @@ export const sort = writable<Sort>();
 export const allAllowedFiles = derived(
   [settings, refreshSignal, folderName],
   ([$settings, $refreshSignal, $folderName]) => {
-    console.log(
-      "allAllowedFiles : Setting or Refresh signal, reading all files again.\nThis function should NOT run on resizing events",
-    );
+    // console.log(
+    //   "allAllowedFiles : Setting or Refresh signal, reading all files again.\nThis function should NOT run on resizing events",
+    // );
     let allFiles: TFile[] = [];
 
     if ($folderName === "") {

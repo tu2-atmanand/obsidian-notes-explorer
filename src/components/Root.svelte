@@ -182,7 +182,7 @@
       $skipNextTransition = false;
 
       if ($refreshOnResize || $settings) {
-        console.log("Root : Resized or setting changed, refreshing...");
+        // console.log("Root : Resized or setting changed, refreshing...");
         notesGrid.layout();
         $refreshOnResize = false;
       }
