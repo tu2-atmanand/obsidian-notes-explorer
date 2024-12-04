@@ -15,24 +15,20 @@ export enum TitleDisplayMode {
   Title = "Title",
   Filename = "Filename",
 }
-
 export enum DeleteFileMode {
   System = "system",
   Trash = "trash",
   Permanent = "perm",
 }
-
 export enum NoteOpenLayout {
   Right = "right",
   NewTab = "tab",
   NewWindow = "window",
 }
-
 export enum TagPostionForCardColor {
   frontmatter = "frontmatter",
   content = "content",
 }
-
 export interface TagSetting {
   name: string;
   color: string;
@@ -230,7 +226,7 @@ export class CardsViewSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Open view on folder click")
       .setDesc(
-        "Enable this if you want to open the cards view with all the notes from a folder, when you will click on the folder from file explorer. You also have same option using file munu, if you dont like this feature."
+        "Enable this if you want to open the cards view with all the notes from a folder, when you will click on the folder from file explorer. You also have same option using file munu, if you dont like this feature.\nNOTE : You will require to restart Obsidian on this setting change."
       )
       .addToggle((toggle) =>
         toggle
