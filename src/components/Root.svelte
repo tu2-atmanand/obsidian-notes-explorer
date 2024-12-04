@@ -187,7 +187,7 @@
       notesGrid.layout();
       $skipNextTransition = false;
 
-      if ($refreshOnResize) {
+      if ($refreshOnResize || $settings) {
         console.log("I hope this is running when I am resizing...");
         notesGrid.layout();
         $refreshOnResize = false;

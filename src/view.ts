@@ -20,7 +20,7 @@ export const VIEW_TYPE = "cards-view";
 
 export class CardsViewPluginView extends ItemView {
   private settings: CardsViewSettings;
-  private svelteRoot: Root | null = null;
+  private svelteRoot: Root | null;
   private plugin: CardsViewPlugin;
   private viewContent: Element;
 
@@ -32,6 +32,7 @@ export class CardsViewPluginView extends ItemView {
     super(leaf);
     this.plugin = plugin;
     this.settings = settings;
+    this.svelteRoot = null;
     this.viewContent = this.containerEl.children[1];
   }
 
@@ -123,7 +124,7 @@ export class CardsViewPluginView extends ItemView {
     const onlyFolder = get(folderName);
 
     if (onlyFolder !== '') {
-      console.log("1");
+      console.log("getAllFiles : Notes from only selected folder...");
       return;
     } else {
       store.files.set(get(allAllowedFiles));
