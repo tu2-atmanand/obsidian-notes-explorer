@@ -47,65 +47,29 @@ export const allAllowedFiles = derived(
   },
 );
 
-// export const sortedFiles = derived(
-//   [sort, files, settings],
-//   ([$sort, $files, $settings]) =>
-//     [...$files]
-//       .filter((file: TFile) => !file.path.endsWith(".excalidraw.md"))
-//       .sort(
-//         (a: TFile, b: TFile) =>
-//           ($settings.pinnedFiles.includes(b.path) ? 1 : 0) -
-//             ($settings.pinnedFiles.includes(a.path) ? 1 : 0) ||
-//           b.stat[$sort] - a.stat[$sort],
-//       ),
-//   [] as TFile[],
-// );
+export const sortedFiles = derived(
+  [sort, files, settings],
+  ([$sort, $files, $settings]) => {
+    const isPinned = (path: string) => $settings.pinnedFiles.includes(path);
 
-export const sortedFiles = derived([sort, files], ([$sort, $files]) =>
-  [...$files]
-    .filter((file: TFile) => !file.path.endsWith(".excalidraw.md"))
-    .sort((a: TFile, b: TFile) => {
-      switch ($sort) {
-        case Sort.NameAsc:
-          return (
-            (get(settings).pinnedFiles.includes(b.path) ? 1 : 0) -
-              (get(settings).pinnedFiles.includes(a.path) ? 1 : 0) ||
-            a.basename.localeCompare(b.basename)
-          );
-        case Sort.NameDesc:
-          return (
-            (get(settings).pinnedFiles.includes(b.path) ? 1 : 0) -
-              (get(settings).pinnedFiles.includes(a.path) ? 1 : 0) ||
-            b.basename.localeCompare(a.basename)
-          );
-        case Sort.EditedDesc:
-          return (
-            (get(settings).pinnedFiles.includes(b.path) ? 1 : 0) -
-              (get(settings).pinnedFiles.includes(a.path) ? 1 : 0) ||
-            b.stat.mtime - a.stat.mtime
-          );
-        case Sort.EditedAsc:
-          return (
-            (get(settings).pinnedFiles.includes(b.path) ? 1 : 0) -
-              (get(settings).pinnedFiles.includes(a.path) ? 1 : 0) ||
-            a.stat.mtime - b.stat.mtime
-          );
-        case Sort.CreatedDesc:
-          return (
-            (get(settings).pinnedFiles.includes(b.path) ? 1 : 0) -
-              (get(settings).pinnedFiles.includes(a.path) ? 1 : 0) ||
-            b.stat.ctime - a.stat.ctime
-          );
-        case Sort.CreatedAsc:
-          return (
-            (get(settings).pinnedFiles.includes(b.path) ? 1 : 0) -
-              (get(settings).pinnedFiles.includes(a.path) ? 1 : 0) ||
-            a.stat.ctime - b.stat.ctime
-          );
-        default:
-          return 0;
-      }
-    }),
+    const comparePinned = (a: TFile, b: TFile) =>
+      (isPinned(b.path) ? 1 : 0) - (isPinned(a.path) ? 1 : 0);
+
+    const sortMethods: Record<string, (a: TFile, b: TFile) => number> = {
+      [Sort.NameAsc]: (a, b) => a.basename.localeCompare(b.basename),
+      [Sort.NameDesc]: (a, b) => b.basename.localeCompare(a.basename),
+      [Sort.EditedAsc]: (a, b) => a.stat.mtime - b.stat.mtime,
+      [Sort.EditedDesc]: (a, b) => b.stat.mtime - a.stat.mtime,
+      [Sort.CreatedAsc]: (a, b) => a.stat.ctime - b.stat.ctime,
+      [Sort.CreatedDesc]: (a, b) => b.stat.ctime - a.stat.ctime,
+    };
+
+    const sortFunction = sortMethods[$sort] || (() => 0);
+
+    return [...$files]
+      .filter((file) => !file.path.endsWith(".excalidraw.md"))
+      .sort((a, b) => comparePinned(a, b) || sortFunction(a, b));
+  },
 );
 
 export const searchQuery = writable<string>("");
@@ -162,11 +126,10 @@ const isEmptyFile = async (file: TFile) => {
 const createFilteredFiles = () =>
   readable<TFile[]>([], (set) => {
     const unsubscribe = sortedFiles.subscribe(async ($sortedFiles) => {
-      const $settings = get(settings);
       const nonEmptyFiles = [];
       for (const file of $sortedFiles) {
         const emptiness = await isEmptyFile(file);
-        if ($settings.showEmptyNotes || !emptiness) {
+        if (get(settings).showEmptyNotes || !emptiness) {
           nonEmptyFiles.push(file);
         }
       }
