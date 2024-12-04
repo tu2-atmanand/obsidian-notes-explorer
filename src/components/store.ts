@@ -34,10 +34,9 @@ export const sort = writable<Sort>();
 export const allAllowedFiles = derived(
   [settings, refreshSignal],
   ([$settings, $refreshSignal]) => {
-    // console.log(
-    //   "allAllowedFiles : This function should NOT run on resizing events",
-    // );
-    $refreshSignal = !($refreshSignal);
+    console.log(
+      "allAllowedFiles : Setting or Refresh signal, reading all files again.\nThis function should NOT run on resizing events",
+    );
     const allFiles = get(app).vault.getMarkdownFiles();
     const filteredFiles = allFiles.filter((file) => {
       return !$settings.excludedFolders.some(
@@ -68,17 +67,41 @@ export const sortedFiles = derived([sort, files], ([$sort, $files]) =>
     .sort((a: TFile, b: TFile) => {
       switch ($sort) {
         case Sort.NameAsc:
-          return a.basename.localeCompare(b.basename);
+          return (
+            (get(settings).pinnedFiles.includes(b.path) ? 1 : 0) -
+              (get(settings).pinnedFiles.includes(a.path) ? 1 : 0) ||
+            a.basename.localeCompare(b.basename)
+          );
         case Sort.NameDesc:
-          return b.basename.localeCompare(a.basename);
+          return (
+            (get(settings).pinnedFiles.includes(b.path) ? 1 : 0) -
+              (get(settings).pinnedFiles.includes(a.path) ? 1 : 0) ||
+            b.basename.localeCompare(a.basename)
+          );
         case Sort.EditedDesc:
-          return b.stat.mtime - a.stat.mtime;
+          return (
+            (get(settings).pinnedFiles.includes(b.path) ? 1 : 0) -
+              (get(settings).pinnedFiles.includes(a.path) ? 1 : 0) ||
+            b.stat.mtime - a.stat.mtime
+          );
         case Sort.EditedAsc:
-          return a.stat.mtime - b.stat.mtime;
+          return (
+            (get(settings).pinnedFiles.includes(b.path) ? 1 : 0) -
+              (get(settings).pinnedFiles.includes(a.path) ? 1 : 0) ||
+            a.stat.mtime - b.stat.mtime
+          );
         case Sort.CreatedDesc:
-          return b.stat.ctime - a.stat.ctime;
+          return (
+            (get(settings).pinnedFiles.includes(b.path) ? 1 : 0) -
+              (get(settings).pinnedFiles.includes(a.path) ? 1 : 0) ||
+            b.stat.ctime - a.stat.ctime
+          );
         case Sort.CreatedAsc:
-          return a.stat.ctime - b.stat.ctime;
+          return (
+            (get(settings).pinnedFiles.includes(b.path) ? 1 : 0) -
+              (get(settings).pinnedFiles.includes(a.path) ? 1 : 0) ||
+            a.stat.ctime - b.stat.ctime
+          );
         default:
           return 0;
       }
