@@ -197,6 +197,48 @@ export class CardsViewSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl).setName("Genearl features").setHeading();
 
+    // new Setting(containerEl)
+    //   .setName("Open view on tag click from Tag Tree")
+    //   .setDesc(
+    //     "Enable this if you want to see all the notes in cards view, which has the tag you just clicked from the tag tree."
+    //   )
+    //   .addToggle((toggle) =>
+    //     toggle
+    //       .setValue(this.plugin.settings.openViewOnTagTreeClick)
+    //       .onChange(async (value) => {
+    //         this.plugin.settings.openViewOnTagTreeClick = value;
+    //         await this.plugin.saveSettings();
+    //       })
+    //   );
+
+    // new Setting(containerEl)
+    //   .setName("Open view on tag click from inline Tag")
+    //   .setDesc(
+    //     "Enable this if you want to see all the notes in cards view, which has the tag you just clicked from the in file tag."
+    //   )
+    //   .addToggle((toggle) =>
+    //     toggle
+    //       .setValue(this.plugin.settings.openViewOnInlineTagClick)
+    //       .onChange(async (value) => {
+    //         this.plugin.settings.openViewOnInlineTagClick = value;
+    //         await this.plugin.saveSettings();
+    //       })
+    //   );
+
+    new Setting(containerEl)
+      .setName("Open view on folder click")
+      .setDesc(
+        "Enable this if you want to open the cards view with all the notes from a folder, when you will click on the folder from file explorer. You also have same option using file munu, if you dont like this feature."
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.openViewOnFolderClick)
+          .onChange(async (value) => {
+            this.plugin.settings.openViewOnFolderClick = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
     new Setting(containerEl)
       .setName("Deleted files")
       .setDesc("What happens to a file after you delete it.")
