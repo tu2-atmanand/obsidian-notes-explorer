@@ -1,6 +1,6 @@
 # Cards View (Beta)
 
-This is a plugin for Obsidian.md that displays all your notes as cards for better visual navigation and revision of the notes.
+This is a plugin for Obsidian.md that displays all your notes as cards for better visual navigation and revision of your notes.
 
 ![Thumbnail](./assets/Thumbnail2.png)
 
@@ -46,3 +46,11 @@ Pull requests and other contribution should be done to the origian project here 
 This project uses the following dependencies:
 
 - [Masonry](https://masonry.desandro.com/). Licensed under the [MIT License](https://desandro.mit-license.org/).
+
+## Support
+
+If you liked the additional features and enjoyed using this plugin. Please consider sponsoring my work through small donation using the below links to keep the development and support for this plugin alive.
+
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/tu2-atmanand?label=Sponsor&logo=GitHub%20Sponsors&style=for-the-badge)](https://github.com/sponsors/tu2-atmanand)
+
+<a href="https://www.buymeacoffee.com/tu2_atmanand"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a book&emoji=📖&slug=tu2_atmanand&button_colour=BD5FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" /></a>
