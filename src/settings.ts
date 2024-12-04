@@ -1,6 +1,12 @@
 // ./src/settings.ts
 
-import { App, Notice, PluginSettingTab, Setting } from "obsidian";
+import {
+  App,
+  Notice,
+  PluginSettingTab,
+  Setting,
+  normalizePath,
+} from "obsidian";
 
 import CardsViewPlugin from "../main";
 
@@ -23,13 +29,21 @@ export enum NoteOpenLayout {
 }
 
 export enum TagPostionForCardColor {
-  frontmatter = "front",
+  frontmatter = "frontmatter",
   content = "content",
 }
 
 export interface TagSetting {
   name: string;
   color: string;
+}
+export enum Sort {
+  NameAsc = "Title (A-Z)",
+  NameDesc = "Title (Z-A)",
+  EditedDesc = "Edited (Newest First)",
+  EditedAsc = "Edited (Oldest First)",
+  CreatedDesc = "Created (Newest First)",
+  CreatedAsc = "Created (Oldest First)",
 }
 
 export interface CardsViewSettings {
@@ -39,12 +53,16 @@ export interface CardsViewSettings {
   showDeleteButton: boolean;
   displayTitle: TitleDisplayMode;
   showEmptyNotes: boolean;
+  showSubFolders: boolean;
   showParentFolder: boolean;
   toSystemTrash: DeleteFileMode;
   openNoteLayout: NoteOpenLayout;
   tagPositionForCardColor: TagPostionForCardColor;
   pinnedFiles: string[];
   tagColors: TagSetting[];
+  defaultSort: Sort;
+  openViewOnFolderClick: boolean;
+  excludedFolders: string[];
 }
 
 export const DEFAULT_SETTINGS: CardsViewSettings = {
@@ -54,20 +72,26 @@ export const DEFAULT_SETTINGS: CardsViewSettings = {
   showDeleteButton: true,
   displayTitle: TitleDisplayMode.Both,
   showEmptyNotes: false,
+  showSubFolders: false,
   showParentFolder: true,
   toSystemTrash: DeleteFileMode.System,
   openNoteLayout: NoteOpenLayout.Right,
   tagPositionForCardColor: TagPostionForCardColor.content,
   pinnedFiles: [],
   tagColors: [],
+  defaultSort: Sort.EditedDesc,
+  openViewOnFolderClick: false,
+  excludedFolders: [],
 };
 
 export class CardsViewSettingsTab extends PluginSettingTab {
   plugin: CardsViewPlugin;
+  tempFolderName: string;
 
   constructor(app: App, plugin: CardsViewPlugin) {
     super(app, plugin);
     this.plugin = plugin;
+    this.tempFolderName = "";
   }
 
   display(): void {
@@ -175,6 +199,48 @@ export class CardsViewSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl).setName("Genearl features").setHeading();
 
+    // new Setting(containerEl)
+    //   .setName("Open view on tag click from Tag Tree")
+    //   .setDesc(
+    //     "Enable this if you want to see all the notes in cards view, which has the tag you just clicked from the tag tree."
+    //   )
+    //   .addToggle((toggle) =>
+    //     toggle
+    //       .setValue(this.plugin.settings.openViewOnTagTreeClick)
+    //       .onChange(async (value) => {
+    //         this.plugin.settings.openViewOnTagTreeClick = value;
+    //         await this.plugin.saveSettings();
+    //       })
+    //   );
+
+    // new Setting(containerEl)
+    //   .setName("Open view on tag click from inline Tag")
+    //   .setDesc(
+    //     "Enable this if you want to see all the notes in cards view, which has the tag you just clicked from the in file tag."
+    //   )
+    //   .addToggle((toggle) =>
+    //     toggle
+    //       .setValue(this.plugin.settings.openViewOnInlineTagClick)
+    //       .onChange(async (value) => {
+    //         this.plugin.settings.openViewOnInlineTagClick = value;
+    //         await this.plugin.saveSettings();
+    //       })
+    //   );
+
+    new Setting(containerEl)
+      .setName("Open view on folder click")
+      .setDesc(
+        "Enable this if you want to open the cards view with all the notes from a folder, when you will click on the folder from file explorer. You also have same option using file munu, if you dont like this feature."
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.openViewOnFolderClick)
+          .onChange(async (value) => {
+            this.plugin.settings.openViewOnFolderClick = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
     new Setting(containerEl)
       .setName("Deleted files")
       .setDesc("What happens to a file after you delete it.")
@@ -269,6 +335,43 @@ export class CardsViewSettingsTab extends PluginSettingTab {
           this.display();
         })
     );
+
+    new Setting(containerEl)
+      .setName("Exclude Folders")
+      .setDesc("Add folders to exclude from the board")
+      .addText((text) =>
+        text.setPlaceholder("Enter folder path").onChange((value) => {
+          this.tempFolderName = value; // Temporary field to hold input
+        })
+      )
+      .addButton((button) =>
+        button
+          .setButtonText("Add")
+          .setCta()
+          .onClick(() => {
+            const folderInput = normalizePath(this.tempFolderName);
+            if (
+              folderInput &&
+              !this.plugin.settings.excludedFolders.includes(folderInput)
+            ) {
+              this.plugin.settings.excludedFolders.push(folderInput);
+              this.plugin.saveSettings();
+              this.display();
+            }
+          })
+      );
+
+    containerEl.createEl("ul", { cls: "exclude-folders-list" });
+    this.plugin.settings.excludedFolders.forEach((folder) => {
+      const li = containerEl.createEl("li", { text: folder });
+      const deleteButton = li.createEl("button", { text: "Remove" });
+      deleteButton.addEventListener("click", () => {
+        this.plugin.settings.excludedFolders =
+          this.plugin.settings.excludedFolders.filter((f) => f !== folder);
+        this.plugin.saveSettings();
+        this.display(); // Refresh UI
+      });
+    });
 
     new Setting(containerEl)
       .setName("Reset settings")
