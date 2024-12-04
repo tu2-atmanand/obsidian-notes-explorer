@@ -1,6 +1,12 @@
 // ./src/settings.ts
 
-import { App, Notice, PluginSettingTab, Setting, normalizePath } from "obsidian";
+import {
+  App,
+  Notice,
+  PluginSettingTab,
+  Setting,
+  normalizePath,
+} from "obsidian";
 
 import CardsViewPlugin from "../main";
 
@@ -55,8 +61,6 @@ export interface CardsViewSettings {
   pinnedFiles: string[];
   tagColors: TagSetting[];
   defaultSort: Sort;
-  openViewOnTagTreeClick: boolean;
-  openViewOnInlineTagClick: boolean;
   openViewOnFolderClick: boolean;
   excludedFolders: string[];
 }
@@ -76,8 +80,6 @@ export const DEFAULT_SETTINGS: CardsViewSettings = {
   pinnedFiles: [],
   tagColors: [],
   defaultSort: Sort.EditedDesc,
-  openViewOnTagTreeClick: false,
-  openViewOnInlineTagClick: false,
   openViewOnFolderClick: false,
   excludedFolders: [],
 };
@@ -89,7 +91,7 @@ export class CardsViewSettingsTab extends PluginSettingTab {
   constructor(app: App, plugin: CardsViewPlugin) {
     super(app, plugin);
     this.plugin = plugin;
-    this.tempFolderName = '';
+    this.tempFolderName = "";
   }
 
   display(): void {
