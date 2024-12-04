@@ -11,9 +11,9 @@ import {
 } from "obsidian";
 
 import type CardsViewPlugin from "main";
-import { Sort, type CardsViewSettings } from "./settings";
+import { type CardsViewSettings } from "./settings";
 import Root from "./components/Root.svelte";
-import { get, readable } from "svelte/store";
+import { get } from "svelte/store";
 import store, { allAllowedFiles, folderName } from "./components/store";
 
 export const VIEW_TYPE = "cards-view";
@@ -124,7 +124,7 @@ export class CardsViewPluginView extends ItemView {
     const onlyFolder = get(folderName);
 
     if (onlyFolder !== '') {
-      console.log("getAllFiles : Notes from only selected folder...");
+      // console.log("getAllFiles : Notes from only selected folder...");
       return;
     } else {
       store.files.set(get(allAllowedFiles));

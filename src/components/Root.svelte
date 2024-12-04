@@ -22,8 +22,6 @@
     refreshOnResize,
   } from "./store";
   import { Sort } from "src/settings";
-  import { get } from "http";
-  import { isString } from "util";
 
   let notesGrid: MiniMasonry;
   let viewContent: HTMLElement;
@@ -59,7 +57,7 @@
       item.setIsLabel(true);
     });
     sortMenu.addItem((item) => {
-      item.setTitle("Title (A-Z)");
+      item.setTitle("Filename (A-Z)");
       item.setChecked($sort == Sort.NameAsc);
       item.onClick(async () => {
         $sort = Sort.NameAsc;
@@ -68,7 +66,7 @@
       });
     });
     sortMenu.addItem((item) => {
-      item.setTitle("Title (Z-A)");
+      item.setTitle("Filename(Z-A)");
       item.setChecked($sort == Sort.NameDesc);
       item.onClick(async () => {
         $sort = Sort.NameDesc;
@@ -151,10 +149,6 @@
   }
 
   function clearFolderFilter(event: MouseEvent) {
-    console.log(
-      "clearFolderFilter : Is this even running... :",
-      $filteredFiles,
-    );
     store.folderName.set("");
     store.files.set($allAllowedFiles);
     notesGrid.layout();
@@ -188,7 +182,7 @@
       $skipNextTransition = false;
 
       if ($refreshOnResize || $settings) {
-        console.log("I hope this is running when I am resizing...");
+        // console.log("I hope this is running, only when I am resizing...");
         notesGrid.layout();
         $refreshOnResize = false;
       }

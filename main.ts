@@ -6,7 +6,7 @@ import {
   DEFAULT_SETTINGS,
 } from "./src/settings";
 import { CardsViewPluginView, VIEW_TYPE } from "./src/view";
-import store, { plugin, pluginIcon } from "./src/components/store";
+import store, { pluginIcon } from "./src/components/store";
 import "./styles.css";
 
 export default class CardsViewPlugin extends Plugin {
@@ -78,7 +78,7 @@ export default class CardsViewPlugin extends Plugin {
 
     if (this.settings.openViewOnFolderClick) {
       this.registerDomEvent(document, "click", async (evt: MouseEvent) => {
-        console.log("CLick event is triggered...");
+        // console.log("CLick event is triggered...");
 
         // // Event to open the Cards View on Tag click from
         // if (this.settings.openViewOnTagTreeClick) {
@@ -118,12 +118,12 @@ export default class CardsViewPlugin extends Plugin {
         // Event to open the Cards View on Folder click, just like Folder Notes plugin
         const elemTarget = evt.target as Element;
         var Tfolder = this.setByFolderElement(elemTarget);
-        console.log(
-          "EVENT : folder returned by setByFolderElement :",
-          Tfolder,
-          " | Instance :",
-          Tfolder instanceof TFolder
-        );
+        // console.log(
+        //   "EVENT : folder returned by setByFolderElement :",
+        //   Tfolder,
+        //   " | Instance :",
+        //   Tfolder instanceof TFolder
+        // );
 
         // open it
         if (Tfolder && Tfolder instanceof TFolder) {
@@ -142,7 +142,7 @@ export default class CardsViewPlugin extends Plugin {
         if (source === "link-context-menu") return;
 
         if (file instanceof TFolder) {
-          console.log("The value :", file.children);
+          // console.log("The value :", file.children);
           menu.addItem((item) => {
             item
               .setTitle("Open folder in Cards View")
@@ -179,27 +179,27 @@ export default class CardsViewPlugin extends Plugin {
     var folderElem = folderItemEl;
     if (className.contains("nav-folder-title-content")) {
       folderName = folderElem.getText();
-      console.log(
-        "setByFolderElement : contains 'nav-folder-title-content' | folderName :",
-        folderName
-      );
+      // console.log(
+      //   "setByFolderElement : contains 'nav-folder-title-content' | folderName :",
+      //   folderName
+      // );
       if (folderItemEl.parentElement) {
         folderElem = folderItemEl.parentElement;
         if (folderElem.attributes.getNamedItem("data-path")?.textContent)
           folderPath =
             folderElem.attributes.getNamedItem("data-path")?.textContent ?? "";
-        console.log("setByFolderElement : data-path : folderPth :", folderPath);
+        // console.log("setByFolderElement : data-path : folderPth :", folderPath);
       }
     } else if (className.contains("nav-folder-title")) {
       folderPath =
         folderItemEl.attributes.getNamedItem("data-path")?.textContent ?? "";
       folderName = folderItemEl.lastElementChild?.getText() ?? "";
-      console.log(
-        "setByFolderElement : contains 'nav-folder-title'\nfolderPath :",
-        folderPath,
-        "\nfolderName :",
-        folderName
-      );
+      // console.log(
+      //   "setByFolderElement : contains 'nav-folder-title'\nfolderPath :",
+      //   folderPath,
+      //   "\nfolderName :",
+      //   folderName
+      // );
     }
 
     // fix the folder path
@@ -211,12 +211,12 @@ export default class CardsViewPlugin extends Plugin {
       }
     }
 
-    console.log(
-      "setByFolderElement : Final values\nfolderPath :",
-      folderPath,
-      "\nfolderName :",
-      folderName
-    );
+    // console.log(
+    //   "setByFolderElement : Final values\nfolderPath :",
+    //   folderPath,
+    //   "\nfolderName :",
+    //   folderName
+    // );
     // set to mine
     return this.app.vault.getAbstractFileByPath(folderPath);
   }
@@ -232,10 +232,10 @@ export default class CardsViewPlugin extends Plugin {
             if (child instanceof TFile && child.extension === "md") {
               files.push(child);
             } else if (child instanceof TFolder) {
-              console.log(
-                "openAllFilesInFolder : This is subFolder :",
-                child.name
-              );
+              // console.log(
+              //   "openAllFilesInFolder : This is subFolder :",
+              //   child.name
+              // );
               collectFiles(child); // Recursively process subfolder
             }
           });
