@@ -182,7 +182,7 @@
       $skipNextTransition = false;
 
       if ($refreshOnResize || $settings) {
-        // console.log("I hope this is running, only when I am resizing...");
+        console.log("Root : Resized or setting changed, refreshing...");
         notesGrid.layout();
         $refreshOnResize = false;
       }
@@ -196,6 +196,7 @@
     use:refreshIcon
     on:click={() => {
       store.refreshSignal.set(!$refreshSignal);
+      store.files.set($allAllowedFiles);
     }}
   />
   <div class="search-component">
