@@ -223,12 +223,14 @@
   </div>
   {#if $folderName}
     <div class="action-bar_folder">
-      <div>{$folderName}</div>
-      <button
-        class="clickable-icon folder-close-button"
-        use:closeIcon
-        on:click={clearFolderFilter}
-      />
+      <div style="align-content: center;">{$folderName}</div>
+      <div class="action-bar_folder_closeButton">
+        <button
+          class="clickable-icon"
+          use:closeIcon
+          on:click={clearFolderFilter}
+        />
+      </div>
     </div>
   {/if}
 </div>
