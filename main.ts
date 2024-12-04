@@ -1,10 +1,9 @@
-import { Notice, Plugin, TFile, TFolder, WorkspaceLeaf } from "obsidian";
+import { Plugin, TFile, TFolder, WorkspaceLeaf } from "obsidian";
 
 import {
   type CardsViewSettings,
   CardsViewSettingsTab,
   DEFAULT_SETTINGS,
-  Sort,
 } from "./src/settings";
 import { CardsViewPluginView, VIEW_TYPE } from "./src/view";
 import store, { plugin, pluginIcon } from "./src/components/store";
@@ -70,58 +69,71 @@ export default class CardsViewPlugin extends Plugin {
     store.viewIsVisible.set(true);
   }
 
-  private registerPluginEvents() {
+  private async registerPluginEvents() {
     this.registerEvent(
       this.app.metadataCache.on("resolved", async () =>
         store.appCache.update(() => this.app.metadataCache)
       )
     );
 
-    this.registerDomEvent(document, "click", (evt: MouseEvent) => {
-      // Event to open the Cards View on Tag click from
-      if (this.settings.openViewOnTagTreeClick) {
-        const target = evt.target as HTMLElement;
-        let tagElement = target.closest(".tree-item-self.tag-pane-tag");
-        if (tagElement) {
-          const textElement = tagElement.querySelector(".tree-item-inner-text");
-          if (textElement) {
-            const tagName = textElement.textContent?.trim();
-            if (tagName) {
-              // this.openTagInCardsView(tagName);
-              evt.preventDefault();
-            }
-          }
-        }
-      }
+    if (this.settings.openViewOnFolderClick) {
+      this.registerDomEvent(document, "click", async (evt: MouseEvent) => {
+        console.log("CLick event is triggered...");
 
-      // Event to open the Cards View on Tag click from
-      if (this.settings.openViewOnInlineTagClick) {
-        const target = evt.target as HTMLElement;
-        if (
-          target.classList.contains("cm-hashtag-end") &&
-          target.closest(".cm-line")
-        ) {
-          const tagName = target.textContent?.trim();
-          if (tagName) {
-            // this.openTagInCardsView(tagName);
-            evt.preventDefault();
-          }
-        }
-      }
+        // // Event to open the Cards View on Tag click from
+        // if (this.settings.openViewOnTagTreeClick) {
+        //   const target = evt.target as HTMLElement;
+        //   let tagElement = target.closest(".tree-item-self.tag-pane-tag");
+        //   if (tagElement) {
+        //     console.log("registerDomEvent : Tag from tag-tree has been clicked...");
+        //     const textElement = tagElement.querySelector(".tree-item-inner-text");
+        //     if (textElement) {
+        //       const tagName = textElement.textContent?.trim();
+        //       if (tagName) {
+        //         // this.openTagInCardsView(tagName);
+        //         evt.preventDefault();
+        //       }
+        //     }
+        //   }
+        // }
 
-      // Event to open the Cards View on Folder click, just like Folder Notes plugin
-      if (this.settings.openViewOnFolderClick) {
-        // get the folder path
+        // // Event to open the Cards View on Tag click from
+        // if (this.settings.openViewOnInlineTagClick) {
+        //   const target = evt.target as HTMLElement;
+        //   if (
+        //     target.classList.contains("cm-hashtag-end") &&
+        //     target.closest(".cm-line")
+        //   ) {
+        //     console.log(
+        //       "registerDomEvent : Tag from inline tag has been clicked..."
+        //     );
+        //     const tagName = target.textContent?.trim();
+        //     if (tagName) {
+        //       // this.openTagInCardsView(tagName);
+        //       evt.preventDefault();
+        //     }
+        //   }
+        // }
+
+        // Event to open the Cards View on Folder click, just like Folder Notes plugin
         const elemTarget = evt.target as Element;
         var Tfolder = this.setByFolderElement(elemTarget);
+        console.log(
+          "EVENT : folder returned by setByFolderElement :",
+          Tfolder,
+          " | Instance :",
+          Tfolder instanceof TFolder
+        );
 
         // open it
         if (Tfolder && Tfolder instanceof TFolder) {
           // this.openAllFilesInFolder(Tfolder);
-          store.folderName.set(Tfolder.name);
+          // store.folderName.set(Tfolder.name);
+          // await this.activateView();
+          await this.openAllFilesInFolder(Tfolder);
         }
-      }
-    });
+      });
+    }
   }
 
   async createFileMenu() {
@@ -167,16 +179,27 @@ export default class CardsViewPlugin extends Plugin {
     var folderElem = folderItemEl;
     if (className.contains("nav-folder-title-content")) {
       folderName = folderElem.getText();
+      console.log(
+        "setByFolderElement : contains 'nav-folder-title-content' | folderName :",
+        folderName
+      );
       if (folderItemEl.parentElement) {
         folderElem = folderItemEl.parentElement;
         if (folderElem.attributes.getNamedItem("data-path")?.textContent)
           folderPath =
             folderElem.attributes.getNamedItem("data-path")?.textContent ?? "";
+        console.log("setByFolderElement : data-path : folderPth :", folderPath);
       }
     } else if (className.contains("nav-folder-title")) {
       folderPath =
         folderItemEl.attributes.getNamedItem("data-path")?.textContent ?? "";
       folderName = folderItemEl.lastElementChild?.getText() ?? "";
+      console.log(
+        "setByFolderElement : contains 'nav-folder-title'\nfolderPath :",
+        folderPath,
+        "\nfolderName :",
+        folderName
+      );
     }
 
     // fix the folder path
@@ -188,6 +211,12 @@ export default class CardsViewPlugin extends Plugin {
       }
     }
 
+    console.log(
+      "setByFolderElement : Final values\nfolderPath :",
+      folderPath,
+      "\nfolderName :",
+      folderName
+    );
     // set to mine
     return this.app.vault.getAbstractFileByPath(folderPath);
   }
@@ -203,7 +232,10 @@ export default class CardsViewPlugin extends Plugin {
             if (child instanceof TFile && child.extension === "md") {
               files.push(child);
             } else if (child instanceof TFolder) {
-              console.log("openAllFilesInFolder : This is subFolder :", child.name);
+              console.log(
+                "openAllFilesInFolder : This is subFolder :",
+                child.name
+              );
               collectFiles(child); // Recursively process subfolder
             }
           });
@@ -259,10 +291,10 @@ export default class CardsViewPlugin extends Plugin {
   //   store.sort.set(sortType);
   // }
 
-  private getErrorMessage(error: unknown): string {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    return String(error);
-  }
+  // private getErrorMessage(error: unknown): string {
+  //   if (error instanceof Error) {
+  //     return error.message;
+  //   }
+  //   return String(error);
+  // }
 }
