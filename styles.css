@@ -26,15 +26,23 @@
     display: flex;
     gap: 0.5rem;
     width: fit-content;
-    background: lightgray;
-    align-content: 1rem;
-    padding-inline: 0.5rem;
-    border-radius: 1rem;
-    border: 1px solid black;
+    background: var(--background-modifier-border);
+    padding-inline-start: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid var(--code-string);
     flex-direction: row;
     font-size: 1.1rem;
     font-style: italic;
     font-weight: 600;
+}
+
+.action-bar_folder_closeButton {
+    color: white;
+    background: var(--canvas-background);
+    align-content: center;
+    border: 0 !important;
+    border-radius: 4px !important;
+    cursor: pointer;
 }
 
 .action-bar .action-bar__tags {
