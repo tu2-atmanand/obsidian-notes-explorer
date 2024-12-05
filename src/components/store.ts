@@ -88,7 +88,7 @@ export const allAllowedFiles = derived(
     // Exclude files in the excluded folders
     const filteredFiles = allFiles.filter((file) => {
       return !$settings.excludedFolders.some(
-        (excludeFolder) => file.path.startsWith(excludeFolder), // TODO : I know I am going to get error here and the fix is, I have to march whether file.parentFolderName is there in excludeFolder or not.
+        (excludeFolder) => file.path.startsWith(excludeFolder),
       );
     });
 

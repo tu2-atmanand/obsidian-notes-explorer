@@ -14,10 +14,8 @@
     viewIsVisible,
     settings,
     refreshSignal,
-    app,
     plugin,
     folderName,
-    filteredFiles,
     allAllowedFiles,
     refreshOnResize,
   } from "./store";
@@ -37,6 +35,11 @@
   const closeIcon = (element: HTMLElement) => {
     setIcon(element, "x");
   };
+
+  function refreshView() {
+    store.refreshSignal.set(!$refreshSignal);
+    store.files.set($allAllowedFiles);
+  }
 
   const searchInput = (element: HTMLElement) => {
     const searchInput = new SearchComponent(element);
@@ -140,8 +143,9 @@
     sortMenu.addItem((item) => {
       item.setTitle("Read sub-folders");
       item.setChecked($settings.showSubFolders);
-      item.onClick(async () => {
+      item.onClick(() => {
         $settings.showSubFolders = !$settings.showSubFolders;
+        refreshView();
       });
     });
 
@@ -194,10 +198,7 @@
   <button
     class="clickable-icon refresh-button"
     use:refreshIcon
-    on:click={() => {
-      store.refreshSignal.set(!$refreshSignal);
-      store.files.set($allAllowedFiles);
-    }}
+    on:click={refreshView}
   />
   <div class="search-component">
     <div class="action-bar__search" use:searchInput />
