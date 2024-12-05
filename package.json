@@ -29,9 +29,12 @@
     "svelte": "^4.2.12",
     "svelte-preprocess": "^5.1.3",
     "tslib": "^2.6.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "@types/sortablejs": "^1.13.0"
   },
   "dependencies": {
+    "@simonwep/pickr": "^1.8.2",
+    "sortablejs": "^1.15.0",
     "minimasonry": "^1.3.2"
   }
 }
