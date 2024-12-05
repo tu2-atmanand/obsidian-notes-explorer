@@ -312,3 +312,53 @@
     flex-wrap: wrap;
     text-wrap: wrap;
 }
+
+
+/* /src/settings.ts */
+
+.cards-view-tag-container .cards-view-tag-container-tag-row {
+    display: flex;
+    align-items: center;
+    border-radius: 5px;
+    margin-block: 2px;
+}
+
+.cards-view-tag-container-tag-row-element {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    padding: 0 !important;
+}
+
+.cards-view-tag-container .setting-item-control {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding-block: 5px;
+}
+
+.cards-view-sortable-fallback {
+    cursor: grabbing;
+    box-shadow: 0px 3px 32px rgb(31 38 135 / 15%);
+}
+
+.cards-view-sortable-grab {
+    cursor: grabbing !important;
+}
+
+.cards-view-sortable-ghost {
+    opacity: 0.4;
+    cursor: grabbing;
+}
+
+.cards-view-sortable-chosen {
+    cursor: grabbing;
+    padding: 0 0 0 18px;
+    background-color: var(--background-primary);
+}
+
+.cards-view-sortable-drag {
+    cursor: grabbing;
+    box-shadow: 0px 3px 32px rgb(31 38 135 / 15%);
+}
