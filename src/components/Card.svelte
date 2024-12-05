@@ -193,7 +193,7 @@
   const blankIcon = (element: HTMLElement) => setIcon(element, "blank");
   const vaultIcon = (element: HTMLElement) => setIcon(element, "vault");
   const pinnedIcon = (element: HTMLElement) =>
-    setIcon(element, "square-arrow-down-left");
+    setIcon(element, "circle-stop");
 
   const dispatch = createEventDispatcher();
   onMount(async () => {
@@ -232,7 +232,6 @@
     {#if pinned}
       <button
         class="clickable-icon"
-        class:is-active={pinned}
         use:pinnedIcon
         on:click|stopPropagation={togglePin}
       />
