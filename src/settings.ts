@@ -9,6 +9,8 @@ import {
 } from "obsidian";
 
 import CardsViewPlugin from "../main";
+import Pickr from "@simonwep/pickr";
+import Sortable from "sortablejs";
 
 export enum TitleDisplayMode {
   Both = "Both",
@@ -32,6 +34,7 @@ export enum TagPostionForCardColor {
 export interface TagSetting {
   name: string;
   color: string;
+  order: number;
 }
 export enum Sort {
   NameAsc = "Title (A-Z)",
@@ -292,41 +295,164 @@ export class CardsViewSettingsTab extends PluginSettingTab {
           })
       );
 
-    this.plugin.settings.tagColors.forEach((tag, index) => {
-      const setting = new Setting(containerEl)
-        .addText((text) =>
-          text
-            .setPlaceholder("Tag Name")
-            .setValue(tag.name)
-            .onChange(async (value) => {
-              this.plugin.settings.tagColors[index].name = value;
-              await this.plugin.saveSettings();
-            })
-        )
-        .addColorPicker((text) =>
-          text.setValue(tag.color).onChange(async (value) => {
-            this.plugin.settings.tagColors[index].color = value;
-            await this.plugin.saveSettings();
-          })
-        )
-        .addButton((button) =>
-          button
-            .setButtonText("Delete")
-            .setCta()
-            .onClick(async () => {
-              this.plugin.settings.tagColors.splice(index, 1);
-              await this.plugin.saveSettings();
-              this.display();
-            })
-        );
+    const tagContainer = containerEl.createDiv({
+      cls: "cards-view-tag-container",
     });
 
+    Sortable.create(tagContainer, {
+      animation: 150,
+      ghostClass: "cards-view-sortable-ghost",
+      chosenClass: "cards-view-sortable-chosen",
+      dragClass: "cards-view-sortable-drag",
+      dragoverBubble: true,
+      forceFallback: true,
+      fallbackClass: "cards-view-sortable-fallback",
+      easing: "cubic-bezier(1, 0, 0, 1)",
+      onSort: async () => {
+        const newOrder = Array.from(tagContainer.children)
+          .map((child, index) => {
+            const tagName = child.getAttribute("data-tag-name");
+            const tag = this.plugin.settings.tagColors.find(
+              (t) => t.name === tagName
+            );
+            if (tag) {
+              tag.order = index + 1;
+              return tag;
+            }
+            return null;
+          })
+          .filter((tag): tag is TagSetting => tag !== null);
+
+        this.plugin.settings.tagColors = newOrder;
+        await this.plugin.saveSettings();
+      },
+    });
+
+    // Render existing tags
+    this.plugin.settings.tagColors
+      .sort((a, b) => a.order - b.order)
+      .forEach((tag, index) => {
+        const row = tagContainer.createDiv({
+          cls: "cards-view-tag-container-tag-row",
+          attr: { "data-tag-name": tag.name },
+        });
+        // row.style.backgroundColor = tag.color;
+
+        let rgbaInput: any;
+        new Setting(row)
+          .setClass("cards-view-tag-container-tag-row-element")
+          .addButton((drag) =>
+            drag.setTooltip("Hold and drag").setIcon("grip-horizontal").buttonEl.setCssStyles({backgroundColor: tag.color})
+          )
+          .addText((text) =>
+            text
+              .setPlaceholder("Tag Name")
+              .setValue(tag.name)
+              .onChange(async (value) => {
+                tag.name = value;
+                row.setAttribute("data-tag-name", value);
+                await this.plugin.saveSettings();
+              })
+              .inputEl.setCssStyles({
+                backgroundColor: tag.color,
+              })
+          )
+          .addText((input) => {
+            rgbaInput = input;
+            input
+              .setPlaceholder("RGBA Color")
+              .setValue(tag.color)
+              .onChange(async (value) => {
+                tag.color = value;
+                row.setAttribute("data-tag-color", "cards-view-tag-color-data");
+                row.style.backgroundColor = value;
+                await this.plugin.saveSettings();
+              });
+            input.inputEl.setCssStyles({
+              backgroundColor: tag.color,
+              width: "100%",
+            });
+          })
+          .addButton((button) => {
+            const pickr = new Pickr({
+              el: button.buttonEl,
+              theme: "nano",
+              default: tag.color,
+              components: {
+                preview: true,
+                opacity: true,
+                hue: true,
+                interaction: {
+                  rgba: true,
+                  input: true,
+                  clear: true,
+                  cancel: true,
+                  save: true,
+                },
+              },
+            });
+
+            pickr
+              .on(
+                "change",
+                (color: {
+                  toRGBA: () => {
+                    (): any;
+                    new (): any;
+                    toString: { (): any; new (): any };
+                  };
+                }) => {
+                  const rgbaColor = color.toRGBA().toString();
+                  tag.color = rgbaColor;
+                  row.style.backgroundColor = rgbaColor;
+                  rgbaInput.setValue(rgbaColor);
+                }
+              )
+              .on(
+                "save",
+                (color: {
+                  toRGBA: () => {
+                    (): any;
+                    new (): any;
+                    toString: { (): any; new (): any };
+                  };
+                }) => {
+                  pickr.hide();
+                  const rgbaColor = color.toRGBA().toString();
+                  tag.color = rgbaColor;
+                  row.style.backgroundColor = rgbaColor;
+                  rgbaInput.setValue(rgbaColor);
+                  this.plugin.saveSettings();
+                }
+              );
+
+            pickr.on("clear", () => pickr.hide());
+          })
+          .addButton((deleteButton) =>
+            deleteButton
+              .setButtonText("Delete")
+              .setIcon("trash")
+              .setCta()
+              .onClick(async () => {
+                this.plugin.settings.tagColors.splice(index, 1);
+                await this.plugin.saveSettings();
+                this.display();
+              })
+          );
+      });
+
+    // Add "Add Tag" button
     new Setting(containerEl).addButton((button) =>
       button
-        .setButtonText("Add Tag")
+        .setButtonText("Add tag color")
         .setCta()
         .onClick(async () => {
-          this.plugin.settings.tagColors.push({ name: "", color: "" });
+          const newTag = {
+            name: "",
+            color: "",
+            order: this.plugin.settings.tagColors.length + 1,
+          };
+          this.plugin.settings.tagColors.push(newTag);
           await this.plugin.saveSettings();
           this.display();
         })
@@ -357,7 +483,7 @@ export class CardsViewSettingsTab extends PluginSettingTab {
           })
       );
 
-    containerEl.createEl("ul", { cls: "exclude-folders-list" });
+    containerEl.createEl("ul", { cls: "cards-view-exclude-folders-list" });
     this.plugin.settings.excludedFolders.forEach((folder) => {
       const li = containerEl.createEl("li", { text: folder });
       const deleteButton = li.createEl("button", { text: "Remove" });
