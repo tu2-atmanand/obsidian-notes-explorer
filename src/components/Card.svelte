@@ -167,7 +167,7 @@
       for (const tag of tags) {
         // Case-insensitive matching of tags with $settings.tagColors
         const matchingTag = $settings.tagColors.find(
-          (tagColor) => tagColor.name.toLowerCase() === tag.toLowerCase(),
+          (tagColor) => tagColor.name === tag,
         );
 
         if (matchingTag) {
