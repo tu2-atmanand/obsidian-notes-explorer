@@ -29,7 +29,8 @@
     background: var(--background-modifier-border);
     padding-inline-start: 0.5rem;
     border-radius: 4px;
-    border: 1px solid var(--code-string);
+    border: 2px solid var(--code-tag);
+    color: var(--code-keyword);
     flex-direction: row;
     font-size: 1.1rem;
     font-style: italic;
@@ -173,7 +174,7 @@
 .top-bar {
     font-size: 1.2em;
     font-weight: 600;
-    color: var(--color-base-60);
+    color: var(--color-base-70);
     padding: 0.2rem;
     border-bottom: 1px solid var(--background-modifier-border);
     text-align: center;
