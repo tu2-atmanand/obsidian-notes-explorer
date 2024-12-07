@@ -1,7 +1,7 @@
 {
   "id": "cards-view-beta",
   "name": "Cards View (Beta)",
-  "version": "1.13.2",
+  "version": "1.14.0",
   "minAppVersion": "0.15.0",
   "description": "View all your notes in a form of cards for better visual navigation and revision of your notes.",
   "author": "Atmanand Gauns",

@@ -1,6 +1,6 @@
 {
   "name": "cards-view-beta",
-  "version": "1.13.2",
+  "version": "1.14.0",
   "description": "View all your notes in a form of cards for better visual navigation and revision of your notes.",
   "main": "main.js",
   "scripts": {
