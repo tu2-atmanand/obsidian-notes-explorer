@@ -1,18 +1,24 @@
-# Cards View (Beta)
+# Notes Explorer
 
-This is a plugin for Obsidian.md that displays all your notes as cards for better visual navigation and revision of your notes.
+This is a plugin for [Obsidian.md](https://obsidian.md) that displays all your notes as cards for better visual navigation and revision of your notes. Explore your vault using the explorer view by using various filters.
 
 ![Thumbnail](./assets/Thumbnail2.png)
 
+>[!IMPORTANT] Notice
+> Initially started as simple fork from the Cards View plugin, now has become a highly functional plugin in itself with a lot of new functionalities. I started integrating all these new features to explore vault efficiently. Although, now after hearing few suggestion from the users, I have decided to publish my own new plugin with all these new changes, as I presume, the author of the Cards View might not be interested in integrating all these new features. This Beta version will be now published with a new name : **Notes Explorer**.
+
 ## Features
 
-- Display notes in a card view.
-- Sorts by last modified or created date.
+- Display notes as cards arranged in a masonry view.
+- Sorts by last modified time, created time and note filename either as ascending or descending order.
+- Filter out empty notes.
+- See notes from specificc folders using Folder tag. Also use sub-folder filter to view all notes from even the sub-folders.
+- Click on folder name from file explorer to open the explorer view.
+- Two different types of tag based color indicators.
 
 ## Installation
 
->[!IMPORTANT]
-> This is a fork of the original project, hence its not available in the Obsidian plugin marketplace. But, till these new features gets integrated in the original **Cards View** plugin, you can still install this beta version and is safe to use. Will notify you once these features are integrated in the original plugin.
+> This plugin is in the process of publishing on the Obsidian plugin marketplace. But till it gets approved, use the following steps to install this plugin the easiest way.
 
 **Step 1 :** Disable the original **Cards View** plugin or you can even uninstall it, but its better to disable : 
 
@@ -35,7 +41,7 @@ https://github.com/tu2-atmanand/cards-view-plugin-beta
 
 ## Contributing
 
-Pull requests and other contribution should be done to the origian project here : [Card View](https://github.com/jillro/obsidian-cards-view-plugin).
+Pull requests and any suggestion for features or improvements are always welcome. Create your new request in the Issues section, to start the discussion : [Notes Explorer Issues](https://github.com/tu2-atmanand/obsidian-notes-explorer).
 
 ## License
 

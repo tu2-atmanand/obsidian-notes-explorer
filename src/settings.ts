@@ -280,7 +280,7 @@ export class CardsViewSettingsTab extends PluginSettingTab {
           })
       );
 
-    new Setting(containerEl).setName("Cards color based on tag").setHeading();
+    new Setting(containerEl).setName("Tag color indicator").setHeading();
 
     new Setting(containerEl)
       .setName("Where do you place the tags")
