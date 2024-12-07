@@ -13,7 +13,7 @@ export default class CardsViewPlugin extends Plugin {
   settings: CardsViewSettings = Object.assign({}, DEFAULT_SETTINGS);
 
   async onload() {
-    console.log("Cards View (Beta) : Loading plugin ...");
+    console.log("Notes Explorer : Loading plugin ...");
 
     this.settings = Object.assign(this.settings, await this.loadData());
     store.settings.subscribe(async () => await this.saveSettings());
@@ -46,7 +46,7 @@ export default class CardsViewPlugin extends Plugin {
   }
 
   onunload() {
-    console.log("Cards View (Beta) : Unloading plugin ...");
+    console.log("Notes Explorer : Unloading plugin ...");
   }
 
   async saveSettings() {
@@ -165,7 +165,7 @@ export default class CardsViewPlugin extends Plugin {
   }
 
   private registerPluginRibbonIcon() {
-    this.addRibbonIcon(pluginIcon, "Cards view (Beta)", () => {
+    this.addRibbonIcon(pluginIcon, "Notes Explorer", () => {
       this.activateView();
     });
   }
