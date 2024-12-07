@@ -377,7 +377,7 @@ export class CardsViewSettingsTab extends PluginSettingTab {
             const pickr = new Pickr({
               el: button.buttonEl,
               theme: "nano",
-              default: tag.color,
+              default: tag.color || "rgba(255, 255, 255, 1)", // Default alpha to 1
               components: {
                 preview: true,
                 opacity: true,
@@ -393,38 +393,33 @@ export class CardsViewSettingsTab extends PluginSettingTab {
             });
 
             pickr
-              .on(
-                "change",
-                (color: {
-                  toRGBA: () => {
-                    (): any;
-                    new (): any;
-                    toString: { (): any; new (): any };
-                  };
-                }) => {
-                  const rgbaColor = color.toRGBA().toString();
+              .on("change", (color: any) => {
+                const rgbaColor = `rgba(${color
+                  .toRGBA()
+                  .map((value: any, index: number) =>
+                    index < 3 ? Math.round(value) : value
+                  )
+                  .join(", ")})`; // Construct valid rgba format
                   tag.color = rgbaColor;
                   row.style.backgroundColor = rgbaColor;
                   rgbaInput.setValue(rgbaColor);
-                }
-              )
-              .on(
-                "save",
-                (color: {
-                  toRGBA: () => {
-                    (): any;
-                    new (): any;
-                    toString: { (): any; new (): any };
-                  };
-                }) => {
+              })
+              .on("save", (color: any) => {
                   pickr.hide();
-                  const rgbaColor = color.toRGBA().toString();
+                const rgbaColor = `rgba(${color
+                  .toRGBA()
+                  .map((value: number, index: number) =>
+                    index < 3 ? Math.round(value) : value
+                  )
+                  .join(", ")})`; // Construct valid rgba format
                   tag.color = rgbaColor;
                   row.style.backgroundColor = rgbaColor;
                   rgbaInput.setValue(rgbaColor);
                   this.plugin.saveSettings();
-                }
-              );
+              })
+              .on("cancel", () => {
+                pickr.hide(); // Close the picker when cancel is pressed
+              });
 
             pickr.on("clear", () => pickr.hide());
           })
