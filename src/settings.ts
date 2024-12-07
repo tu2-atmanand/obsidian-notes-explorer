@@ -31,6 +31,10 @@ export enum TagPostionForCardColor {
   frontmatter = "frontmatter",
   content = "content",
 }
+export enum TagCardColorIndicatorType {
+  background = "background",
+  sidebars = "sidebars",
+}
 export interface TagSetting {
   name: string;
   color: string;
@@ -59,6 +63,7 @@ export interface CardsViewSettings {
   tagPositionForCardColor: TagPostionForCardColor;
   pinnedFiles: string[];
   tagColors: TagSetting[];
+  tagColorIndicatorType: TagCardColorIndicatorType;
   defaultSort: Sort;
   openViewOnFolderClick: boolean;
   excludedFolders: string[];
@@ -78,6 +83,7 @@ export const DEFAULT_SETTINGS: CardsViewSettings = {
   tagPositionForCardColor: TagPostionForCardColor.content,
   pinnedFiles: [],
   tagColors: [],
+  tagColorIndicatorType: TagCardColorIndicatorType.background,
   defaultSort: Sort.EditedDesc,
   openViewOnFolderClick: false,
   excludedFolders: [],
@@ -295,6 +301,25 @@ export class CardsViewSettingsTab extends PluginSettingTab {
           })
       );
 
+    new Setting(containerEl)
+      .setName("Tag color indicator type")
+      .setDesc(
+        "Select whether you want the cards background color as the tag color or cards sidebars. With background options sometimes few elements of your note might not be properly visible due to the theme you are using, in that case use the sidbar option."
+      )
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOptions({
+            [TagCardColorIndicatorType.background]: "Card's background",
+            [TagCardColorIndicatorType.sidebars]: "Card's sidebars",
+          })
+          .setValue(this.plugin.settings.tagColorIndicatorType)
+          .onChange(async (value) => {
+            this.plugin.settings.tagColorIndicatorType =
+              value as TagCardColorIndicatorType;
+            await this.plugin.saveSettings();
+          })
+      );
+
     const tagContainer = containerEl.createDiv({
       cls: "cards-view-tag-container",
     });
@@ -342,7 +367,10 @@ export class CardsViewSettingsTab extends PluginSettingTab {
         new Setting(row)
           .setClass("cards-view-tag-container-tag-row-element")
           .addButton((drag) =>
-            drag.setTooltip("Hold and drag").setIcon("grip-horizontal").buttonEl.setCssStyles({backgroundColor: tag.color})
+            drag
+              .setTooltip("Hold and drag")
+              .setIcon("grip-horizontal")
+              .buttonEl.setCssStyles({ backgroundColor: tag.color })
           )
           .addText((text) =>
             text
@@ -400,22 +428,22 @@ export class CardsViewSettingsTab extends PluginSettingTab {
                     index < 3 ? Math.round(value) : value
                   )
                   .join(", ")})`; // Construct valid rgba format
-                  tag.color = rgbaColor;
-                  row.style.backgroundColor = rgbaColor;
-                  rgbaInput.setValue(rgbaColor);
+                tag.color = rgbaColor;
+                row.style.backgroundColor = rgbaColor;
+                rgbaInput.setValue(rgbaColor);
               })
               .on("save", (color: any) => {
-                  pickr.hide();
+                pickr.hide();
                 const rgbaColor = `rgba(${color
                   .toRGBA()
                   .map((value: number, index: number) =>
                     index < 3 ? Math.round(value) : value
                   )
                   .join(", ")})`; // Construct valid rgba format
-                  tag.color = rgbaColor;
-                  row.style.backgroundColor = rgbaColor;
-                  rgbaInput.setValue(rgbaColor);
-                  this.plugin.saveSettings();
+                tag.color = rgbaColor;
+                row.style.backgroundColor = rgbaColor;
+                rgbaInput.setValue(rgbaColor);
+                this.plugin.saveSettings();
               })
               .on("cancel", () => {
                 pickr.hide(); // Close the picker when cancel is pressed
@@ -423,6 +451,7 @@ export class CardsViewSettingsTab extends PluginSettingTab {
 
             pickr.on("clear", () => pickr.hide());
           })
+
           .addButton((deleteButton) =>
             deleteButton
               .setButtonText("Delete")
