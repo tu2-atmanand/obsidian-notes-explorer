@@ -8,7 +8,7 @@ import {
   normalizePath,
 } from "obsidian";
 
-import CardsViewPlugin from "../main";
+import NotesExplorerPlugin from "../main";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
 
@@ -90,10 +90,10 @@ export const DEFAULT_SETTINGS: CardsViewSettings = {
 };
 
 export class CardsViewSettingsTab extends PluginSettingTab {
-  plugin: CardsViewPlugin;
+  plugin: NotesExplorerPlugin;
   tempFolderName: string;
 
-  constructor(app: App, plugin: CardsViewPlugin) {
+  constructor(app: App, plugin: NotesExplorerPlugin) {
     super(app, plugin);
     this.plugin = plugin;
     this.tempFolderName = "";
@@ -321,17 +321,17 @@ export class CardsViewSettingsTab extends PluginSettingTab {
       );
 
     const tagContainer = containerEl.createDiv({
-      cls: "cards-view-tag-container",
+      cls: "notes-explorer-tag-container",
     });
 
     Sortable.create(tagContainer, {
       animation: 150,
-      ghostClass: "cards-view-sortable-ghost",
-      chosenClass: "cards-view-sortable-chosen",
-      dragClass: "cards-view-sortable-drag",
+      ghostClass: "notes-explorer-sortable-ghost",
+      chosenClass: "notes-explorer-sortable-chosen",
+      dragClass: "notes-explorer-sortable-drag",
       dragoverBubble: true,
       forceFallback: true,
-      fallbackClass: "cards-view-sortable-fallback",
+      fallbackClass: "notes-explorer-sortable-fallback",
       easing: "cubic-bezier(1, 0, 0, 1)",
       onSort: async () => {
         const newOrder = Array.from(tagContainer.children)
@@ -358,14 +358,14 @@ export class CardsViewSettingsTab extends PluginSettingTab {
       .sort((a, b) => a.order - b.order)
       .forEach((tag, index) => {
         const row = tagContainer.createDiv({
-          cls: "cards-view-tag-container-tag-row",
+          cls: "notes-explorer-tag-container-tag-row",
           attr: { "data-tag-name": tag.name },
         });
         // row.style.backgroundColor = tag.color;
 
         let rgbaInput: any;
         new Setting(row)
-          .setClass("cards-view-tag-container-tag-row-element")
+          .setClass("notes-explorer-tag-container-tag-row-element")
           .addButton((drag) =>
             drag
               .setTooltip("Hold and drag")
@@ -392,7 +392,7 @@ export class CardsViewSettingsTab extends PluginSettingTab {
               .setValue(tag.color)
               .onChange(async (value) => {
                 tag.color = value;
-                row.setAttribute("data-tag-color", "cards-view-tag-color-data");
+                row.setAttribute("data-tag-color", "notes-explorer-tag-color-data");
                 row.style.backgroundColor = value;
                 await this.plugin.saveSettings();
               });
@@ -507,7 +507,7 @@ export class CardsViewSettingsTab extends PluginSettingTab {
           })
       );
 
-    containerEl.createEl("ul", { cls: "cards-view-exclude-folders-list" });
+    containerEl.createEl("ul", { cls: "notes-explorer-exclude-folders-list" });
     this.plugin.settings.excludedFolders.forEach((folder) => {
       const li = containerEl.createEl("li", { text: folder });
       const deleteButton = li.createEl("button", { text: "Remove" });

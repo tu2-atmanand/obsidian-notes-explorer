@@ -13,11 +13,11 @@ import {
 } from "obsidian";
 import { derived, get, readable, writable } from "svelte/store";
 import { Sort, type CardsViewSettings } from "../settings";
-import CardsViewPlugin from "main";
+import NotesExplorerPlugin from "main";
 
 export const pluginIcon = "align-start-horizontal";
 
-export const plugin = writable<CardsViewPlugin>();
+export const plugin = writable<NotesExplorerPlugin>();
 export const app = writable<App>();
 export const view = writable<ItemView>();
 export const settings = writable<CardsViewSettings>();

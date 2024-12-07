@@ -6,26 +6,25 @@ import {
   ItemView,
   TAbstractFile,
   TFile,
-  TFolder,
   WorkspaceLeaf,
 } from "obsidian";
 
-import type CardsViewPlugin from "main";
+import type NotesExplorerPlugin from "main";
 import { type CardsViewSettings } from "./settings";
 import Root from "./components/Root.svelte";
 import { get } from "svelte/store";
 import store, { allAllowedFiles, folderName } from "./components/store";
 
-export const VIEW_TYPE = "cards-view";
+export const VIEW_TYPE = "notes-explorer";
 
 export class CardsViewPluginView extends ItemView {
   private settings: CardsViewSettings;
   private svelteRoot: Root | null;
-  private plugin: CardsViewPlugin;
+  private plugin: NotesExplorerPlugin;
   private viewContent: Element;
 
   constructor(
-    plugin: CardsViewPlugin,
+    plugin: NotesExplorerPlugin,
     settings: CardsViewSettings,
     leaf: WorkspaceLeaf
   ) {

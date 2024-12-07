@@ -34,7 +34,7 @@ This is a plugin for [Obsidian.md](https://obsidian.md) that displays all your n
 `Open Obsidian settings` > `BRAT` > `Add Beta plugin button` > `Paste the below link` > `Click on Add Plugin`.
 
 ```md
-https://github.com/tu2-atmanand/cards-view-plugin-beta
+https://github.com/tu2-atmanand/obsidian-notes-explorer
 ```
 
 **Step 4 :** Thats it! Now you can open the Cards View, as usual.

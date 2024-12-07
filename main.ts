@@ -9,7 +9,7 @@ import { CardsViewPluginView, VIEW_TYPE } from "./src/view";
 import store, { pluginIcon } from "./src/components/store";
 import "./styles.css";
 
-export default class CardsViewPlugin extends Plugin {
+export default class NotesExplorerPlugin extends Plugin {
   settings: CardsViewSettings = Object.assign({}, DEFAULT_SETTINGS);
 
   async onload() {
@@ -156,7 +156,7 @@ export default class CardsViewPlugin extends Plugin {
 
   private registerCommands() {
     this.addCommand({
-      id: "cards-view-plugin",
+      id: "notes-explorer-plugin",
       name: "Open card view",
       callback: () => {
         this.activateView();
