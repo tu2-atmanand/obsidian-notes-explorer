@@ -9,12 +9,7 @@
     TFile,
   } from "obsidian";
   import { afterUpdate, createEventDispatcher, onMount } from "svelte";
-  import {
-    skipNextTransition,
-    app,
-    view,
-    settings,
-  } from "./store";
+  import { skipNextTransition, app, view, settings } from "./store";
   import { TitleDisplayMode } from "../settings";
   import type { Child } from "svelte-eslint-parser/lib/parser/compat";
 
@@ -139,14 +134,9 @@
     }
   };
 
-  type TagSetting = {
-    name: string;
-    color: string;
-  };
-
   let backgroundColor = "";
 
-  const updateBackgroundColor = async () => {
+  const updateTagColorIndicator = async () => {
     if (contentDiv && $settings.tagPositionForCardColor === "content") {
       const content = contentDiv.textContent || contentDiv.innerText;
       for (let tag of $settings.tagColors) {
@@ -178,10 +168,34 @@
     }
   };
 
-  // Compute style based on settings
-  $: cardStyle = $settings.maxCardHeight
-    ? `max-height: ${$settings.maxCardHeight}px; overflow: hidden; text-overflow: ellipsis; background-color: ${backgroundColor};`
-    : `background-color: ${backgroundColor};`;
+  function calculateStyle() {
+    let style = "";
+    if ($settings.maxCardHeight) {
+      style = `max-height: ${$settings.maxCardHeight}px; overflow: hidden; text-overflow: ellipsis; `;
+    }
+
+    if ($settings.tagColorIndicatorType === "background") {
+      // console.log("Whats the value of backgroundColor :", backgroundColor);
+      style += `background-color: ${backgroundColor};`;
+    } else {
+      if (backgroundColor !== "") {
+        const modifiedBG =
+          backgroundColor.slice(0, backgroundColor.lastIndexOf(",") + 1) +
+          " 0.1)";
+        style += `border-inline: 4px solid ${backgroundColor}; background-color: ${modifiedBG};`;
+        // console.log("The final style :", style);
+      }
+    }
+
+    return style;
+  }
+
+  $: cardStyle = calculateStyle();
+
+  // // Compute style based on settings
+  // $: cardStyle = $settings.maxCardHeight
+  //   ? `max-height: ${$settings.maxCardHeight}px; overflow: hidden; text-overflow: ellipsis; background-color: ${backgroundColor};`
+  //   : `background-color: ${backgroundColor};`;
 
   $: folderIconClass = $settings.showParentFolder
     ? "folder-name"
@@ -192,18 +206,20 @@
   const folderIcon = (element: HTMLElement) => setIcon(element, "folder");
   const blankIcon = (element: HTMLElement) => setIcon(element, "blank");
   const vaultIcon = (element: HTMLElement) => setIcon(element, "vault");
-  const pinnedIcon = (element: HTMLElement) =>
-    setIcon(element, "circle-stop");
+  const pinnedIcon = (element: HTMLElement) => setIcon(element, "circle-stop");
 
   const dispatch = createEventDispatcher();
   onMount(async () => {
     await renderFile(contentDiv);
-    updateBackgroundColor();
+    await updateTagColorIndicator();
+    cardStyle = calculateStyle();
     dispatch("loaded");
   });
 
   afterUpdate(() => {
-    updateBackgroundColor();
+    updateTagColorIndicator().then(() => {
+      cardStyle = calculateStyle(); // Recalculate style after tag color update
+    });
   });
 </script>
 
@@ -222,6 +238,9 @@
 
   <div
     class="card-content"
+    style={$settings.tagColorIndicatorType === "background"
+      ? "padding-inline: 8px;"
+      : "padding-inline: 4px"}
     on:dblclick={openFile}
     on:keydown={openFile}
     bind:this={contentDiv}

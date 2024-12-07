@@ -260,7 +260,7 @@
     /* Allow contentDiv to take remaining space */
     overflow-y: auto;
     /* Make contentDiv scrollable if content overflows */
-    padding-inline: 8px;
+    /* padding-inline: 8px; */
     max-width: 100%;
 }
 
