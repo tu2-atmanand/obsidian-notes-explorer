@@ -53,6 +53,7 @@ export enum Sort {
 export interface NotesExplorerSettings {
   minCardWidth: number;
   maxCardHeight: number | null;
+  maxLines: number | null;
   launchOnStart: boolean;
   showDeleteButton: boolean;
   displayTitle: TitleDisplayMode;
@@ -73,6 +74,7 @@ export interface NotesExplorerSettings {
 export const DEFAULT_SETTINGS: NotesExplorerSettings = {
   minCardWidth: 250,
   maxCardHeight: null,
+  maxLines: null,
   launchOnStart: false,
   showDeleteButton: true,
   displayTitle: TitleDisplayMode.Both,
@@ -156,17 +158,39 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Maximum card height")
       .setDesc(
-        "Set the maximum height of the card in pixels (leave blank for no restriction)"
+        "Set the maximum height of the card in pixels (leave blank for no restriction). Cards will not be larger than this height (in pixels)"
       )
       .addText((text) =>
         text
-          .setPlaceholder("e.g., 300")
+          .setPlaceholder("e.g., 500")
           .setValue(this.plugin.settings.maxCardHeight?.toString() || "")
           .onChange(async (value) => {
             if (value.trim() === "") {
               this.plugin.settings.maxCardHeight = null;
             } else if (!isNaN(parseInt(value))) {
               this.plugin.settings.maxCardHeight = parseInt(value);
+            } else {
+              new Notice("Invalid number");
+              return;
+            }
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Maximum number of lines")
+      .setDesc(
+        "Set the maximum number of lines to be rendered in the cards from the note. Default : 20 lines"
+      )
+      .addText((text) =>
+        text
+          .setPlaceholder("e.g., 20")
+          .setValue(this.plugin.settings.maxLines?.toString() || "")
+          .onChange(async (value) => {
+            if (value.trim() === "") {
+              this.plugin.settings.maxLines = null;
+            } else if (!isNaN(parseInt(value))) {
+              this.plugin.settings.maxLines = parseInt(value);
             } else {
               new Notice("Invalid number");
               return;
