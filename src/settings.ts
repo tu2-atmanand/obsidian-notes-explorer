@@ -6,6 +6,7 @@ import {
   PluginSettingTab,
   Setting,
   normalizePath,
+  setIcon,
 } from "obsidian";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "./icons";
 
@@ -535,10 +536,31 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
           })
       );
 
-    containerEl.createEl("ul", { cls: "notes-explorer-exclude-folders-list" });
+    const folderIcon = (element: HTMLElement) => setIcon(element, "folder");
+
+    const excludeFolderContainer = containerEl.createDiv({
+      cls: "notes-explorer-exclude-folders-list",
+    });
     this.plugin.settings.excludedFolders.forEach((folder) => {
-      const li = containerEl.createEl("li", { text: folder });
-      const deleteButton = li.createEl("button", { text: "Remove" });
+      const listItem = excludeFolderContainer.createDiv({
+        cls: "notes-explorer-exclude-folders-list-item",
+      });
+
+      // Add folder icon
+      const folderIconDiv = listItem.createDiv({
+        cls: "notes-explorer-exclude-folders-list-folderIcon",
+      });
+      folderIcon(folderIconDiv);
+
+      listItem.createDiv({
+        text: folder,
+        cls: "notes-explorer-exclude-folders-list-folderName",
+      });
+
+      const deleteButton = listItem.createEl("button", {
+        text: "Remove",
+        cls: "notes-explorer-exclude-folders-list-button",
+      });
       deleteButton.addEventListener("click", () => {
         this.plugin.settings.excludedFolders =
           this.plugin.settings.excludedFolders.filter((f) => f !== folder);
@@ -574,7 +596,9 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       });
 
     const footerText = createEl("p");
-    footerText.appendText("If you like this plugin, do consider supporting my work by making a small donation for continued better improvement of this idea!");
+    footerText.appendText(
+      "If you like this plugin, do consider supporting my work by making a small donation for continued better improvement of this idea!"
+    );
 
     footerSection.appendChild(footerText);
 
