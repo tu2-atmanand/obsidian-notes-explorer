@@ -6,8 +6,9 @@ import {
   DEFAULT_SETTINGS,
 } from "./src/settings";
 import { CardsViewPluginView, VIEW_TYPE } from "./src/view";
-import store, { pluginIcon } from "./src/components/store";
+import store from "./src/components/store";
 import "./styles.css";
+import { pluginIcon } from "src/icons";
 
 export default class NotesExplorerPlugin extends Plugin {
   settings: NotesExplorerSettings = Object.assign({}, DEFAULT_SETTINGS);
