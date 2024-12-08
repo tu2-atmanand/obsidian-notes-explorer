@@ -35,7 +35,7 @@ This is a plugin for [Obsidian.md](https://obsidian.md) that displays all your n
 https://github.com/tu2-atmanand/obsidian-notes-explorer
 ```
 
-**Step 4 :** Thats it! Now you can open the Cards View, as usual.
+**Step 4 :** Thats it! Now you can open the Cards View, as usual from the ribbon icon.
 
 ## Contributing
 

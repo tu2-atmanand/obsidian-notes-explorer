@@ -15,8 +15,6 @@ import { derived, get, readable, writable } from "svelte/store";
 import { Sort, type NotesExplorerSettings } from "../settings";
 import NotesExplorerPlugin from "main";
 
-export const pluginIcon = "align-start-horizontal";
-
 export const plugin = writable<NotesExplorerPlugin>();
 export const app = writable<App>();
 export const view = writable<ItemView>();
