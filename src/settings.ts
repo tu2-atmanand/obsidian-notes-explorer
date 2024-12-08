@@ -49,7 +49,7 @@ export enum Sort {
   CreatedAsc = "Created (Oldest First)",
 }
 
-export interface CardsViewSettings {
+export interface NotesExplorerSettings {
   minCardWidth: number;
   maxCardHeight: number | null;
   launchOnStart: boolean;
@@ -69,8 +69,8 @@ export interface CardsViewSettings {
   excludedFolders: string[];
 }
 
-export const DEFAULT_SETTINGS: CardsViewSettings = {
-  minCardWidth: 200,
+export const DEFAULT_SETTINGS: NotesExplorerSettings = {
+  minCardWidth: 250,
   maxCardHeight: null,
   launchOnStart: false,
   showDeleteButton: true,
@@ -89,7 +89,7 @@ export const DEFAULT_SETTINGS: CardsViewSettings = {
   excludedFolders: [],
 };
 
-export class CardsViewSettingsTab extends PluginSettingTab {
+export class NotesExplorerSettingsTab extends PluginSettingTab {
   plugin: NotesExplorerPlugin;
   tempFolderName: string;
 

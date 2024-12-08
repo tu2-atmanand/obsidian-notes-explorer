@@ -1,8 +1,8 @@
 import { Plugin, TFile, TFolder, WorkspaceLeaf } from "obsidian";
 
 import {
-  type CardsViewSettings,
-  CardsViewSettingsTab,
+  type NotesExplorerSettings,
+  NotesExplorerSettingsTab,
   DEFAULT_SETTINGS,
 } from "./src/settings";
 import { CardsViewPluginView, VIEW_TYPE } from "./src/view";
@@ -10,7 +10,7 @@ import store, { pluginIcon } from "./src/components/store";
 import "./styles.css";
 
 export default class NotesExplorerPlugin extends Plugin {
-  settings: CardsViewSettings = Object.assign({}, DEFAULT_SETTINGS);
+  settings: NotesExplorerSettings = Object.assign({}, DEFAULT_SETTINGS);
 
   async onload() {
     console.log("Notes Explorer : Loading plugin ...");
@@ -30,7 +30,7 @@ export default class NotesExplorerPlugin extends Plugin {
 
       this.registerCommands();
 
-      this.addSettingTab(new CardsViewSettingsTab(this.app, this));
+      this.addSettingTab(new NotesExplorerSettingsTab(this.app, this));
 
       this.registerPluginRibbonIcon();
 

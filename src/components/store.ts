@@ -12,7 +12,7 @@ import {
   TFolder,
 } from "obsidian";
 import { derived, get, readable, writable } from "svelte/store";
-import { Sort, type CardsViewSettings } from "../settings";
+import { Sort, type NotesExplorerSettings } from "../settings";
 import NotesExplorerPlugin from "main";
 
 export const pluginIcon = "align-start-horizontal";
@@ -20,7 +20,7 @@ export const pluginIcon = "align-start-horizontal";
 export const plugin = writable<NotesExplorerPlugin>();
 export const app = writable<App>();
 export const view = writable<ItemView>();
-export const settings = writable<CardsViewSettings>();
+export const settings = writable<NotesExplorerSettings>();
 export const appCache = writable<MetadataCache>();
 export const files = writable<TFile[]>([]);
 export const folderName = writable<string>("");

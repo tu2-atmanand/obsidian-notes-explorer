@@ -10,7 +10,7 @@ import {
 } from "obsidian";
 
 import type NotesExplorerPlugin from "main";
-import { type CardsViewSettings } from "./settings";
+import { type NotesExplorerSettings } from "./settings";
 import Root from "./components/Root.svelte";
 import { get } from "svelte/store";
 import store, { allAllowedFiles, folderName } from "./components/store";
@@ -18,14 +18,14 @@ import store, { allAllowedFiles, folderName } from "./components/store";
 export const VIEW_TYPE = "notes-explorer";
 
 export class CardsViewPluginView extends ItemView {
-  private settings: CardsViewSettings;
+  private settings: NotesExplorerSettings;
   private svelteRoot: Root | null;
   private plugin: NotesExplorerPlugin;
   private viewContent: Element;
 
   constructor(
     plugin: NotesExplorerPlugin,
-    settings: CardsViewSettings,
+    settings: NotesExplorerSettings,
     leaf: WorkspaceLeaf
   ) {
     super(leaf);
