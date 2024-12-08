@@ -250,6 +250,7 @@
     role="presentation"
   ></div>
 
+  <div class="card-info-parent">
   <div class="card-info">
     {#if pinned}
       <button
@@ -283,6 +284,7 @@
     {:else}
       <button class="clickable-icon" use:blankIcon />
     {/if}
+    </div>
   </div>
 </div>
 
