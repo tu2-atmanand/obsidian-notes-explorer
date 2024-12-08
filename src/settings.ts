@@ -547,16 +547,16 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       });
     });
 
-    new Setting(containerEl)
-      .setName("Reset settings")
-      .setDesc("Reset all settings to default")
-      .addButton((button) =>
-        button.setButtonText("Reset").onClick(async () => {
-          this.plugin.settings = DEFAULT_SETTINGS;
-          await this.plugin.saveSettings();
-          this.display();
-        })
-      );
+    // new Setting(containerEl)
+    //   .setName("Reset settings")
+    //   .setDesc("Reset all settings to default")
+    //   .addButton((button) =>
+    //     button.setButtonText("Reset").onClick(async () => {
+    //       this.plugin.settings = DEFAULT_SETTINGS;
+    //       await this.plugin.saveSettings();
+    //       this.display();
+    //     })
+    //   );
 
     containerEl.createEl("hr");
 
