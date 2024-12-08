@@ -238,9 +238,12 @@
 
   <div
     class="card-content"
-    style={$settings.tagColorIndicatorType === "background"
-      ? "padding-inline: 8px;"
-      : "padding-inline: 4px"}
+    style="
+    padding-inline: {$settings.tagColorIndicatorType === 'background'
+      ? '8px'
+      : '4px'};
+    {$settings.maxCardHeight ? 'overflow-y: clip;' : ''}
+  "
     on:dblclick={openFile}
     on:keydown={openFile}
     bind:this={contentDiv}
