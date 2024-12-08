@@ -71,6 +71,7 @@
             right: 0;
 
             white-space: normal;
+            height: 100%;
             z-index: var(--layer-popover);
             background-color: var(--background-primary);
             padding-bottom: var(--size-4-2);
@@ -262,6 +263,8 @@
     /* Make contentDiv scrollable if content overflows */
     /* padding-inline: 8px; */
     max-width: 100%;
+    width: 100%;
+    overflow-x: clip;
 }
 
 .card-content blockquote {
@@ -278,6 +281,19 @@
     background-color: var(--background-modifier-hover);
 }
 
+.card-info-parent {
+    background-color: transparent;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
+.card:hover .card-info-parent {
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(4px);
+}
+
 .card-info {
     width: 100%;
     flex-grow: 1;
@@ -286,7 +302,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--size-4-1);
-    color: var(--text-muted);
+    color: var(--ascent-color);
 }
 
 .card-info .clickable-icon {
@@ -298,6 +314,7 @@
 .card:hover .clickable-icon {
     opacity: 1;
     transform: scale(1);
+    color: var(--text-on-accent);
 }
 
 .card-content-empty {
@@ -361,4 +378,70 @@
 .notes-explorer-sortable-drag {
     cursor: grabbing;
     box-shadow: 0px 3px 32px rgb(31 38 135 / 15%);
+}
+
+.notes-explorer-exclude-folders-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.notes-explorer-exclude-folders-list-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background-color: var(--background-secondary);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.notes-explorer-exclude-folders-list-item:hover {
+    background-color: var(--interactive-accent);
+    transform: scale(1.02);
+    border: 1px solid var(--graph-node);
+}
+
+.notes-explorer-exclude-folders-list-folderIcon {
+    width: 25px;
+    height: 25px;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #007aff;
+}
+
+.notes-explorer-exclude-folders-list-folderName {
+    flex-grow: 1;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.notes-explorer-exclude-folders-list-button {
+    padding: 4px 8px;
+    font-size: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.notes-explorer-exclude-folders-list-button:hover {
+    background-color: #d9363e;
+}
+
+.settingTabFooterSection {
+    align-items: center;
+    text-align: center;
+}
+
+.settingTabFooterDonationsSec {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    margin-top: 1em;
+    align-items: center;
+    justify-content: center;
+    max-height: 60px;
 }
