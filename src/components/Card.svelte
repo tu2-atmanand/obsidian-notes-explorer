@@ -274,9 +274,43 @@
   //   ? `max-height: ${$settings.fixedCardHeight}px; overflow: hidden; text-overflow: ellipsis; background-color: ${backgroundColor};`
   //   : `background-color: ${backgroundColor};`;
 
-  $: folderIconClass = $settings.showParentFolder
-    ? "folder-name"
-    : "clickable-icon";
+  $: footerMetadataClass = $settings.metadataVisibility
+    ? "footer-metadata"
+    : "clickable-icon footer-metadata";
+
+  function getFooterMetadata(): string {
+    const metadataType = $settings.noteMetadata;
+
+    switch (metadataType) {
+      case "fileName":
+        return file.name;
+
+      case "folderName":
+        return file.parent?.path !== "/"
+          ? file.parent?.path || ""
+          : "Root folder";
+
+      case "editedTime":
+        return file.stat.mtime
+          ? new Date(file.stat.mtime).toLocaleString()
+          : "N/A";
+
+      case "createdTime":
+        return file.stat.ctime
+          ? new Date(file.stat.ctime).toLocaleString()
+          : "N/A";
+
+      case "frontmatter":
+        const frontmatterTag = $settings.frontmatterTag?.trim();
+        if (!frontmatterTag) return "Invalid frontmatter tag";
+
+        const frontmatter = $app.metadataCache.getFileCache(file)?.frontmatter;
+        return frontmatter?.[frontmatterTag] || "Tag not found";
+
+      default:
+        return "Invalid Metadata Setting";
+    }
+  }
 
   const pinButton = (element: HTMLElement) => setIcon(element, "pin");
   const trashIcon = (element: HTMLElement) => setIcon(element, "trash");
@@ -327,8 +361,8 @@
     role="presentation"
   ></div>
 
-  <div class="card-info-parent">
-    <div class="card-info">
+  <div class="card-footer-parent">
+    <div class="card-footer">
       {#if pinned}
         <button
           class="clickable-icon"
@@ -343,15 +377,14 @@
           on:click|stopPropagation={togglePin}
         />
       {/if}
-      {#if file.parent != null && file.parent.path !== "/"}
-        <div class={folderIconClass}>
-          <span use:folderIcon />{file.parent.path}
+      <div class={footerMetadataClass}>
+        {#if $settings.noteMetadata === "folderName" && file.parent != null && file.parent.path !== "/"}
+          <span use:folderIcon />
+        {:else if $settings.noteMetadata === "folderName"}
+          <span use:vaultIcon />
+        {/if}
+        <div class="card-footer-text">{getFooterMetadata()}</div>
         </div>
-      {:else}
-        <div class={folderIconClass}>
-          <span use:vaultIcon />Root
-        </div>
-      {/if}
       {#if $settings.showDeleteButton}
         <button
           class="clickable-icon"
@@ -364,6 +397,3 @@
     </div>
   </div>
 </div>
-
-<style>
-</style>
