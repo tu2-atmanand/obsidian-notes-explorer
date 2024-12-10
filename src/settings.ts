@@ -53,7 +53,7 @@ export enum Sort {
 
 export interface NotesExplorerSettings {
   minCardWidth: number;
-  maxCardHeight: number | null;
+  fixedCardHeight: number | null;
   maxLines: number | null;
   launchOnStart: boolean;
   showDeleteButton: boolean;
@@ -74,7 +74,7 @@ export interface NotesExplorerSettings {
 
 export const DEFAULT_SETTINGS: NotesExplorerSettings = {
   minCardWidth: 250,
-  maxCardHeight: null,
+  fixedCardHeight: null,
   maxLines: null,
   launchOnStart: false,
   showDeleteButton: true,
@@ -157,19 +157,19 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Maximum card height")
+      .setName("Fixed card height")
       .setDesc(
-        "Set the maximum height of the card in pixels (leave blank for no restriction). Cards will not be larger than this height (in pixels)"
+        "Set a fixed height of the card in pixels (leave blank for no restriction). All cards will take a fixed height regardless of how many maximum lines you have set or if the note contains any image, etc. This setting will help you to get a gallary view instead of a masonry view."
       )
       .addText((text) =>
         text
           .setPlaceholder("e.g., 500")
-          .setValue(this.plugin.settings.maxCardHeight?.toString() || "")
+          .setValue(this.plugin.settings.fixedCardHeight?.toString() || "")
           .onChange(async (value) => {
             if (value.trim() === "") {
-              this.plugin.settings.maxCardHeight = null;
+              this.plugin.settings.fixedCardHeight = null;
             } else if (!isNaN(parseInt(value))) {
-              this.plugin.settings.maxCardHeight = parseInt(value);
+              this.plugin.settings.fixedCardHeight = parseInt(value);
             } else {
               new Notice("Invalid number");
               return;

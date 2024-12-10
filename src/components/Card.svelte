@@ -247,8 +247,8 @@
 
   function calculateStyle() {
     let style = "";
-    if ($settings.maxCardHeight) {
-      style = `max-height: ${$settings.maxCardHeight}px; overflow: hidden; text-overflow: ellipsis; `;
+    if ($settings.fixedCardHeight) {
+      style = `height: ${$settings.fixedCardHeight}px; max-height: ${$settings.fixedCardHeight}px; overflow: hidden; text-overflow: ellipsis; `;
     }
 
     if ($settings.tagColorIndicatorType === "background") {
@@ -270,8 +270,8 @@
   $: cardStyle = calculateStyle();
 
   // // Compute style based on settings
-  // $: cardStyle = $settings.maxCardHeight
-  //   ? `max-height: ${$settings.maxCardHeight}px; overflow: hidden; text-overflow: ellipsis; background-color: ${backgroundColor};`
+  // $: cardStyle = $settings.fixedCardHeight
+  //   ? `max-height: ${$settings.fixedCardHeight}px; overflow: hidden; text-overflow: ellipsis; background-color: ${backgroundColor};`
   //   : `background-color: ${backgroundColor};`;
 
   $: folderIconClass = $settings.showParentFolder
@@ -319,7 +319,7 @@
     padding-inline: {$settings.tagColorIndicatorType === 'background'
       ? '8px'
       : '4px'};
-    {$settings.maxCardHeight ? 'overflow-y: clip;' : ''}
+    {$settings.fixedCardHeight ? 'overflow-y: clip;' : ''}
   "
     on:dblclick={openFile}
     on:keydown={openFile}
