@@ -258,10 +258,6 @@
 
 .card-content {
     /* flex-grow: 1; */
-    /* Allow contentDiv to take remaining space */
-    overflow-y: auto;
-    /* Make contentDiv scrollable if content overflows */
-    /* padding-inline: 8px; */
     max-width: 100%;
     width: 100%;
     height: 100%;
@@ -272,31 +268,22 @@
     margin-inline: 8px;
 }
 
-.card-info {
-    flex-shrink: 0;
-    /* Prevent card-info from being pushed off-screen */
-}
-
-.card .clickable-icon.is-active {
-    color: var(--tab-text-color-focused-active);
-    background-color: var(--background-modifier-hover);
-}
-
-.card-info-parent {
+.card-footer-parent {
     background-color: transparent;
     position: absolute;
     bottom: 0;
     width: 100%;
 }
 
-.card:hover .card-info-parent {
+.card:hover .card-footer-parent {
     background: rgba(255, 255, 255, 0.25);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     backdrop-filter: blur(4px);
 }
 
-.card-info {
+.card-footer {
     width: 100%;
+    flex-shrink: 0;
     flex-grow: 1;
     display: flex;
     flex-direction: row;
@@ -306,7 +293,27 @@
     color: var(--ascent-color);
 }
 
-.card-info .clickable-icon {
+.footer-metadata {
+    display: flex;
+    flex-direction: row;
+    gap: 0.4rem;
+    align-items: center;
+    text-wrap: wrap;
+}
+
+.card-footer-text {
+    font-size: 1.05rem;
+    font-weight: 600;
+    text-wrap: pretty;
+}
+
+.card .clickable-icon.is-active {
+    color: var(--tab-text-color-focused-active);
+    background-color: var(--background-modifier-hover);
+    cursor: pointer;
+}
+
+.card-footer .clickable-icon {
     opacity: 0;
     transform: scale(0.9);
     transition: opacity 0.3s ease, transform 0.3s ease;
@@ -315,20 +322,16 @@
 .card:hover .clickable-icon {
     opacity: 1;
     transform: scale(1);
-    color : var(--text-color);
+    color: var(--text-color);
+}
+
+.card-footer button.clickable-icon {
+    cursor: pointer;
 }
 
 .card-content-empty {
     padding-block: 2rem;
     text-align: center;
-}
-
-.folder-name {
-    display: flex;
-    gap: 0.4rem;
-    align-items: center;
-    flex-wrap: wrap;
-    text-wrap: wrap;
 }
 
 
@@ -445,4 +448,43 @@
     align-items: center;
     justify-content: center;
     max-height: 60px;
+}
+
+/* DeleteTaskConfirmationModal */
+
+.deleteConfirmationModalHome {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.7rem;
+}
+
+.deleteConfirmationModalHome-button-container {
+    display: flex;
+    gap: 1em;
+    margin-top: 1.5rem;
+}
+
+.deleteTaskConfirmBtn {
+    padding-block: 4px;
+    padding-inline: 25px;
+    cursor: pointer;
+}
+
+.deleteTaskCancelmBtn {
+    padding-block: 4px;
+    padding-inline: 25px;
+    cursor: pointer;
+}
+
+.deleteTaskConfirmBtn:hover {
+    background-color: red !important;
+    /* Change background to green on hover */
+}
+
+.deleteTaskCancelmBtn:hover {
+    background-color: green !important;
+    /* Change background to red on hover */
 }
