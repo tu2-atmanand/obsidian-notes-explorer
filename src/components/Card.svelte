@@ -11,6 +11,8 @@
   import { afterUpdate, createEventDispatcher, onMount } from "svelte";
   import { skipNextTransition, app, view, settings } from "./store";
   import { TitleDisplayMode } from "../settings";
+  import { DeleteConfirmationModal } from "../Modals/DeleteConfirmationModal";
+  import { openDeleteConfirmationModal } from "src/utils/helpers";
 
   export let file: TFile;
   let displayFilename: boolean =
@@ -195,10 +197,18 @@
   };
 
   const trashFile = async () => {
-    await file.vault.trash(
-      file,
-      $settings.toSystemTrash !== "trash" ? true : false,
-    );
+    const modalAnswer = await openDeleteConfirmationModal($app);
+    if (modalAnswer) {
+      try {
+        await file.vault.trash(
+          file,
+          $settings.deleteFileMode === "trash" ? false : true,
+        );
+        console.log("trashFile : The note has been deleted.")
+      } catch (error) {
+        console.error("trashFile : Error deleting the file:", error);
+      }
+    }
   };
 
   const openFile = async () => {
@@ -384,7 +394,7 @@
           <span use:vaultIcon />
         {/if}
         <div class="card-footer-text">{getFooterMetadata()}</div>
-        </div>
+      </div>
       {#if $settings.showDeleteButton}
         <button
           class="clickable-icon"
