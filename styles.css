@@ -314,7 +314,7 @@
 .card:hover .clickable-icon {
     opacity: 1;
     transform: scale(1);
-    color: var(--text-on-accent);
+    color : var(--text-color);
 }
 
 .card-content-empty {
