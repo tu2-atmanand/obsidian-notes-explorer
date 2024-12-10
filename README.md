@@ -5,7 +5,7 @@ This is a plugin for [Obsidian.md](https://obsidian.md) that displays all your n
 ![Thumbnail](./assets/Thumbnail2.png)
 
 >[!IMPORTANT]
-> **Notice :** Initially started as simple fork from the [Cards View plugin](https://github.com/jillro/obsidian-cards-view-plugin), now has become a highly functional plugin in itself with a lot of new functionalities. I started integrating all these new features to explore vault efficiently. Although, now after hearing few suggestions from the users, I have decided to publish my own new plugin with all these new changes, as I presume, the author of the Cards View might not be interested in integrating all these new features. This Beta version will be now published with a new name : **Notes Explorer**.
+> **Notice :** Initially started as simple fork from the [Cards View plugin](https://github.com/jillro/obsidian-cards-view-plugin), now has become a highly functional plugin in itself with a lot of new functionalities. I started integrating all these new features to explore vault efficiently. Although, now after hearing few suggestions from the users, I have decided to publish this fork plugin with all these new changes to Obsidian marketplace, as I presume, the author of the Cards View plugin might not be interested in integrating all these new features. This Beta version will be now published with a new name : **Notes Explorer**.
 
 ## Features
 
