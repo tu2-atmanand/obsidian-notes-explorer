@@ -24,6 +24,13 @@ export enum DeleteFileMode {
   Trash = "trash",
   Permanent = "perm",
 }
+export enum NoteMetadata {
+  Finename = "fileName",
+  FolderName = "folderName",
+  LastEditedTime = "editedTime",
+  CreatedTime = "createdTime",
+  Frontmatter = "frontmatter",
+}
 export enum NoteOpenLayout {
   Right = "right",
   NewTab = "tab",
@@ -60,8 +67,10 @@ export interface NotesExplorerSettings {
   displayTitle: TitleDisplayMode;
   showEmptyNotes: boolean;
   showSubFolders: boolean;
-  showParentFolder: boolean;
-  toSystemTrash: DeleteFileMode;
+  metadataVisibility: boolean;
+  noteMetadata: NoteMetadata;
+  frontmatterTag: string | null;
+  deleteFileMode: DeleteFileMode;
   openNoteLayout: NoteOpenLayout;
   tagPositionForCardColor: TagPostionForCardColor;
   pinnedFiles: string[];
@@ -81,8 +90,10 @@ export const DEFAULT_SETTINGS: NotesExplorerSettings = {
   displayTitle: TitleDisplayMode.Both,
   showEmptyNotes: false,
   showSubFolders: false,
-  showParentFolder: true,
-  toSystemTrash: DeleteFileMode.System,
+  noteMetadata: NoteMetadata.FolderName,
+  frontmatterTag: null,
+  metadataVisibility: true,
+  deleteFileMode: DeleteFileMode.System,
   openNoteLayout: NoteOpenLayout.Right,
   tagPositionForCardColor: TagPostionForCardColor.content,
   pinnedFiles: [],
@@ -215,15 +226,55 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
+      .setName("Note's Metadata")
+      .setDesc(
+        "Select the property of the you want to see in the cards footer. After selecting the 'frontmatter' option, enter the frontmatter-tag-name in the below text input box."
+      )
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOptions({
+            [NoteMetadata.Finename]: "Note's file name",
+            [NoteMetadata.FolderName]: "Note's folder name",
+            [NoteMetadata.LastEditedTime]: "Last edited time",
+            [NoteMetadata.CreatedTime]: "Created date-time",
+            [NoteMetadata.Frontmatter]: "Frontmatter",
+          })
+          .setValue(this.plugin.settings.noteMetadata)
+          .onChange(async (value) => {
+            this.plugin.settings.noteMetadata = value as NoteMetadata;
+            await this.plugin.saveSettings();
+            frontmatterTagSetting.setDisabled(
+              value !== NoteMetadata.Frontmatter
+            );
+          })
+      );
+
+    const frontmatterTagSetting = new Setting(containerEl)
+      .setName("Frontmatter Tag")
+      .setDesc("Enter the name of the frontmatter tag to display its value.")
+      .addText((text) =>
+        text
+          .setPlaceholder("eg.: author")
+          .setValue(this.plugin.settings.frontmatterTag || "")
+          .onChange(async (value) => {
+            this.plugin.settings.frontmatterTag = value;
+            await this.plugin.saveSettings();
+          })
+      )
+      .setDisabled(
+        this.plugin.settings.noteMetadata !== NoteMetadata.Frontmatter
+      );
+
+    new Setting(containerEl)
       .setName("Show parent folder name")
       .setDesc(
         "Disable this option to hide the parent folder from showing on the cards. Visible on mouse hover."
       )
       .addToggle((toggle) =>
         toggle
-          .setValue(this.plugin.settings.showParentFolder)
+          .setValue(this.plugin.settings.metadataVisibility)
           .onChange(async (value) => {
-            this.plugin.settings.showParentFolder = value;
+            this.plugin.settings.metadataVisibility = value;
             await this.plugin.saveSettings();
           })
       );
@@ -282,9 +333,9 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
             [DeleteFileMode.Trash]: "Move to vault trash folder (.trash)",
             [DeleteFileMode.Permanent]: "Permanently delete",
           })
-          .setValue(this.plugin.settings.toSystemTrash)
+          .setValue(this.plugin.settings.deleteFileMode)
           .onChange(async (value) => {
-            this.plugin.settings.toSystemTrash = value as DeleteFileMode;
+            this.plugin.settings.deleteFileMode = value as DeleteFileMode;
             await this.plugin.saveSettings();
           })
       );
