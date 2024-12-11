@@ -11,7 +11,6 @@
   import { afterUpdate, createEventDispatcher, onMount } from "svelte";
   import { skipNextTransition, app, view, settings } from "./store";
   import { TitleDisplayMode } from "../settings";
-  import { DeleteConfirmationModal } from "../Modals/DeleteConfirmationModal";
   import { openDeleteConfirmationModal } from "src/utils/helpers";
 
   export let file: TFile;
