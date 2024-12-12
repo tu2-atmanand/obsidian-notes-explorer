@@ -184,6 +184,11 @@
     min-height: 7%;
 }
 
+.top-bar-fileName {
+    width: 100%;
+    text-wrap: pretty;
+}
+
 .card.skip-transition {
     transition: none;
 }
