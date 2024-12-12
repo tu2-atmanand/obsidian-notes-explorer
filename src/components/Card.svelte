@@ -267,14 +267,16 @@
         ? frontmatter.tags
         : [frontmatter.tags];
 
-      for (const tag of tags) {
-        // Case-insensitive matching of tags with $settings.tagColors
-        const matchingTag = $settings.tagColors.find(
-          (tagColor) => tagColor.name === tag,
-        );
+      // // Sort tagColors by order before iterating
+      // const sortedTagColors = [...$settings.tagColors].sort(
+      //   (a, b) => a.order - b.order,
+      // );
+
+      for (const tagColor of $settings.tagColors) {
+        const matchingTag = tags.find((tag) => tag === tagColor.name);
 
         if (matchingTag) {
-          backgroundColor = matchingTag.color;
+          backgroundColor = tagColor.color;
           break; // Exit once a match is found
         }
       }
