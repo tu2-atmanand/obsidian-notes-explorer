@@ -120,9 +120,11 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
+    new Setting(containerEl).setName("General features").setHeading();
+
     new Setting(containerEl)
       .setName("Launch on start")
-      .setDesc("Open the cards view when Obsidian starts")
+      .setDesc("Open the notes explorer board when Obsidian starts")
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.settings.launchOnStart)
@@ -132,11 +134,103 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
           })
       );
 
+    // new Setting(containerEl)
+    //   .setName("Open board on tag click from Tag Tree")
+    //   .setDesc(
+    //     "Enable this if you want to see all the notes in cards board, which has the tag you just clicked from the tag tree."
+    //   )
+    //   .addToggle((toggle) =>
+    //     toggle
+    //       .setValue(this.plugin.settings.openViewOnTagTreeClick)
+    //       .onChange(async (value) => {
+    //         this.plugin.settings.openViewOnTagTreeClick = value;
+    //         await this.plugin.saveSettings();
+    //       })
+    //   );
+
+    // new Setting(containerEl)
+    //   .setName("Open board on tag click from inline Tag")
+    //   .setDesc(
+    //     "Enable this if you want to see all the notes in cards board, which has the tag you just clicked from the in file tag."
+    //   )
+    //   .addToggle((toggle) =>
+    //     toggle
+    //       .setValue(this.plugin.settings.openViewOnInlineTagClick)
+    //       .onChange(async (value) => {
+    //         this.plugin.settings.openViewOnInlineTagClick = value;
+    //         await this.plugin.saveSettings();
+    //       })
+    //   );
+
+    new Setting(containerEl)
+      .setName("Open note layout")
+      .setDesc(
+        "Select how should the parent note open. Double click on the card to open the note."
+      )
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOptions({
+            [NoteOpenLayout.Right]: "Open note on right side",
+            [NoteOpenLayout.NewTab]: "Open note in new tab",
+            [NoteOpenLayout.NewWindow]: "Open note in new window",
+          })
+          .setValue(this.plugin.settings.openNoteLayout)
+          .onChange(async (value) => {
+            this.plugin.settings.openNoteLayout = value as NoteOpenLayout;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Deleted files")
+      .setDesc("What happens to a file after you delete it.")
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOptions({
+            [DeleteFileMode.System]: "Move to system trash",
+            [DeleteFileMode.Trash]: "Move to vault trash folder (.trash)",
+            [DeleteFileMode.Permanent]: "Permanently delete",
+          })
+          .setValue(this.plugin.settings.deleteFileMode)
+          .onChange(async (value) => {
+            this.plugin.settings.deleteFileMode = value as DeleteFileMode;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Note's content interactions")
+      .setDesc(
+        "Enable this feature if you like to have in-card interactions, such as opening internal links and getting hover preview. NOTE : Obsidian restart required for this setting."
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.contentInteractions)
+          .onChange(async (value) => {
+            this.plugin.settings.contentInteractions = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Open board on folder click")
+      .setDesc(
+        "Enable this if you want to open the notes explorer board with all the notes from a folder, when you will click on the folder from file explorer. You also have same option using right-click menu, if you dont like this feature.\nNOTE : Obsidian restart required for this setting."
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.openViewOnFolderClick)
+          .onChange(async (value) => {
+            this.plugin.settings.openViewOnFolderClick = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
     new Setting(containerEl).setName("Cards UI").setHeading();
 
     new Setting(containerEl)
       .setName("Title display mode")
-      .setDesc("What to display on cards starting with a # Level 1 title")
+      .setDesc("Select what you want to see at the top of each card.")
       .addDropdown((dropdown) =>
         dropdown
           .addOptions({
@@ -156,7 +250,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       .setDesc("Cards will not be smaller than this width (in pixels)")
       .addText((text) =>
         text
-          .setPlaceholder("200")
+          .setPlaceholder("eg.: 200")
           .setValue(this.plugin.settings.minCardWidth.toString())
           .onChange(async (value) => {
             if (isNaN(parseInt(value))) {
@@ -172,11 +266,11 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Fixed card height")
       .setDesc(
-        "Set a fixed height of the card in pixels (leave blank for no restriction). All cards will take a fixed height regardless of how many maximum lines you have set or if the note contains any image, etc. This setting will help you to get a gallary view instead of a masonry view."
+        "Set a fixed height for the card in pixels (leave blank for no restriction). All cards will take a fixed height regardless of how many maximum lines you have set or if the note contains any image, etc. This setting will help you to get a gallery view instead of a masonry view."
       )
       .addText((text) =>
         text
-          .setPlaceholder("e.g., 500")
+          .setPlaceholder("eg.: 500")
           .setValue(this.plugin.settings.fixedCardHeight?.toString() || "")
           .onChange(async (value) => {
             if (value.trim() === "") {
@@ -194,11 +288,11 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Maximum number of lines")
       .setDesc(
-        "Set the maximum number of lines to be rendered in the cards from the note. Default : 20 lines"
+        "Set the maximum number of lines to be rendered in card from the note. Default : 20 lines"
       )
       .addText((text) =>
         text
-          .setPlaceholder("e.g., 20")
+          .setPlaceholder("eg.: 20")
           .setValue(this.plugin.settings.maxLines?.toString() || "")
           .onChange(async (value) => {
             if (value.trim() === "") {
@@ -230,7 +324,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Note's Metadata")
       .setDesc(
-        "Select the property of the you want to see in the cards footer. After selecting the 'frontmatter' option, enter the frontmatter-tag-name in the below text input box."
+        "Select the property of the note that you want to see in the cards footer. If selected the 'frontmatter' option, enter the frontmatter-tag in the below text input box."
       )
       .addDropdown((dropdown) =>
         dropdown
@@ -251,20 +345,6 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
           })
       );
 
-    new Setting(containerEl)
-      .setName("Note content interactions")
-      .setDesc(
-        "Enable this feature you like to have in-card interactions, such as opening internal links and getting hover preview. NOTE : Obsidian restart required for this setting."
-      )
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.plugin.settings.contentInteractions)
-          .onChange(async (value) => {
-            this.plugin.settings.contentInteractions = value;
-            await this.plugin.saveSettings();
-          })
-      );
-
     const frontmatterTagSetting = new Setting(containerEl)
       .setName("Frontmatter Tag")
       .setDesc("Enter the name of the frontmatter tag to display its value.")
@@ -282,9 +362,9 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Show parent folder name")
+      .setName("Footer always visible")
       .setDesc(
-        "Disable this option to hide the parent folder from showing on the cards. Visible on mouse hover."
+        "Disable this option to hide the note's metadata from showing in the card's footer. Visible only on mouse hover."
       )
       .addToggle((toggle) =>
         toggle
@@ -295,90 +375,12 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
           })
       );
 
-    new Setting(containerEl).setName("Genearl features").setHeading();
-
-    // new Setting(containerEl)
-    //   .setName("Open view on tag click from Tag Tree")
-    //   .setDesc(
-    //     "Enable this if you want to see all the notes in cards view, which has the tag you just clicked from the tag tree."
-    //   )
-    //   .addToggle((toggle) =>
-    //     toggle
-    //       .setValue(this.plugin.settings.openViewOnTagTreeClick)
-    //       .onChange(async (value) => {
-    //         this.plugin.settings.openViewOnTagTreeClick = value;
-    //         await this.plugin.saveSettings();
-    //       })
-    //   );
-
-    // new Setting(containerEl)
-    //   .setName("Open view on tag click from inline Tag")
-    //   .setDesc(
-    //     "Enable this if you want to see all the notes in cards view, which has the tag you just clicked from the in file tag."
-    //   )
-    //   .addToggle((toggle) =>
-    //     toggle
-    //       .setValue(this.plugin.settings.openViewOnInlineTagClick)
-    //       .onChange(async (value) => {
-    //         this.plugin.settings.openViewOnInlineTagClick = value;
-    //         await this.plugin.saveSettings();
-    //       })
-    //   );
-
-    new Setting(containerEl)
-      .setName("Open view on folder click")
-      .setDesc(
-        "Enable this if you want to open the cards view with all the notes from a folder, when you will click on the folder from file explorer. You also have same option using file munu, if you dont like this feature.\nNOTE : You will require to restart Obsidian on this setting change."
-      )
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.plugin.settings.openViewOnFolderClick)
-          .onChange(async (value) => {
-            this.plugin.settings.openViewOnFolderClick = value;
-            await this.plugin.saveSettings();
-          })
-      );
-
-    new Setting(containerEl)
-      .setName("Deleted files")
-      .setDesc("What happens to a file after you delete it.")
-      .addDropdown((dropdown) =>
-        dropdown
-          .addOptions({
-            [DeleteFileMode.System]: "Move to system trash",
-            [DeleteFileMode.Trash]: "Move to vault trash folder (.trash)",
-            [DeleteFileMode.Permanent]: "Permanently delete",
-          })
-          .setValue(this.plugin.settings.deleteFileMode)
-          .onChange(async (value) => {
-            this.plugin.settings.deleteFileMode = value as DeleteFileMode;
-            await this.plugin.saveSettings();
-          })
-      );
-
-    new Setting(containerEl)
-      .setName("Open note layout")
-      .setDesc("Where should the note open.")
-      .addDropdown((dropdown) =>
-        dropdown
-          .addOptions({
-            [NoteOpenLayout.Right]: "Open note on right side",
-            [NoteOpenLayout.NewTab]: "Open note in new tab",
-            [NoteOpenLayout.NewWindow]: "Open note in new window",
-          })
-          .setValue(this.plugin.settings.openNoteLayout)
-          .onChange(async (value) => {
-            this.plugin.settings.openNoteLayout = value as NoteOpenLayout;
-            await this.plugin.saveSettings();
-          })
-      );
-
     new Setting(containerEl).setName("Tag color indicator").setHeading();
 
     new Setting(containerEl)
-      .setName("Where do you place the tags")
+      .setName("Which tags to read")
       .setDesc(
-        "If you use frontmatter then create a property 'tags' and enter your tag name as value."
+        "Whether to read the tags from content or frontmatter. If selected frontmatter then create a property 'tags'."
       )
       .addDropdown((dropdown) =>
         dropdown
@@ -395,7 +397,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Tag color indicator type")
+      .setName("Indicator type")
       .setDesc(
         "Select whether you want the cards background color as the tag color or cards sidebars. With background options sometimes few elements of your note might not be properly visible due to the theme you are using, in that case use the sidbar option."
       )
@@ -578,9 +580,13 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
         })
     );
 
+    new Setting(containerEl).setName("Exclude Folders").setHeading();
+
     new Setting(containerEl)
-      .setName("Exclude Folders")
-      .setDesc("Add folders to exclude from the board")
+      .setName("Folder name")
+      .setDesc(
+        "Enter the complete folder path and click on save to exclude all notes from this folder from the board. You can also apply filters to board notes from sub-folders from the board filter menu."
+      )
       .addText((text) =>
         text.setPlaceholder("Enter folder path").onChange((value) => {
           this.tempFolderName = value; // Temporary field to hold input
