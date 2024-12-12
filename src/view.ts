@@ -44,7 +44,6 @@ export class CardsViewPluginView extends ItemView {
   }
 
   async onOpen() {
-    // const this.viewContent = this.containerEl.children[1];
     store.view.set(this);
 
     this.registerAllEvent();
@@ -125,7 +124,6 @@ export class CardsViewPluginView extends ItemView {
     const onlyFolder = get(folderName);
 
     if (onlyFolder !== '') {
-      // console.log("getAllFiles : Notes from only selected folder...");
       return;
     } else {
       store.files.set(get(allAllowedFiles));
@@ -134,8 +132,6 @@ export class CardsViewPluginView extends ItemView {
 
   private renderMoreOnScroll() {
     // Obtain a reference to the cards-container via Svelte component instance
-    // const rootInstance = this.svelteRoot as Root; // Assuming Root has cardsContainer defined
-    // const cardsContainer = await rootInstance.cardsContainer;
     const cardsContainer = this.viewContent.children[1];
     // Apply the scroll event to cardsContainer
     if (cardsContainer) {
@@ -151,16 +147,5 @@ export class CardsViewPluginView extends ItemView {
     } else {
       console.error("cardsContainer is undefined");
     }
-
-    // // On scroll 80% of viewContent, load more cards
-    // viewContent.addEventListener("scroll", async () => {
-    //   if (
-    //     viewContent.scrollTop + viewContent.clientHeight >
-    //     viewContent.scrollHeight - 500
-    //   ) {
-    //     store.skipNextTransition.set(true);
-    //     store.displayedCount.set(get(store.displayedFiles).length + 50);
-    //   }
-    // });
   }
 }

@@ -119,12 +119,6 @@ export default class NotesExplorerPlugin extends Plugin {
         // Event to open the Cards View on Folder click, just like Folder Notes plugin
         const elemTarget = evt.target as Element;
         var Tfolder = this.setByFolderElement(elemTarget);
-        // console.log(
-        //   "EVENT : folder returned by setByFolderElement :",
-        //   Tfolder,
-        //   " | Instance :",
-        //   Tfolder instanceof TFolder
-        // );
 
         // open it
         if (Tfolder && Tfolder instanceof TFolder) {
@@ -180,10 +174,6 @@ export default class NotesExplorerPlugin extends Plugin {
     var folderElem = folderItemEl;
     if (className.contains("nav-folder-title-content")) {
       folderName = folderElem.getText();
-      // console.log(
-      //   "setByFolderElement : contains 'nav-folder-title-content' | folderName :",
-      //   folderName
-      // );
       if (folderItemEl.parentElement) {
         folderElem = folderItemEl.parentElement;
         if (folderElem.attributes.getNamedItem("data-path")?.textContent)
@@ -212,13 +202,6 @@ export default class NotesExplorerPlugin extends Plugin {
       }
     }
 
-    // console.log(
-    //   "setByFolderElement : Final values\nfolderPath :",
-    //   folderPath,
-    //   "\nfolderName :",
-    //   folderName
-    // );
-    // set to mine
     return this.app.vault.getAbstractFileByPath(folderPath);
   }
 
@@ -233,10 +216,6 @@ export default class NotesExplorerPlugin extends Plugin {
             if (child instanceof TFile && child.extension === "md") {
               files.push(child);
             } else if (child instanceof TFolder) {
-              // console.log(
-              //   "openAllFilesInFolder : This is subFolder :",
-              //   child.name
-              // );
               collectFiles(child); // Recursively process subfolder
             }
           });
