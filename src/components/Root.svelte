@@ -194,41 +194,43 @@
   );
 </script>
 
-<div class="action-bar" bind:this={viewContent}>
-  <button
-    class="clickable-icon refresh-button"
-    use:refreshIcon
-    on:click={refreshView}
-  />
-  <div class="search-component">
-    <div class="action-bar__search" use:searchInput />
+<div class="action-bar-parent">
+  <div class="action-bar" bind:this={viewContent}>
     <button
-      class="clickable-icon sort-button"
-      use:sortIcon
-      on:click={sortMenu}
+      class="clickable-icon refresh-button"
+      use:refreshIcon
+      on:click={refreshView}
     />
-  </div>
-  <div class="action-bar__tags">
-    <div class="action-bar__tags__list">
-      {#each $tags as tag}
-        <button class="action-bar__tag" on:click={() => ($searchQuery = tag)}
-          >{tag}</button
-        >
-      {/each}
+    <div class="search-component">
+      <div class="action-bar__search" use:searchInput />
+      <button
+        class="clickable-icon sort-button"
+        use:sortIcon
+        on:click={sortMenu}
+      />
     </div>
-  </div>
-  {#if $folderName}
-    <div class="action-bar_folder">
-      <div style="align-content: center;">{$folderName}</div>
-      <div class="action-bar_folder_closeButton">
-        <button
-          class="clickable-icon"
-          use:closeIcon
-          on:click={clearFolderFilter}
-        />
+    <div class="action-bar__tags">
+      <div class="action-bar__tags__list">
+        {#each $tags as tag}
+          <button class="action-bar__tag" on:click={() => ($searchQuery = tag)}
+            >{tag}</button
+          >
+        {/each}
       </div>
     </div>
-  {/if}
+    {#if $folderName}
+      <div class="action-bar_folder">
+        <div style="align-content: center;">{$folderName}</div>
+        <div class="action-bar_folder_closeButton">
+          <button
+            class="clickable-icon"
+            use:closeIcon
+            on:click={clearFolderFilter}
+          />
+        </div>
+      </div>
+    {/if}
+  </div>
 </div>
 <div
   bind:this={cardsContainer}

@@ -3,19 +3,41 @@
  */
 
 .workspace-leaf-content[data-type="notes-explorer"] .view-content {
-    overflow: unset;
+    /* overflow: unset; */
     padding-block-start: 0 !important;
+    padding-right: 5px;
 }
 
 /* Root.svelte */
+.action-bar-parent {
+    z-index: 10;
+    margin-bottom: 10px;
+    /* display: block; */
+    display: block;
+    /* opacity: 1; */
+    width: 100%;
+    position: relative;
+    /* transition: display 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    /* transform: translateY(0); */
+    /* display: block; */
+    /* opacity: 1; */
+}
+
+.action-bar-parent-hide {
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+    /* Optional: to prevent interaction when hidden */
+}
+
 .action-bar {
     overflow: auto;
     position: relative;
     display: flex;
     flex-direction: row-reverse;
-    gap: var(--size-4-5);
-    margin-bottom: var(--size-4-5);
+    /* gap: var(--size-4-5); */
     flex-wrap: wrap;
+    justify-content: space-between;
 
     @media screen and (min-width: 700px) {
         flex-wrap: nowrap;
@@ -46,7 +68,7 @@
     cursor: pointer;
 }
 
-.action-bar .action-bar__tags {
+/* .action-bar .action-bar__tags {
     flex-grow: 1;
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -75,13 +97,33 @@
             z-index: var(--layer-popover);
             background-color: var(--background-primary);
             padding-bottom: var(--size-4-2);
-            box-shadow: 0 0 var(--size-2-3) var(--size-2-3) var(--background-primary);
+            box-shadow: 0 0 var(--size-2-3) var(--size-2-3) var(--background-primary-alt);
 
             & button.action-bar__tag {
                 margin-bottom: var(--size-2-2);
             }
         }
     }
+} */
+
+.action-bar .action-bar__tags {
+    flex-grow: 1;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    white-space: nowrap;
+    overflow: auto;
+
+    @media screen and (min-width: 700px) {
+        overflow: hidden;
+        max-width: 65vw;
+    }
+}
+
+.action-bar__tags__list {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-behavior: smooth;
 }
 
 .action-bar button.action-bar__tag {
@@ -117,8 +159,8 @@
     position: relative;
     container-type: inline-size;
     max-height: 100%;
-    /* Or a specific height, e.g., 500px */
     overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
 }
