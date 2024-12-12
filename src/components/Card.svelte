@@ -386,7 +386,9 @@
   ></div>
 
   <div
-    class="card-footer-parent"
+    class={$settings.metadataVisibility
+      ? "card-footer-parent-active"
+      : "card-footer-parent"}
     bind:this={footerDiv}
     on:mouseenter={(event) => parentNoteHoverPreview(event, footerDiv)}
     role="presentation"

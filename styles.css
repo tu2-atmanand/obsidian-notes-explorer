@@ -271,6 +271,14 @@
     width: 100%;
 }
 
+.card-footer-parent-active {
+    background-color: var(--background-primary);
+    box-shadow: 0 8px 32px 0 var(--caret-color);
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+}
+
 .card:hover .card-footer-parent {
     background-color: var(--background-primary);
     box-shadow: 0 8px 32px 0 var(--caret-color);
