@@ -67,6 +67,7 @@ export interface NotesExplorerSettings {
   displayTitle: TitleDisplayMode;
   showEmptyNotes: boolean;
   showSubFolders: boolean;
+  contentInteractions: boolean;
   metadataVisibility: boolean;
   noteMetadata: NoteMetadata;
   frontmatterTag: string | null;
@@ -90,6 +91,7 @@ export const DEFAULT_SETTINGS: NotesExplorerSettings = {
   displayTitle: TitleDisplayMode.Both,
   showEmptyNotes: false,
   showSubFolders: false,
+  contentInteractions: false,
   noteMetadata: NoteMetadata.FolderName,
   frontmatterTag: null,
   metadataVisibility: true,
@@ -246,6 +248,20 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
             frontmatterTagSetting.setDisabled(
               value !== NoteMetadata.Frontmatter
             );
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Note content interactions")
+      .setDesc(
+        "Enable this feature you like to have in-card interactions, such as opening internal links and getting hover preview."
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.showDeleteButton)
+          .onChange(async (value) => {
+            this.plugin.settings.showDeleteButton = value;
+            await this.plugin.saveSettings();
           })
       );
 
