@@ -9,7 +9,7 @@
     TFile,
   } from "obsidian";
   import { afterUpdate, createEventDispatcher, onMount } from "svelte";
-  import { skipNextTransition, app, view, settings } from "./store";
+  import { skipNextTransition, app, view, settings, plugin } from "./store";
   import { TitleDisplayMode } from "../settings";
   import { openDeleteConfirmationModal } from "src/utils/helpers";
   import {
@@ -21,8 +21,17 @@
   let displayFilename: boolean =
     $settings.displayTitle !== TitleDisplayMode.Title;
   let contentDiv: HTMLElement;
+  let footerDiv: HTMLElement;
   let pinned: boolean;
+  let backgroundColor = "";
   $: pinned = $settings.pinnedFiles.includes(file.path);
+
+  const pinButton = (element: HTMLElement) => setIcon(element, "pin");
+  const trashIcon = (element: HTMLElement) => setIcon(element, "trash");
+  const folderIcon = (element: HTMLElement) => setIcon(element, "folder");
+  const blankIcon = (element: HTMLElement) => setIcon(element, "blank");
+  const vaultIcon = (element: HTMLElement) => setIcon(element, "vault");
+  const pinnedIcon = (element: HTMLElement) => setIcon(element, "circle-stop");
 
   // function postProcessor(
   //   element: HTMLElement,
@@ -101,7 +110,7 @@
   //   }
   // }
 
-  // const renderFile = async (el: HTMLElement): Promise<void> => {
+  // const renderNoteCard = async (el: HTMLElement): Promise<void> => {
   //   const content = await file.vault.cachedRead(file);
   //   if (content.trim().length > 0) {
   //     MarkdownPreviewRenderer.registerPostProcessor(postProcessor);
@@ -123,7 +132,7 @@
       : content;
   };
 
-  const renderFile = async (el: HTMLElement): Promise<void> => {
+  const renderNoteCard = async (el: HTMLElement): Promise<void> => {
     const content = await file.vault.cachedRead(file);
     if (content.trim().length > 0) {
       const maxLiness = $settings.maxLines || 20;
@@ -223,7 +232,7 @@
           file,
           $settings.deleteFileMode === "trash" ? false : true,
         );
-        console.log("trashFile : The note has been deleted.")
+        console.log("trashFile : The note has been deleted.");
       } catch (error) {
         console.error("trashFile : Error deleting the file:", error);
       }
@@ -239,8 +248,6 @@
       await $app.workspace.getLeaf("window").openFile(file);
     }
   };
-
-  let backgroundColor = "";
 
   const updateTagColorIndicator = async () => {
     if (contentDiv && $settings.tagPositionForCardColor === "content") {
@@ -273,39 +280,6 @@
       }
     }
   };
-
-  function calculateStyle() {
-    let style = "";
-    if ($settings.fixedCardHeight) {
-      style = `height: ${$settings.fixedCardHeight}px; max-height: ${$settings.fixedCardHeight}px; overflow: hidden; text-overflow: ellipsis; `;
-    }
-
-    if ($settings.tagColorIndicatorType === "background") {
-      // console.log("Whats the value of backgroundColor :", backgroundColor);
-      style += `background-color: ${backgroundColor};`;
-    } else {
-      if (backgroundColor !== "") {
-        const modifiedBG =
-          backgroundColor.slice(0, backgroundColor.lastIndexOf(",") + 1) +
-          " 0.1)";
-        style += `border-inline: 4px solid ${backgroundColor}; background-color: ${modifiedBG};`;
-        // console.log("The final style :", style);
-      }
-    }
-
-    return style;
-  }
-
-  $: cardStyle = calculateStyle();
-
-  // // Compute style based on settings
-  // $: cardStyle = $settings.fixedCardHeight
-  //   ? `max-height: ${$settings.fixedCardHeight}px; overflow: hidden; text-overflow: ellipsis; background-color: ${backgroundColor};`
-  //   : `background-color: ${backgroundColor};`;
-
-  $: footerMetadataClass = $settings.metadataVisibility
-    ? "footer-metadata"
-    : "clickable-icon footer-metadata";
 
   function getFooterMetadata(): string {
     const metadataType = $settings.noteMetadata;
@@ -341,16 +315,38 @@
     }
   }
 
-  const pinButton = (element: HTMLElement) => setIcon(element, "pin");
-  const trashIcon = (element: HTMLElement) => setIcon(element, "trash");
-  const folderIcon = (element: HTMLElement) => setIcon(element, "folder");
-  const blankIcon = (element: HTMLElement) => setIcon(element, "blank");
-  const vaultIcon = (element: HTMLElement) => setIcon(element, "vault");
-  const pinnedIcon = (element: HTMLElement) => setIcon(element, "circle-stop");
+  function calculateStyle() {
+    let style = "";
+    if ($settings.fixedCardHeight) {
+      style = `height: ${$settings.fixedCardHeight}px; max-height: ${$settings.fixedCardHeight}px; overflow: hidden; text-overflow: ellipsis; `;
+    }
+
+    if ($settings.tagColorIndicatorType === "background") {
+      // console.log("Whats the value of backgroundColor :", backgroundColor);
+      style += `background-color: ${backgroundColor};`;
+    } else {
+      if (backgroundColor !== "") {
+        const modifiedBG =
+          backgroundColor.slice(0, backgroundColor.lastIndexOf(",") + 1) +
+          " 0.1)";
+        style += `border-inline: 4px solid ${backgroundColor}; background-color: ${modifiedBG};`;
+        // console.log("The final style :", style);
+      }
+    }
+
+    return style;
+  }
+
+  // Compute style based on settings
+  $: cardStyle = calculateStyle();
+
+  $: footerMetadataClass = $settings.metadataVisibility
+    ? "footer-metadata"
+    : "clickable-icon footer-metadata";
 
   const dispatch = createEventDispatcher();
   onMount(async () => {
-    await renderFile(contentDiv);
+    await renderNoteCard(contentDiv);
     await updateTagColorIndicator();
     cardStyle = calculateStyle();
     dispatch("loaded");
@@ -385,7 +381,6 @@
     {$settings.fixedCardHeight ? 'overflow-y: clip;' : ''}
   "
     on:dblclick={openFile}
-    on:keydown={openFile}
     bind:this={contentDiv}
     role="presentation"
   ></div>
