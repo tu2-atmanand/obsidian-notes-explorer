@@ -126,10 +126,18 @@
 
   // Function to truncate content to a specific number of words
   const truncateContent = (content: string, maxLiness: number): string => {
+    // Remove frontmatter (--- block)
+    content = content.replace(/^---[\s\S]*?---\n?/, "");
+
+    // Remove content between %% and the %% markers
+    content = content.replace(/%%[\s\S]*?%%\n?/g, "");
+
+    // Split into lines and slice
     const lines = content.split(/\r?\n/);
-    return lines.length > maxLiness
-      ? lines.slice(0, maxLiness).join("\n")
-      : content;
+    const truncatedLines = lines.slice(0, maxLiness);
+
+    // Join the truncated lines
+    return truncatedLines.join("\n").trim();
   };
 
   const renderNoteCard = async (el: HTMLElement): Promise<void> => {
@@ -370,7 +378,7 @@
 >
   {#if displayFilename}
     <div class="top-bar">
-      <div>{file.basename}</div>
+      <div class="top-bar-fileName">{file.basename}</div>
     </div>
   {/if}
 
