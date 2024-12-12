@@ -5,7 +5,7 @@ import {
   NotesExplorerSettingsTab,
   DEFAULT_SETTINGS,
 } from "./src/settings";
-import { CardsViewPluginView, VIEW_TYPE } from "./src/view";
+import { CardsViewPluginView, PLUGIN_VIEW_TYPE } from "./src/view";
 import store from "./src/components/store";
 import "./styles.css";
 import { pluginIcon } from "src/icons";
@@ -36,7 +36,7 @@ export default class NotesExplorerPlugin extends Plugin {
       this.registerPluginRibbonIcon();
 
       this.registerView(
-        VIEW_TYPE,
+        PLUGIN_VIEW_TYPE,
         (leaf) => new CardsViewPluginView(this, this.settings, leaf)
       );
 
@@ -58,7 +58,7 @@ export default class NotesExplorerPlugin extends Plugin {
     const { workspace } = this.app;
 
     let leaf: WorkspaceLeaf | null;
-    const leaves = workspace.getLeavesOfType(VIEW_TYPE);
+    const leaves = workspace.getLeavesOfType(PLUGIN_VIEW_TYPE);
 
     if (leaves.length) {
       leaf = leaves[0];
@@ -66,7 +66,7 @@ export default class NotesExplorerPlugin extends Plugin {
       leaf = workspace.getLeaf("tab");
     }
 
-    await leaf.setViewState({ type: VIEW_TYPE, active: true });
+    await leaf.setViewState({ type: PLUGIN_VIEW_TYPE, active: true });
     store.viewIsVisible.set(true);
   }
 

@@ -15,7 +15,7 @@ import Root from "./components/Root.svelte";
 import { get } from "svelte/store";
 import store, { allAllowedFiles, folderName } from "./components/store";
 
-export const VIEW_TYPE = "notes-explorer";
+export const PLUGIN_VIEW_TYPE = "notes-explorer";
 
 export class CardsViewPluginView extends ItemView {
   private settings: NotesExplorerSettings;
@@ -36,7 +36,7 @@ export class CardsViewPluginView extends ItemView {
   }
 
   getViewType() {
-    return VIEW_TYPE;
+    return PLUGIN_VIEW_TYPE;
   }
 
   getDisplayText() {
@@ -115,7 +115,9 @@ export class CardsViewPluginView extends ItemView {
       const rootLeaf = this.app.workspace.getMostRecentLeaf(
         this.app.workspace.rootSplit
       );
-      store.viewIsVisible.set(rootLeaf?.view?.getViewType() === VIEW_TYPE);
+      store.viewIsVisible.set(
+        rootLeaf?.view?.getViewType() === PLUGIN_VIEW_TYPE
+      );
     });
   }
 
