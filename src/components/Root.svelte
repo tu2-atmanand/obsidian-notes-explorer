@@ -235,7 +235,7 @@
   class="cards-container"
   style:--columns={columns}
 >
-  {#each $displayedFiles as file (file.path + file.stat.mtime)}
+  {#each $displayedFiles as file (file.path)}
     <Card {file} on:loaded={() => notesGrid.layout()} />
   {/each}
 </div>
