@@ -150,13 +150,15 @@
       //   defaultMod: true /* require ctrl key trigger */,
       //   display: "Notes Explorer",
       // });
-      hookMarkdownLinkMouseEventHandlers(
-        $app,
-        $plugin,
-        el,
-        file.path,
-        file.path,
-      );
+      if ($settings.contentInteractions) {
+        hookMarkdownLinkMouseEventHandlers(
+          $app,
+          $plugin,
+          el,
+          file.path,
+          file.path,
+        );
+      }
     } else {
       el.createEl("div", {
         text: "File is Empty",
@@ -166,7 +168,7 @@
   };
 
   const parentNoteHoverPreview = async (event: MouseEvent, el: HTMLElement) => {
-    console.log("parentNoteHoverPreview : Running...")
+    console.log("parentNoteHoverPreview : Running...");
     markdownButtonHoverPreviewEvent($app, event, el, file.path);
   };
 
