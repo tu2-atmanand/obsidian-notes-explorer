@@ -513,7 +513,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
                   input: true,
                   clear: true,
                   cancel: true,
-                  save: true,
+                  save: false,
                 },
               },
             });
@@ -530,19 +530,19 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
                 row.style.backgroundColor = rgbaColor;
                 rgbaInput.setValue(rgbaColor);
               })
-              .on("save", (color: any) => {
-                pickr.hide();
-                const rgbaColor = `rgba(${color
-                  .toRGBA()
-                  .map((value: number, index: number) =>
-                    index < 3 ? Math.round(value) : value
-                  )
-                  .join(", ")})`; // Construct valid rgba format
-                tag.color = rgbaColor;
-                row.style.backgroundColor = rgbaColor;
-                rgbaInput.setValue(rgbaColor);
-                this.plugin.saveSettings();
-              })
+              // .on("save", (color: any) => {
+              //   pickr.hide();
+              //   const rgbaColor = `rgba(${color
+              //     .toRGBA()
+              //     .map((value: number, index: number) =>
+              //       index < 3 ? Math.round(value) : value
+              //     )
+              //     .join(", ")})`; // Construct valid rgba format
+              //   tag.color = rgbaColor;
+              //   row.style.backgroundColor = rgbaColor;
+              //   rgbaInput.setValue(rgbaColor);
+              //   this.plugin.saveSettings();
+              // })
               .on("cancel", () => {
                 pickr.hide(); // Close the picker when cancel is pressed
               });
