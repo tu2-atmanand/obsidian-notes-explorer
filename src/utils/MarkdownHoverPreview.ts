@@ -51,7 +51,6 @@ export function markdownButtonHoverPreviewEvent(
   containerEl: HTMLElement,
   filePath: string
 ) {
-  console.log("markdownButtonHoverPreviewEvent ...");
   if (!event.ctrlKey) return; // Only proceed if CTRL is held
   app.workspace.trigger("hover-link", {
     event,

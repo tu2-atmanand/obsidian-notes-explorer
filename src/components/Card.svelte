@@ -168,7 +168,6 @@
   };
 
   const parentNoteHoverPreview = async (event: MouseEvent, el: HTMLElement) => {
-    console.log("parentNoteHoverPreview : Running...");
     markdownButtonHoverPreviewEvent($app, event, el, file.path);
   };
 
@@ -234,7 +233,6 @@
           file,
           $settings.deleteFileMode === "trash" ? false : true,
         );
-        console.log("trashFile : The note has been deleted.");
       } catch (error) {
         console.error("trashFile : Error deleting the file:", error);
       }
