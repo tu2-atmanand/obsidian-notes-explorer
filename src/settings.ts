@@ -254,13 +254,13 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Note content interactions")
       .setDesc(
-        "Enable this feature you like to have in-card interactions, such as opening internal links and getting hover preview."
+        "Enable this feature you like to have in-card interactions, such as opening internal links and getting hover preview. NOTE : Obsidian restart required for this setting."
       )
       .addToggle((toggle) =>
         toggle
-          .setValue(this.plugin.settings.showDeleteButton)
+          .setValue(this.plugin.settings.contentInteractions)
           .onChange(async (value) => {
-            this.plugin.settings.showDeleteButton = value;
+            this.plugin.settings.contentInteractions = value;
             await this.plugin.saveSettings();
           })
       );
