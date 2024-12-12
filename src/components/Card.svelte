@@ -12,6 +12,10 @@
   import { skipNextTransition, app, view, settings } from "./store";
   import { TitleDisplayMode } from "../settings";
   import { openDeleteConfirmationModal } from "src/utils/helpers";
+  import {
+    hookMarkdownLinkMouseEventHandlers,
+    markdownButtonHoverPreviewEvent,
+  } from "src/utils/MarkdownHoverPreview";
 
   export let file: TFile;
   let displayFilename: boolean =
@@ -133,12 +137,28 @@
         $view,
       );
       postProcessRenderedContent(el);
+      // $plugin.registerHoverLinkSource(PLUGIN_VIEW_TYPE, {
+      //   defaultMod: true /* require ctrl key trigger */,
+      //   display: "Notes Explorer",
+      // });
+      hookMarkdownLinkMouseEventHandlers(
+        $app,
+        $plugin,
+        el,
+        file.path,
+        file.path,
+      );
     } else {
       el.createEl("div", {
         text: "File is Empty",
         cls: "card-content-empty",
       });
     }
+  };
+
+  const parentNoteHoverPreview = async (event: MouseEvent, el: HTMLElement) => {
+    console.log("parentNoteHoverPreview : Running...")
+    markdownButtonHoverPreviewEvent($app, event, el, file.path);
   };
 
   // Post-process rendered content for optimizations
@@ -370,7 +390,12 @@
     role="presentation"
   ></div>
 
-  <div class="card-footer-parent">
+  <div
+    class="card-footer-parent"
+    bind:this={footerDiv}
+    on:mouseenter={(event) => parentNoteHoverPreview(event, footerDiv)}
+    role="presentation"
+  >
     <div class="card-footer">
       {#if pinned}
         <button
