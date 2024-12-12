@@ -300,10 +300,9 @@
 }
 
 .card-footer-text {
-    font-size: (--nav-item-size);
+    font-size: var(--nav-item-size);
     font-weight: 500;
     text-wrap: pretty;
-    max-width: 80%;
 }
 
 .card .clickable-icon.is-active {
