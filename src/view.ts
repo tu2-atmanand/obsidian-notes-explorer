@@ -2,12 +2,7 @@
 
 import "../styles.css";
 
-import {
-  ItemView,
-  TAbstractFile,
-  TFile,
-  WorkspaceLeaf,
-} from "obsidian";
+import { ItemView, TAbstractFile, TFile, WorkspaceLeaf } from "obsidian";
 
 import type NotesExplorerPlugin from "main";
 import { type NotesExplorerSettings } from "./settings";
@@ -123,7 +118,7 @@ export class CardsViewPluginView extends ItemView {
   private getAllFiles() {
     const onlyFolder = get(folderName);
 
-    if (onlyFolder !== '') {
+    if (onlyFolder !== "") {
       return;
     } else {
       store.files.set(get(allAllowedFiles));
@@ -132,10 +127,14 @@ export class CardsViewPluginView extends ItemView {
 
   private renderMoreOnScroll() {
     // Obtain a reference to the cards-container via Svelte component instance
+    // const actionBarParent = this.viewContent.children[0];
     const cardsContainer = this.viewContent.children[1];
+    // console.log("actionbar :", actionBarParent);
     // Apply the scroll event to cardsContainer
     if (cardsContainer) {
       cardsContainer.addEventListener("scroll", async () => {
+        // actionBarParent.removeClass(".action-bar-parent");
+        // actionBarParent.addClass(".action-bar-parent-hide");
         if (
           cardsContainer.scrollTop + cardsContainer.clientHeight >
           cardsContainer.scrollHeight - 100
