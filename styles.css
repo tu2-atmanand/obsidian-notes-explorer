@@ -212,6 +212,7 @@
     overflow-x: auto;
     position: absolute;
     bottom: 2em;
+    right: 1em;
     padding-inline: 1em;
     max-width: 93vw;
 
@@ -227,7 +228,7 @@
     pointer-events: auto;
     /* background-color: var(--background-modifier-success); */
     border-radius: 2em;
-    padding-block-start: 10px;
+    padding-block: 10px;
     box-shadow: 0px 5px 20px -4px var(--caret-color);
     backdrop-filter: blur(10px);
 }
@@ -235,11 +236,13 @@
 .page-bar button {
     padding: 0.5rem 1rem;
     cursor: pointer;
+    background-color: var(--background-secondary);
 }
 
 .page-bar button.active {
     font-weight: bold;
     text-decoration: underline;
+    background-color: var(--Fold6);
 }
 
 /* Card.svelte */
