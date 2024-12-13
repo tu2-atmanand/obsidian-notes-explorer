@@ -170,11 +170,13 @@ export default class NotesExplorerPlugin extends Plugin {
 
   private registerStatusBar() {
     // This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-    const statusBarItemEl = this.addStatusBarItem();
-    store.displayedCount.subscribe(() => {
-      const statusBarText = "Total Cards :" + get(displayedCount);
-      statusBarItemEl.setText(statusBarText);
-    });
+    if (!this.settings.pagesView) {
+      const statusBarItemEl = this.addStatusBarItem();
+      store.displayedCount.subscribe(() => {
+        const statusBarText = "Total Cards :" + get(displayedCount);
+        statusBarItemEl.setText(statusBarText);
+      });
+    }
   }
 
   // set by folder element
