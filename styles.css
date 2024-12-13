@@ -3,7 +3,7 @@
  */
 
 .workspace-leaf-content[data-type="notes-explorer"] .view-content {
-    /* overflow: unset; */
+    overflow: unset;
     padding-block-start: 0 !important;
     padding-right: 5px;
 }
@@ -185,6 +185,45 @@
 
 .refresh-button:hover {
     background-color: var(--interactive-accent-hover);
+}
+
+.page-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    overflow-x: auto;
+    position: absolute;
+    bottom: 2em;
+    padding-inline: 1em;
+    max-width: 93vw;
+
+    opacity: 0;
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    pointer-events: none;
+}
+
+.page-bar-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    /* background-color: var(--background-modifier-success); */
+    border-radius: 2em;
+    padding-block-start: 10px;
+    box-shadow: 0px 5px 20px -4px var(--caret-color);
+    backdrop-filter: blur(10px);
+}
+
+.page-bar button {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+.page-bar button.active {
+    font-weight: bold;
+    text-decoration: underline;
 }
 
 /* Card.svelte */
