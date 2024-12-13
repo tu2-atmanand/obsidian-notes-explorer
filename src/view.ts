@@ -13,8 +13,9 @@ import store, {
   currentPage,
   folderName,
   showActionBar,
+  totalPages,
 } from "./components/store";
-import { topBarIcon } from "./icons";
+import { leftSideArrow, rightSideArrow, topBarIcon } from "./icons";
 
 export const PLUGIN_VIEW_TYPE = "notes-explorer";
 
@@ -157,16 +158,39 @@ export class CardsViewPluginView extends ItemView {
       }
     } else {
       const pageBarContainer = this.viewContent.children[2];
-      console.log("Container :", pageBarContainer);
       if (pageBarContainer) {
-        const statusBarText = "Page : " + get(currentPage);
         const statusBarEl = this.plugin.addStatusBarItem();
-        statusBarEl.createEl("span", {
-          text: statusBarText,
+
+        // Left-side arrow button
+        const leftArrowButton = statusBarEl.createEl("button", {
+          cls: "status-bar-button",
         });
+        leftArrowButton.innerHTML = `<i class="${leftSideArrow}"></i>`;
+        leftArrowButton.addEventListener("click", () => {
+          if (get(currentPage) > 1) {
+            store.currentPage.set(get(currentPage) - 1);
+          }
+        });
+
+        // Status text
+        const statusBarText = statusBarEl.createEl("span", {
+          text: "Page : " + get(currentPage),
+        });
+
+        // Right-side arrow button
+        const rightArrowButton = statusBarEl.createEl("button", {
+          cls: "status-bar-button",
+        });
+        rightArrowButton.innerHTML = `<i class="${rightSideArrow}"></i>`;
+        rightArrowButton.addEventListener("click", () => {
+          if (get(currentPage) < get(totalPages)) {
+            store.currentPage.set(get(currentPage) + 1);
+          }
+        });
+
         // Add a click event listener to toggle the visibility
         let isPageBarVisible = false;
-        statusBarEl.addEventListener("click", () => {
+        statusBarText.addEventListener("click", () => {
           isPageBarVisible = !isPageBarVisible;
           if (isPageBarVisible) {
             pageBarContainer.classList.add("page-bar-visible");
