@@ -207,6 +207,12 @@ export const displayedCount = writable(50);
 // );
 
 export const currentPage = writable(1);
+export const totalPages = derived(
+  [allAllowedFiles, settings],
+  ([$allAllowedFiles, $settings]) => {
+    return Math.ceil($allAllowedFiles.length / $settings.cardsPerPage);
+  },
+);
 export const pagesView = writable();
 
 export const displayedFiles = derived(
@@ -217,6 +223,7 @@ export const displayedFiles = derived(
     pagesView,
     searchQuery,
     displayedCount,
+    settings,
   ],
   ([
     $filteredFiles,
@@ -225,12 +232,13 @@ export const displayedFiles = derived(
     $pagesView,
     $searchQuery,
     $displayedCount,
+    $settings,
   ]) => {
     const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
 
-    if ($pagesView) {
-      const start = ($currentPage - 1) * 50;
-      return filesToDisplay.slice(start, start + 50);
+    if ($pagesView && $settings.cardsPerPage) {
+      const start = ($currentPage - 1) * $settings.cardsPerPage;
+      return filesToDisplay.slice(start, start + $settings.cardsPerPage);
     } else {
       return filesToDisplay.slice(0, $displayedCount);
     }
@@ -241,9 +249,9 @@ export const displayedFiles = derived(
 // displayedFiles.subscribe((files) => console.log("Displayed Files:", files));
 
 export const tags = derived(
-  [displayedFiles, appCache],
-  ([$displayedFiles, $appCache]) => {
-    const tags = $displayedFiles
+  [allAllowedFiles, appCache],
+  ([$allAllowedFiles, $appCache]) => {
+    const tags = $allAllowedFiles
       .map(
         (file) =>
           getAllTags($appCache.getFileCache(file) as CachedMetadata) || [],
@@ -285,4 +293,5 @@ export default {
   pagesView,
   currentPage,
   showActionBar,
+  totalPages,
 };
