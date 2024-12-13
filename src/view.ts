@@ -8,7 +8,13 @@ import type NotesExplorerPlugin from "main";
 import { type NotesExplorerSettings } from "./settings";
 import Root from "./components/Root.svelte";
 import { get } from "svelte/store";
-import store, { allAllowedFiles, folderName } from "./components/store";
+import store, {
+  allAllowedFiles,
+  currentPage,
+  folderName,
+  showActionBar,
+} from "./components/store";
+import { topBarIcon } from "./icons";
 
 export const PLUGIN_VIEW_TYPE = "notes-explorer";
 
@@ -47,6 +53,12 @@ export class CardsViewPluginView extends ItemView {
 
     this.svelteRoot = new Root({
       target: this.viewContent,
+    });
+
+    this.addAction(topBarIcon, "Show/Hide top bar", () => {
+      // const actionBarContainer = this.viewContent.children[1];
+      // console.log("Container :", actionBarContainer);
+      store.showActionBar.set(!get(showActionBar));
     });
 
     this.renderMoreOnScroll();
@@ -133,23 +145,23 @@ export class CardsViewPluginView extends ItemView {
     // Obtain a reference to the cards-container via Svelte component instance
     // const actionBarParent = this.viewContent.children[0];
     if (!this.settings.pagesView) {
-    const cardsContainer = this.viewContent.children[1];
+      const cardsContainer = this.viewContent.children[1];
       console.log("Container :", cardsContainer);
-    // Apply the scroll event to cardsContainer
-    if (cardsContainer) {
-      cardsContainer.addEventListener("scroll", async () => {
-        // actionBarParent.removeClass(".action-bar-parent");
-        // actionBarParent.addClass(".action-bar-parent-hide");
-        if (
-          cardsContainer.scrollTop + cardsContainer.clientHeight >
-          cardsContainer.scrollHeight - 100
-        ) {
-          store.skipNextTransition.set(true);
-          store.displayedCount.set(get(store.displayedFiles).length + 50);
-        }
-      });
-    } else {
-      console.error("cardsContainer is undefined");
+      // Apply the scroll event to cardsContainer
+      if (cardsContainer) {
+        cardsContainer.addEventListener("scroll", async () => {
+          // actionBarParent.removeClass(".action-bar-parent");
+          // actionBarParent.addClass(".action-bar-parent-hide");
+          if (
+            cardsContainer.scrollTop + cardsContainer.clientHeight >
+            cardsContainer.scrollHeight - 100
+          ) {
+            store.skipNextTransition.set(true);
+            store.displayedCount.set(get(store.displayedFiles).length + 50);
+          }
+        });
+      } else {
+        console.error("cardsContainer is undefined");
       }
     } else {
       const pageBarContainer = this.viewContent.children[2];

@@ -18,8 +18,11 @@
     folderName,
     allAllowedFiles,
     refreshOnResize,
+    filteredFiles,
+    showActionBar,
   } from "./store";
   import { Sort } from "src/settings";
+  import { get } from "svelte/store";
 
   let notesGrid: MiniMasonry;
   let viewContent: HTMLElement;
@@ -209,9 +212,13 @@
       }
     }),
   );
+
+  $: actionBarStyle = $showActionBar
+    ? "action-bar-parent"
+    : "action-bar-parent action-bar-parent-hide";
 </script>
 
-<div class="action-bar-parent">
+<div class={actionBarStyle}>
   <div class="action-bar" bind:this={viewContent}>
     <button
       class="clickable-icon refresh-button"
@@ -249,10 +256,12 @@
     {/if}
   </div>
 </div>
+
 <div
   bind:this={cardsContainer}
   class="cards-container"
-  style:--columns={columns}
+  style="--columns: {columns};"
+  style:padding-top={$showActionBar ? "3.6em" : "0"}
 >
   {#each $displayedFiles as file (file.path)}
     <Card {file} on:loaded={() => notesGrid.layout()} />
