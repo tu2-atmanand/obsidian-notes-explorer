@@ -26,6 +26,7 @@ export const viewIsVisible = writable(false);
 export const skipNextTransition = writable(true);
 export const refreshSignal = writable<boolean>(false);
 export const refreshOnResize = writable<boolean>(false);
+export const showActionBar = writable<boolean>(true);
 
 export const sort = writable<Sort>();
 
@@ -85,8 +86,8 @@ export const allAllowedFiles = derived(
 
     // Exclude files in the excluded folders
     const filteredFiles = allFiles.filter((file) => {
-      return !$settings.excludedFolders.some(
-        (excludeFolder) => file.path.startsWith(excludeFolder),
+      return !$settings.excludedFolders.some((excludeFolder) =>
+        file.path.startsWith(excludeFolder),
       );
     });
 
@@ -197,11 +198,42 @@ export const filteredFiles = createFilteredFiles();
 
 export const displayedCount = writable(50);
 
+// export const displayedFiles = derived(
+//   [filteredFiles, searchResultFiles, displayedCount, searchQuery],
+//   ([$filteredFiles, $searchResultFiles, $displayedCount, $searchQuery]) => {
+//     const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
+//     return filesToDisplay.slice(0, $displayedCount);
+//   },
+// );
+
+export const currentPage = writable(1);
+export const pagesView = writable();
+
 export const displayedFiles = derived(
-  [filteredFiles, searchResultFiles, displayedCount, searchQuery],
-  ([$filteredFiles, $searchResultFiles, $displayedCount, $searchQuery]) => {
+  [
+    filteredFiles,
+    searchResultFiles,
+    currentPage,
+    pagesView,
+    searchQuery,
+    displayedCount,
+  ],
+  ([
+    $filteredFiles,
+    $searchResultFiles,
+    $currentPage,
+    $pagesView,
+    $searchQuery,
+    $displayedCount,
+  ]) => {
     const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
-    return filesToDisplay.slice(0, $displayedCount);
+
+    if ($pagesView) {
+      const start = ($currentPage - 1) * 50;
+      return filesToDisplay.slice(start, start + 50);
+    } else {
+      return filesToDisplay.slice(0, $displayedCount);
+    }
   },
 );
 
@@ -250,4 +282,7 @@ export default {
   view,
   settings,
   appCache,
+  pagesView,
+  currentPage,
+  showActionBar,
 };

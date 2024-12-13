@@ -26,6 +26,23 @@
   export let cardsContainer: HTMLElement;
   let columns: number;
 
+  let currentPage = 1;
+  let totalPages = Math.ceil(get(allAllowedFiles).length / 50);
+
+  function goToPage(page: number) {
+    currentPage = page;
+    store.currentPage.set(currentPage);
+    // store.displayedCount.set(page * 50);
+  }
+
+  function nextPage() {
+    if (currentPage < totalPages) goToPage(currentPage + 1);
+  }
+
+  function previousPage() {
+    if (currentPage > 1) goToPage(currentPage - 1);
+  }
+
   const sortIcon = (element: HTMLElement) => {
     setIcon(element, "arrow-down-wide-narrow");
   };
@@ -240,4 +257,17 @@
   {#each $displayedFiles as file (file.path)}
     <Card {file} on:loaded={() => notesGrid.layout()} />
   {/each}
+</div>
+
+<div class="page-bar">
+  <button on:click={previousPage} disabled={currentPage === 1}>Previous</button>
+  {#each Array(totalPages)
+    .fill(0)
+    .map((_, i) => i + 1) as page}
+    <button class:active={currentPage === page} on:click={() => goToPage(page)}>
+      {page}
+    </button>
+  {/each}
+  <button on:click={nextPage} disabled={currentPage === totalPages}>Next</button
+  >
 </div>

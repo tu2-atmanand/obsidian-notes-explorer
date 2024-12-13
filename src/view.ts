@@ -126,10 +126,15 @@ export class CardsViewPluginView extends ItemView {
   }
 
   private renderMoreOnScroll() {
+    store.pagesView.set(this.settings.pagesView);
+    // if (this.settings.pagesView) {
+    //   return;
+    // }
     // Obtain a reference to the cards-container via Svelte component instance
     // const actionBarParent = this.viewContent.children[0];
+    if (!this.settings.pagesView) {
     const cardsContainer = this.viewContent.children[1];
-    // console.log("actionbar :", actionBarParent);
+      console.log("Container :", cardsContainer);
     // Apply the scroll event to cardsContainer
     if (cardsContainer) {
       cardsContainer.addEventListener("scroll", async () => {
@@ -145,6 +150,29 @@ export class CardsViewPluginView extends ItemView {
       });
     } else {
       console.error("cardsContainer is undefined");
+      }
+    } else {
+      const pageBarContainer = this.viewContent.children[2];
+      console.log("Container :", pageBarContainer);
+      if (pageBarContainer) {
+        const statusBarText = "Page : " + get(currentPage);
+        const statusBarEl = this.plugin.addStatusBarItem();
+        statusBarEl.createEl("span", {
+          text: statusBarText,
+        });
+        // Add a click event listener to toggle the visibility
+        let isPageBarVisible = false;
+        statusBarEl.addEventListener("click", () => {
+          isPageBarVisible = !isPageBarVisible;
+          if (isPageBarVisible) {
+            pageBarContainer.classList.add("page-bar-visible");
+          } else {
+            pageBarContainer.classList.remove("page-bar-visible");
+          }
+        });
+      } else {
+        console.error("cardsContainer is undefined");
+      }
     }
   }
 }

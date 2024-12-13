@@ -80,6 +80,7 @@ export interface NotesExplorerSettings {
   defaultSort: Sort;
   openViewOnFolderClick: boolean;
   excludedFolders: string[];
+  pagesView: boolean;
 }
 
 export const DEFAULT_SETTINGS: NotesExplorerSettings = {
@@ -104,6 +105,7 @@ export const DEFAULT_SETTINGS: NotesExplorerSettings = {
   defaultSort: Sort.EditedDesc,
   openViewOnFolderClick: false,
   excludedFolders: [],
+  pagesView: true,
 };
 
 export class NotesExplorerSettingsTab extends PluginSettingTab {
@@ -121,6 +123,18 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     containerEl.empty();
 
     new Setting(containerEl).setName("General features").setHeading();
+
+    new Setting(containerEl)
+      .setName("DEV : Page View")
+      .setDesc("Show pages instead of contineous scrolling.")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.pagesView)
+          .onChange(async (value) => {
+            this.plugin.settings.pagesView = value;
+            await this.plugin.saveSettings();
+          })
+      );
 
     new Setting(containerEl)
       .setName("Launch on start")
