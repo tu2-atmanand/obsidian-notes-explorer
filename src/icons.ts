@@ -1,5 +1,6 @@
 export const pluginIcon = "book-copy";
-
+export const leftSideArrow = "arrow-left-to-line";
+export const rightSideArrow = "arrow-right-to-line";
 export const topBarIcon = "credit-card"
 
 export const pinnedIconSVG = `
