@@ -139,19 +139,11 @@ export class CardsViewPluginView extends ItemView {
 
   private renderMoreOnScroll() {
     store.pagesView.set(this.settings.pagesView);
-    // if (this.settings.pagesView) {
-    //   return;
-    // }
-    // Obtain a reference to the cards-container via Svelte component instance
-    // const actionBarParent = this.viewContent.children[0];
     if (!this.settings.pagesView) {
       const cardsContainer = this.viewContent.children[1];
-      console.log("Container :", cardsContainer);
-      // Apply the scroll event to cardsContainer
       if (cardsContainer) {
+        // Apply the scroll event to cardsContainer
         cardsContainer.addEventListener("scroll", async () => {
-          // actionBarParent.removeClass(".action-bar-parent");
-          // actionBarParent.addClass(".action-bar-parent-hide");
           if (
             cardsContainer.scrollTop + cardsContainer.clientHeight >
             cardsContainer.scrollHeight - 100
