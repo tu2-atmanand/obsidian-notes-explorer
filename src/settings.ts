@@ -81,6 +81,7 @@ export interface NotesExplorerSettings {
   openViewOnFolderClick: boolean;
   excludedFolders: string[];
   pagesView: boolean;
+  cardsPerPage: number;
 }
 
 export const DEFAULT_SETTINGS: NotesExplorerSettings = {
@@ -106,6 +107,7 @@ export const DEFAULT_SETTINGS: NotesExplorerSettings = {
   openViewOnFolderClick: false,
   excludedFolders: [],
   pagesView: true,
+  cardsPerPage: 50,
 };
 
 export class NotesExplorerSettingsTab extends PluginSettingTab {
@@ -133,8 +135,32 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.pagesView = value;
             await this.plugin.saveSettings();
+            cardsPerPageSetting.setDisabled(!value);
           })
       );
+
+    const cardsPerPageSetting = new Setting(containerEl)
+      .setName("Cards per page")
+      .setDesc(
+        "Enter the number of cards you want to see on per page. Find the best number which gives you smooth experience."
+      )
+      .addText((text) =>
+        text
+          .setPlaceholder("eg.: 50")
+          .setValue(this.plugin.settings.cardsPerPage?.toString() || "")
+          .onChange(async (value) => {
+            if (value.trim() === "") {
+              this.plugin.settings.cardsPerPage = 50;
+            } else if (!isNaN(parseInt(value))) {
+              this.plugin.settings.cardsPerPage = parseInt(value);
+            } else {
+              new Notice("Invalid number");
+              return;
+            }
+            await this.plugin.saveSettings();
+          })
+      )
+      .setDisabled(!this.plugin.settings.pagesView);
 
     new Setting(containerEl)
       .setName("Launch on start")
