@@ -3,29 +3,51 @@
  */
 
 .workspace-leaf-content[data-type="notes-explorer"] .view-content {
-    /* overflow: unset; */
+    overflow: unset;
     padding-block-start: 0 !important;
     padding-right: 5px;
+    padding-block-end: 4em;
+}
+
+/* View.ts  */
+
+.notes-explorer-statuBarSpanEl {
+    padding-inline: 5px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.notes-explorer-status-bar-button {
+    background-color: var(--background-modifier-box-shadow);
+    padding-inline: 2px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.notes-explorer-status-bar-button:hover {
+    background-color: var(--background-secondary);
 }
 
 /* Root.svelte */
 .action-bar-parent {
     z-index: 10;
-    margin-bottom: 10px;
-    /* display: block; */
+    /* border-radius: 2em; */
     display: block;
-    /* opacity: 1; */
     width: 100%;
-    position: relative;
-    /* transition: display 0.3s ease-in-out, opacity 0.3s ease-in-out;
-    /* transform: translateY(0); */
-    /* display: block; */
-    /* opacity: 1; */
+    position: absolute;
+    left: 0;
+    right: 0;
+    /* padding-inline: 1em; */
+
+    opacity: 1;
+    transform: translateY(0);
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    pointer-events: auto;
 }
 
 .action-bar-parent-hide {
-    display: none;
     opacity: 0;
+    transform: translateY(0);
     pointer-events: none;
     /* Optional: to prevent interaction when hidden */
 }
@@ -35,9 +57,13 @@
     position: relative;
     display: flex;
     flex-direction: row-reverse;
-    /* gap: var(--size-4-5); */
+    padding-inline: 1em;
     flex-wrap: wrap;
     justify-content: space-between;
+    align-items: center;
+    background-color: var(--background-primary);
+    box-shadow: 0px 10px 15px -10px var(--background-modifier-success);
+    backdrop-filter: blur(5px);
 
     @media screen and (min-width: 700px) {
         flex-wrap: nowrap;
@@ -57,6 +83,7 @@
     font-size: 1.1rem;
     font-style: italic;
     font-weight: 600;
+    margin-inline: 5px;
 }
 
 .action-bar_folder_closeButton {
@@ -124,6 +151,7 @@
     flex-direction: row;
     overflow-x: auto;
     scroll-behavior: smooth;
+    margin-block: 4px;
 }
 
 .action-bar button.action-bar__tag {
@@ -163,6 +191,8 @@
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
+    /* margin-top: 3em; */
+    margin-bottom: 2em;
 }
 
 .cards-container :global(*) {
@@ -185,6 +215,48 @@
 
 .refresh-button:hover {
     background-color: var(--interactive-accent-hover);
+}
+
+.page-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    overflow-x: auto;
+    position: absolute;
+    z-index: var(--layer-status-bar);
+    bottom: 2.4em;
+    right: 1em;
+    padding-inline: 1em;
+    max-width: 94vw;
+
+    opacity: 0;
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    pointer-events: none;
+}
+
+.page-bar-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    /* background-color: var(--background-modifier-success); */
+    border-radius: 2em;
+    padding-block: 10px;
+    box-shadow: 0px 0px 15px -4px var(--background-modifier-success);
+    backdrop-filter: blur(10px);
+}
+
+.page-bar button {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    background-color: var(--background-secondary);
+}
+
+.page-bar button.active {
+    font-weight: bold;
+    background-color: var(--color-accent);
 }
 
 /* Card.svelte */

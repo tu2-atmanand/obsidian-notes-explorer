@@ -26,6 +26,7 @@ export const viewIsVisible = writable(false);
 export const skipNextTransition = writable(true);
 export const refreshSignal = writable<boolean>(false);
 export const refreshOnResize = writable<boolean>(false);
+export const showActionBar = writable<boolean>(true);
 
 export const sort = writable<Sort>();
 
@@ -85,8 +86,8 @@ export const allAllowedFiles = derived(
 
     // Exclude files in the excluded folders
     const filteredFiles = allFiles.filter((file) => {
-      return !$settings.excludedFolders.some(
-        (excludeFolder) => file.path.startsWith(excludeFolder),
+      return !$settings.excludedFolders.some((excludeFolder) =>
+        file.path.startsWith(excludeFolder),
       );
     });
 
@@ -197,21 +198,65 @@ export const filteredFiles = createFilteredFiles();
 
 export const displayedCount = writable(50);
 
+// export const displayedFiles = derived(
+//   [filteredFiles, searchResultFiles, displayedCount, searchQuery],
+//   ([$filteredFiles, $searchResultFiles, $displayedCount, $searchQuery]) => {
+//     const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
+//     return filesToDisplay.slice(0, $displayedCount);
+//   },
+// );
+
+export const currentPage = writable(1);
+export const totalPages = derived(
+  [sortedFiles, searchQuery, searchResultFiles, settings],
+  ([$sortedFiles, $searchQuery, $searchResultFiles, $settings]) => {
+    if ($searchQuery !== "") {
+      const tempData = Math.ceil(
+        $searchResultFiles.length / $settings.cardsPerPage,
+      );
+      return tempData;
+    } else {
+      const tempData = Math.ceil($sortedFiles.length / $settings.cardsPerPage);
+      return tempData;
+    }
+  },
+);
+export const pagesView = writable();
+
 export const displayedFiles = derived(
-  [filteredFiles, searchResultFiles, displayedCount, searchQuery],
-  ([$filteredFiles, $searchResultFiles, $displayedCount, $searchQuery]) => {
+  [
+    filteredFiles,
+    searchResultFiles,
+    currentPage,
+    pagesView,
+    searchQuery,
+    displayedCount,
+    settings,
+  ],
+  ([
+    $filteredFiles,
+    $searchResultFiles,
+    $currentPage,
+    $pagesView,
+    $searchQuery,
+    $displayedCount,
+    $settings,
+  ]) => {
     const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
-    return filesToDisplay.slice(0, $displayedCount);
+
+    if ($pagesView && $settings.cardsPerPage) {
+      const start = ($currentPage - 1) * $settings.cardsPerPage;
+      return filesToDisplay.slice(start, start + $settings.cardsPerPage);
+    } else {
+      return filesToDisplay.slice(0, $displayedCount);
+    }
   },
 );
 
-// displayedCount.subscribe((count) => console.log("Displayed Count:", count));
-// displayedFiles.subscribe((files) => console.log("Displayed Files:", files));
-
 export const tags = derived(
-  [displayedFiles, appCache],
-  ([$displayedFiles, $appCache]) => {
-    const tags = $displayedFiles
+  [allAllowedFiles, appCache],
+  ([$allAllowedFiles, $appCache]) => {
+    const tags = $allAllowedFiles
       .map(
         (file) =>
           getAllTags($appCache.getFileCache(file) as CachedMetadata) || [],
@@ -250,4 +295,8 @@ export default {
   view,
   settings,
   appCache,
+  pagesView,
+  currentPage,
+  showActionBar,
+  totalPages,
 };

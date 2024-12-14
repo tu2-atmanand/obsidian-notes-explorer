@@ -18,12 +18,15 @@
     folderName,
     allAllowedFiles,
     refreshOnResize,
+    showActionBar,
+    totalPages,
+    currentPage,
   } from "./store";
   import { Sort } from "src/settings";
 
+  export let cardsContainer: HTMLElement;
   let notesGrid: MiniMasonry;
   let viewContent: HTMLElement;
-  export let cardsContainer: HTMLElement;
   let columns: number;
 
   const sortIcon = (element: HTMLElement) => {
@@ -35,6 +38,21 @@
   const closeIcon = (element: HTMLElement) => {
     setIcon(element, "x");
   };
+
+  let currentPageLocal = 1;
+  $: currentPageLocal = $currentPage;
+
+  function goToPage(page: number) {
+    store.currentPage.set(page);
+  }
+
+  export function nextPage() {
+    if (currentPageLocal < $totalPages) goToPage(currentPageLocal + 1);
+  }
+
+  export function previousPage() {
+    if (currentPageLocal > 1) goToPage(currentPageLocal - 1);
+  }
 
   function refreshView() {
     store.refreshSignal.set(!$refreshSignal);
@@ -186,15 +204,18 @@
       $skipNextTransition = false;
 
       if ($refreshOnResize || $settings) {
-        // console.log("Root : Resized or setting changed, refreshing...");
         notesGrid.layout();
         $refreshOnResize = false;
       }
     }),
   );
+
+  $: actionBarStyle = $showActionBar
+    ? "action-bar-parent"
+    : "action-bar-parent action-bar-parent-hide";
 </script>
 
-<div class="action-bar-parent">
+<div class={actionBarStyle}>
   <div class="action-bar" bind:this={viewContent}>
     <button
       class="clickable-icon refresh-button"
@@ -232,12 +253,33 @@
     {/if}
   </div>
 </div>
+
 <div
   bind:this={cardsContainer}
   class="cards-container"
-  style:--columns={columns}
+  style="--columns: {columns};"
+  style:padding-top={$showActionBar ? "3.6em" : "0"}
 >
   {#each $displayedFiles as file (file.path)}
     <Card {file} on:loaded={() => notesGrid.layout()} />
   {/each}
+</div>
+
+<div class="page-bar">
+  <button on:click={previousPage} disabled={currentPageLocal === 1}
+    >Previous</button
+  >
+  {#each Array($totalPages)
+    .fill(0)
+    .map((_, i) => i + 1) as page}
+    <button
+      class:active={currentPageLocal === page}
+      on:click={() => goToPage(page)}
+    >
+      {page}
+    </button>
+  {/each}
+  <button on:click={nextPage} disabled={currentPageLocal === $totalPages}
+    >Next</button
+  >
 </div>

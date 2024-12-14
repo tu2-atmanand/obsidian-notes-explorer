@@ -6,10 +6,9 @@ import {
   DEFAULT_SETTINGS,
 } from "./src/settings";
 import { CardsViewPluginView, PLUGIN_VIEW_TYPE } from "./src/view";
-import store, { displayedCount } from "./src/components/store";
+import store from "./src/components/store";
 import "./styles.css";
 import { pluginIcon } from "src/icons";
-import { get } from "svelte/store";
 
 export default class NotesExplorerPlugin extends Plugin {
   settings: NotesExplorerSettings = Object.assign({}, DEFAULT_SETTINGS);
@@ -35,8 +34,6 @@ export default class NotesExplorerPlugin extends Plugin {
       this.addSettingTab(new NotesExplorerSettingsTab(this.app, this));
 
       this.registerPluginRibbonIcon();
-
-      this.registerStatusBar();
 
       this.registerView(
         PLUGIN_VIEW_TYPE,
@@ -152,7 +149,7 @@ export default class NotesExplorerPlugin extends Plugin {
     );
   }
 
-  private registerCommands() {
+  private async registerCommands() {
     this.addCommand({
       id: "notes-explorer-plugin",
       name: "Open card view",
@@ -162,18 +159,9 @@ export default class NotesExplorerPlugin extends Plugin {
     });
   }
 
-  private registerPluginRibbonIcon() {
+  private async registerPluginRibbonIcon() {
     this.addRibbonIcon(pluginIcon, "Notes Explorer", () => {
       this.activateView();
-    });
-  }
-
-  private registerStatusBar() {
-    // This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-    const statusBarItemEl = this.addStatusBarItem();
-    store.displayedCount.subscribe(() => {
-      const statusBarText = "Total Cards :" + get(displayedCount);
-      statusBarItemEl.setText(statusBarText);
     });
   }
 
@@ -197,12 +185,6 @@ export default class NotesExplorerPlugin extends Plugin {
       folderPath =
         folderItemEl.attributes.getNamedItem("data-path")?.textContent ?? "";
       folderName = folderItemEl.lastElementChild?.getText() ?? "";
-      // console.log(
-      //   "setByFolderElement : contains 'nav-folder-title'\nfolderPath :",
-      //   folderPath,
-      //   "\nfolderName :",
-      //   folderName
-      // );
     }
 
     // fix the folder path

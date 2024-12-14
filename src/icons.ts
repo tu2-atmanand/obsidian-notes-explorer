@@ -1,4 +1,7 @@
 export const pluginIcon = "book-copy";
+export const leftSideArrow = "arrow-left-to-line";
+export const rightSideArrow = "arrow-right-to-line";
+export const topBarIcon = "credit-card"
 
 export const pinnedIconSVG = `
 <?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->

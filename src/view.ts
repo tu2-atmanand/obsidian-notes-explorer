@@ -2,13 +2,27 @@
 
 import "../styles.css";
 
-import { ItemView, TAbstractFile, TFile, WorkspaceLeaf } from "obsidian";
+import {
+  ItemView,
+  TAbstractFile,
+  TFile,
+  WorkspaceLeaf,
+  setIcon,
+} from "obsidian";
 
 import type NotesExplorerPlugin from "main";
 import { type NotesExplorerSettings } from "./settings";
 import Root from "./components/Root.svelte";
 import { get } from "svelte/store";
-import store, { allAllowedFiles, folderName } from "./components/store";
+import store, {
+  allAllowedFiles,
+  currentPage,
+  displayedCount,
+  folderName,
+  showActionBar,
+  totalPages,
+} from "./components/store";
+import { leftSideArrow, rightSideArrow, topBarIcon } from "./icons";
 
 export const PLUGIN_VIEW_TYPE = "notes-explorer";
 
@@ -17,6 +31,7 @@ export class CardsViewPluginView extends ItemView {
   private svelteRoot: Root | null;
   private plugin: NotesExplorerPlugin;
   private viewContent: Element;
+  private statusBarEl: HTMLElement | null = null;
 
   constructor(
     plugin: NotesExplorerPlugin,
@@ -49,6 +64,10 @@ export class CardsViewPluginView extends ItemView {
       target: this.viewContent,
     });
 
+    this.addAction(topBarIcon, "Show/Hide top bar", () => {
+      store.showActionBar.set(!get(showActionBar));
+    });
+
     this.renderMoreOnScroll();
   }
 
@@ -56,6 +75,11 @@ export class CardsViewPluginView extends ItemView {
     store.viewIsVisible.set(false);
     store.searchQuery.set("");
     store.displayedCount.set(50);
+
+    if (this.statusBarEl) {
+      this.statusBarEl.remove();
+      this.statusBarEl = null;
+    }
   }
 
   private registerAllEvent() {
@@ -126,25 +150,85 @@ export class CardsViewPluginView extends ItemView {
   }
 
   private renderMoreOnScroll() {
-    // Obtain a reference to the cards-container via Svelte component instance
-    // const actionBarParent = this.viewContent.children[0];
-    const cardsContainer = this.viewContent.children[1];
-    // console.log("actionbar :", actionBarParent);
-    // Apply the scroll event to cardsContainer
-    if (cardsContainer) {
-      cardsContainer.addEventListener("scroll", async () => {
-        // actionBarParent.removeClass(".action-bar-parent");
-        // actionBarParent.addClass(".action-bar-parent-hide");
-        if (
-          cardsContainer.scrollTop + cardsContainer.clientHeight >
-          cardsContainer.scrollHeight - 100
-        ) {
-          store.skipNextTransition.set(true);
-          store.displayedCount.set(get(store.displayedFiles).length + 50);
-        }
+    store.pagesView.set(this.settings.pagesView);
+    if (!this.settings.pagesView) {
+      // Add status bar showing the number of cards rendered inside the view.
+      const statusBarItemEl = this.plugin.addStatusBarItem();
+      store.displayedCount.subscribe(() => {
+        const statusBarText = "Total Cards :" + get(displayedCount);
+        statusBarItemEl.setText(statusBarText);
       });
+
+      const cardsContainer = this.viewContent.children[1];
+      if (cardsContainer) {
+        // Apply the scroll event to cardsContainer
+        cardsContainer.addEventListener("scroll", async () => {
+          if (
+            cardsContainer.scrollTop + cardsContainer.clientHeight >
+            cardsContainer.scrollHeight - 100
+          ) {
+            store.skipNextTransition.set(true);
+            store.displayedCount.set(get(store.displayedFiles).length + 50);
+          }
+        });
+      } else {
+        console.error("cardsContainer is undefined");
+      }
     } else {
-      console.error("cardsContainer is undefined");
+      const pageBarContainer = this.viewContent.children[2];
+      if (pageBarContainer) {
+        this.statusBarEl = this.plugin.addStatusBarItem();
+
+        // Left-side arrow button
+        const leftArrowButton = this.statusBarEl.createEl("span", {
+          cls: "notes-explorer-status-bar-button",
+        });
+        setIcon(leftArrowButton, leftSideArrow);
+        leftArrowButton.addEventListener("click", () => {
+          if (get(currentPage) > 1) {
+            store.currentPage.set(get(currentPage) - 1);
+          }
+        });
+        leftArrowButton.setAttribute("aria-label", "Go to previous page");
+        leftArrowButton.setAttribute("aria-label-position", "top");
+
+        // Status text
+        const statusBarText = this.statusBarEl.createEl("span", {
+          text: "Page : " + get(currentPage),
+          cls: "notes-explorer-statuBarSpanEl",
+        });
+        store.currentPage.subscribe(() => {
+          statusBarText.textContent = "Page : " + get(currentPage);
+        });
+        statusBarText.setAttribute("aria-label", "Open page navigation bar");
+        statusBarText.setAttribute("aria-label-position", "top");
+
+        // Right-side arrow button
+        const rightArrowButton = this.statusBarEl.createEl("span", {
+          cls: "notes-explorer-status-bar-button",
+        });
+        setIcon(rightArrowButton, rightSideArrow);
+        rightArrowButton.addEventListener("click", () => {
+          if (get(currentPage) < get(totalPages)) {
+            store.currentPage.set(get(currentPage) + 1);
+          }
+        });
+        rightArrowButton.setAttribute("aria-label", "Go to next page");
+        rightArrowButton.setAttribute("aria-label-position", "top");
+
+        // Add a click event listener to toggle the visibility
+        let isPageBarVisible = false;
+        statusBarText.addEventListener("click", () => {
+          isPageBarVisible = !isPageBarVisible;
+          if (isPageBarVisible) {
+            pageBarContainer.classList.add("page-bar-visible");
+          } else {
+            pageBarContainer.classList.remove("page-bar-visible");
+          }
+        });
+      } else {
+        console.error("cardsContainer is undefined");
+      }
     }
   }
 }
