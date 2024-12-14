@@ -2,7 +2,13 @@
 
 import "../styles.css";
 
-import { ItemView, TAbstractFile, TFile, WorkspaceLeaf } from "obsidian";
+import {
+  ItemView,
+  TAbstractFile,
+  TFile,
+  WorkspaceLeaf,
+  setIcon,
+} from "obsidian";
 
 import type NotesExplorerPlugin from "main";
 import { type NotesExplorerSettings } from "./settings";
@@ -11,6 +17,7 @@ import { get } from "svelte/store";
 import store, {
   allAllowedFiles,
   currentPage,
+  displayedCount,
   folderName,
   showActionBar,
   totalPages,
@@ -24,6 +31,7 @@ export class CardsViewPluginView extends ItemView {
   private svelteRoot: Root | null;
   private plugin: NotesExplorerPlugin;
   private viewContent: Element;
+  private statusBarEl: HTMLElement | null = null;
 
   constructor(
     plugin: NotesExplorerPlugin,
@@ -69,6 +77,11 @@ export class CardsViewPluginView extends ItemView {
     store.viewIsVisible.set(false);
     store.searchQuery.set("");
     store.displayedCount.set(50);
+
+    if (this.statusBarEl) {
+      this.statusBarEl.remove();
+      this.statusBarEl = null; // Clear the reference
+    }
   }
 
   private registerAllEvent() {
@@ -141,6 +154,13 @@ export class CardsViewPluginView extends ItemView {
   private renderMoreOnScroll() {
     store.pagesView.set(this.settings.pagesView);
     if (!this.settings.pagesView) {
+      // Add status bar showing the number of cards rendered inside the view.
+      const statusBarItemEl = this.plugin.addStatusBarItem();
+      store.displayedCount.subscribe(() => {
+        const statusBarText = "Total Cards :" + get(displayedCount);
+        statusBarItemEl.setText(statusBarText);
+      });
+
       const cardsContainer = this.viewContent.children[1];
       if (cardsContainer) {
         // Apply the scroll event to cardsContainer
@@ -159,7 +179,7 @@ export class CardsViewPluginView extends ItemView {
     } else {
       const pageBarContainer = this.viewContent.children[2];
       if (pageBarContainer) {
-        const statusBarEl = this.plugin.addStatusBarItem();
+        this.statusBarEl = this.plugin.addStatusBarItem();
 
         // Left-side arrow button
         const leftArrowButton = this.statusBarEl.createEl("span", {
@@ -173,7 +193,7 @@ export class CardsViewPluginView extends ItemView {
         });
 
         // Status text
-        const statusBarText = statusBarEl.createEl("span", {
+        const statusBarText = this.statusBarEl.createEl("span", {
           text: "Page : " + get(currentPage),
           cls: "notes-explorer-statuBarSpanEl",
         });

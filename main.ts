@@ -36,8 +36,6 @@ export default class NotesExplorerPlugin extends Plugin {
 
       this.registerPluginRibbonIcon();
 
-      this.registerStatusBar();
-
       this.registerView(
         PLUGIN_VIEW_TYPE,
         (leaf) => new CardsViewPluginView(this, this.settings, leaf)
@@ -166,17 +164,6 @@ export default class NotesExplorerPlugin extends Plugin {
     this.addRibbonIcon(pluginIcon, "Notes Explorer", () => {
       this.activateView();
     });
-  }
-
-  private registerStatusBar() {
-    // This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-    if (!this.settings.pagesView) {
-      const statusBarItemEl = this.addStatusBarItem();
-      store.displayedCount.subscribe(() => {
-        const statusBarText = "Total Cards :" + get(displayedCount);
-        statusBarItemEl.setText(statusBarText);
-      });
-    }
   }
 
   // set by folder element
