@@ -18,32 +18,16 @@
     folderName,
     allAllowedFiles,
     refreshOnResize,
-    filteredFiles,
     showActionBar,
     totalPages,
     currentPage,
   } from "./store";
   import { Sort } from "src/settings";
 
+  export let cardsContainer: HTMLElement;
   let notesGrid: MiniMasonry;
   let viewContent: HTMLElement;
-  export let cardsContainer: HTMLElement;
   let columns: number;
-
-  let currentPageLocal = 1;
-  $: currentPageLocal = $currentPage;
-
-  function goToPage(page: number) {
-    store.currentPage.set(page); // Update store
-  }
-
-  export function nextPage() {
-    if (currentPageLocal < $totalPages) goToPage(currentPageLocal + 1);
-  }
-
-  export function previousPage() {
-    if (currentPageLocal > 1) goToPage(currentPageLocal - 1);
-  }
 
   const sortIcon = (element: HTMLElement) => {
     setIcon(element, "arrow-down-wide-narrow");
@@ -54,6 +38,21 @@
   const closeIcon = (element: HTMLElement) => {
     setIcon(element, "x");
   };
+
+  let currentPageLocal = 1;
+  $: currentPageLocal = $currentPage;
+
+  function goToPage(page: number) {
+    store.currentPage.set(page);
+  }
+
+  export function nextPage() {
+    if (currentPageLocal < $totalPages) goToPage(currentPageLocal + 1);
+  }
+
+  export function previousPage() {
+    if (currentPageLocal > 1) goToPage(currentPageLocal - 1);
+  }
 
   function refreshView() {
     store.refreshSignal.set(!$refreshSignal);
@@ -205,7 +204,6 @@
       $skipNextTransition = false;
 
       if ($refreshOnResize || $settings) {
-        // console.log("Root : Resized or setting changed, refreshing...");
         notesGrid.layout();
         $refreshOnResize = false;
       }
@@ -268,11 +266,16 @@
 </div>
 
 <div class="page-bar">
-  <button on:click={previousPage} disabled={currentPageLocal === 1}>Previous</button>
+  <button on:click={previousPage} disabled={currentPageLocal === 1}
+    >Previous</button
+  >
   {#each Array($totalPages)
     .fill(0)
     .map((_, i) => i + 1) as page}
-    <button class:active={currentPageLocal === page} on:click={() => goToPage(page)}>
+    <button
+      class:active={currentPageLocal === page}
+      on:click={() => goToPage(page)}
+    >
       {page}
     </button>
   {/each}

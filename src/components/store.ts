@@ -210,16 +210,13 @@ export const currentPage = writable(1);
 export const totalPages = derived(
   [sortedFiles, searchQuery, searchResultFiles, settings],
   ([$sortedFiles, $searchQuery, $searchResultFiles, $settings]) => {
-    console.log("totalPages changed ...");
     if ($searchQuery !== "") {
       const tempData = Math.ceil(
         $searchResultFiles.length / $settings.cardsPerPage,
       );
-      console.log("Value :", tempData);
       return tempData;
     } else {
       const tempData = Math.ceil($sortedFiles.length / $settings.cardsPerPage);
-      console.log("Value :", tempData);
       return tempData;
     }
   },
@@ -255,9 +252,6 @@ export const displayedFiles = derived(
     }
   },
 );
-
-// displayedCount.subscribe((count) => console.log("Displayed Count:", count));
-// displayedFiles.subscribe((files) => console.log("Displayed Files:", files));
 
 export const tags = derived(
   [allAllowedFiles, appCache],

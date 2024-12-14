@@ -128,7 +128,6 @@
   const truncateContent = (content: string, maxLiness: number): string => {
     // Remove frontmatter (--- block)
     content = content.replace(/^---[\s\S]*?---\n?/, "");
-
     // Remove content between %% and the %% markers
     content = content.replace(/%%[\s\S]*?%%\n?/g, "");
 
@@ -181,6 +180,7 @@
 
   // Post-process rendered content for optimizations
   const postProcessRenderedContent = (element: HTMLElement) => {
+    // TODO : The below feature not working. Also add another option to remove both title and filename from the card header :
     if ($settings.displayTitle === TitleDisplayMode.Filename) {
       const firstChild = element.firstElementChild;
       if (firstChild?.tagName === "H1") {

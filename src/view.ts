@@ -65,8 +65,6 @@ export class CardsViewPluginView extends ItemView {
     });
 
     this.addAction(topBarIcon, "Show/Hide top bar", () => {
-      // const actionBarContainer = this.viewContent.children[1];
-      // console.log("Container :", actionBarContainer);
       store.showActionBar.set(!get(showActionBar));
     });
 
@@ -80,7 +78,7 @@ export class CardsViewPluginView extends ItemView {
 
     if (this.statusBarEl) {
       this.statusBarEl.remove();
-      this.statusBarEl = null; // Clear the reference
+      this.statusBarEl = null;
     }
   }
 
