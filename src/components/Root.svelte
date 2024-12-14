@@ -21,29 +21,28 @@
     filteredFiles,
     showActionBar,
     totalPages,
+    currentPage,
   } from "./store";
   import { Sort } from "src/settings";
-  import { get } from "svelte/store";
 
   let notesGrid: MiniMasonry;
   let viewContent: HTMLElement;
   export let cardsContainer: HTMLElement;
   let columns: number;
 
-  let currentPage = 1;
+  let currentPageLocal = 1;
+  $: currentPageLocal = $currentPage;
 
   function goToPage(page: number) {
-    currentPage = page;
-    store.currentPage.set(currentPage);
-    // store.displayedCount.set(page * 50);
+    store.currentPage.set(page); // Update store
   }
 
   export function nextPage() {
-    if (currentPage < $totalPages) goToPage(currentPage + 1);
+    if (currentPageLocal < $totalPages) goToPage(currentPageLocal + 1);
   }
 
   export function previousPage() {
-    if (currentPage > 1) goToPage(currentPage - 1);
+    if (currentPageLocal > 1) goToPage(currentPageLocal - 1);
   }
 
   const sortIcon = (element: HTMLElement) => {
@@ -269,14 +268,15 @@
 </div>
 
 <div class="page-bar">
-  <button on:click={previousPage} disabled={currentPage === 1}>Previous</button>
+  <button on:click={previousPage} disabled={currentPageLocal === 1}>Previous</button>
   {#each Array($totalPages)
     .fill(0)
     .map((_, i) => i + 1) as page}
-    <button class:active={currentPage === page} on:click={() => goToPage(page)}>
+    <button class:active={currentPageLocal === page} on:click={() => goToPage(page)}>
       {page}
     </button>
   {/each}
-  <button on:click={nextPage} disabled={currentPage === $totalPages}>Next</button
+  <button on:click={nextPage} disabled={currentPageLocal === $totalPages}
+    >Next</button
   >
 </div>
