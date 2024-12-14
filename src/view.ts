@@ -191,6 +191,8 @@ export class CardsViewPluginView extends ItemView {
             store.currentPage.set(get(currentPage) - 1);
           }
         });
+        leftArrowButton.setAttribute("aria-label", "Go to previous page");
+        leftArrowButton.setAttribute("aria-label-position", "top");
 
         // Status text
         const statusBarText = this.statusBarEl.createEl("span", {
@@ -200,6 +202,8 @@ export class CardsViewPluginView extends ItemView {
         store.currentPage.subscribe(() => {
           statusBarText.textContent = "Page : " + get(currentPage);
         });
+        statusBarText.setAttribute("aria-label", "Open page navigation bar");
+        statusBarText.setAttribute("aria-label-position", "top");
 
         // Right-side arrow button
         const rightArrowButton = this.statusBarEl.createEl("span", {
@@ -211,6 +215,8 @@ export class CardsViewPluginView extends ItemView {
             store.currentPage.set(get(currentPage) + 1);
           }
         });
+        rightArrowButton.setAttribute("aria-label", "Go to next page");
+        rightArrowButton.setAttribute("aria-label-position", "top");
 
         // Add a click event listener to toggle the visibility
         let isPageBarVisible = false;

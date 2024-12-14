@@ -14,6 +14,7 @@
 .notes-explorer-statuBarSpanEl {
     padding-inline: 5px;
     font-weight: 500;
+    cursor: pointer;
 }
 
 .notes-explorer-status-bar-button {
