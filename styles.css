@@ -6,27 +6,42 @@
     overflow: unset;
     padding-block-start: 0 !important;
     padding-right: 5px;
+    padding-block-end: 4em;
+}
+
+/* View.ts  */
+
+.notes-explorer-statuBarSpanEl {
+    padding-inline: 5px;
+    font-weight: 500;
+}
+
+.notes-explorer-status-bar-button {
+    background-color: var(--background-modifier-box-shadow);
+    padding-inline: 2px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.notes-explorer-status-bar-button:hover {
+    background-color: var(--background-secondary);
 }
 
 /* Root.svelte */
 .action-bar-parent {
     z-index: 10;
-    border-radius: 2em;
+    /* border-radius: 2em; */
     display: block;
     width: 100%;
     position: absolute;
     left: 0;
     right: 0;
-    padding-inline: 1em;
+    /* padding-inline: 1em; */
 
     opacity: 1;
     transform: translateY(0);
     transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
     pointer-events: auto;
-    /* transition: display 0.3s ease-in-out, opacity 0.3s ease-in-out;
-    /* transform: translateY(0); */
-    /* display: block; */
-    /* opacity: 1; */
 }
 
 .action-bar-parent-hide {
@@ -40,14 +55,13 @@
     overflow: auto;
     position: relative;
     display: flex;
-    border-radius: 2em;
     flex-direction: row-reverse;
-    /* gap: var(--size-4-5); */
+    padding-inline: 1em;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     background-color: var(--background-primary);
-    box-shadow: 0px 3px 12px -4px var(--caret-color);
+    box-shadow: 0px 10px 15px -10px var(--background-modifier-success);
     backdrop-filter: blur(5px);
 
     @media screen and (min-width: 700px) {
@@ -124,7 +138,6 @@
     scrollbar-width: none;
     white-space: nowrap;
     overflow: auto;
-    padding-inline-start: 1em;
 
     @media screen and (min-width: 700px) {
         overflow: hidden;
@@ -211,10 +224,11 @@
     margin-top: 1rem;
     overflow-x: auto;
     position: absolute;
-    bottom: 2em;
+    z-index: var(--layer-status-bar);
+    bottom: 2.4em;
     right: 1em;
     padding-inline: 1em;
-    max-width: 93vw;
+    max-width: 94vw;
 
     opacity: 0;
     transform: translateY(100%);
@@ -229,7 +243,7 @@
     /* background-color: var(--background-modifier-success); */
     border-radius: 2em;
     padding-block: 10px;
-    box-shadow: 0px 5px 20px -4px var(--caret-color);
+    box-shadow: 0px 0px 15px -4px var(--background-modifier-success);
     backdrop-filter: blur(10px);
 }
 
@@ -241,8 +255,7 @@
 
 .page-bar button.active {
     font-weight: bold;
-    text-decoration: underline;
-    background-color: var(--Fold6);
+    background-color: var(--color-accent);
 }
 
 /* Card.svelte */
