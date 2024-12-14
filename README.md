@@ -20,7 +20,7 @@ This is a plugin for [Obsidian.md](https://obsidian.md) that displays all your n
 
 > This plugin is in the process of being published on the Obsidian plugin marketplace. However, until it is approved, use the following steps to install this plugin most easily.
 
-**Step 1 : (Optional)** The support for **Cards View (Beta)** plugin as been ended, so unistall it, if you had installed it through BRAT.
+**Step 1 : (Optional)** The support for **Cards View (Beta)** plugin as been ended, so unistall it, if you had installed it earlier through BRAT.
 
 **Step 2:** Install [**Brat plugin**](obsidian://show-plugin?id=obsidian42-brat).
 
