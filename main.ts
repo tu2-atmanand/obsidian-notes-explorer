@@ -150,7 +150,7 @@ export default class NotesExplorerPlugin extends Plugin {
     );
   }
 
-  private registerCommands() {
+  private async registerCommands() {
     this.addCommand({
       id: "notes-explorer-plugin",
       name: "Open card view",
@@ -160,7 +160,7 @@ export default class NotesExplorerPlugin extends Plugin {
     });
   }
 
-  private registerPluginRibbonIcon() {
+  private async registerPluginRibbonIcon() {
     this.addRibbonIcon(pluginIcon, "Notes Explorer", () => {
       this.activateView();
     });
