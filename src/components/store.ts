@@ -208,9 +208,20 @@ export const displayedCount = writable(50);
 
 export const currentPage = writable(1);
 export const totalPages = derived(
-  [allAllowedFiles, settings],
-  ([$allAllowedFiles, $settings]) => {
-    return Math.ceil($allAllowedFiles.length / $settings.cardsPerPage);
+  [sortedFiles, searchQuery, searchResultFiles, settings],
+  ([$sortedFiles, $searchQuery, $searchResultFiles, $settings]) => {
+    console.log("totalPages changed ...");
+    if ($searchQuery !== "") {
+      const tempData = Math.ceil(
+        $searchResultFiles.length / $settings.cardsPerPage,
+      );
+      console.log("Value :", tempData);
+      return tempData;
+    } else {
+      const tempData = Math.ceil($sortedFiles.length / $settings.cardsPerPage);
+      console.log("Value :", tempData);
+      return tempData;
+    }
   },
 );
 export const pagesView = writable();
