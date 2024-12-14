@@ -162,10 +162,10 @@ export class CardsViewPluginView extends ItemView {
         const statusBarEl = this.plugin.addStatusBarItem();
 
         // Left-side arrow button
-        const leftArrowButton = statusBarEl.createEl("button", {
-          cls: "status-bar-button",
+        const leftArrowButton = this.statusBarEl.createEl("span", {
+          cls: "notes-explorer-status-bar-button",
         });
-        leftArrowButton.innerHTML = `<i class="${leftSideArrow}"></i>`;
+        setIcon(leftArrowButton, leftSideArrow);
         leftArrowButton.addEventListener("click", () => {
           if (get(currentPage) > 1) {
             store.currentPage.set(get(currentPage) - 1);
@@ -178,10 +178,10 @@ export class CardsViewPluginView extends ItemView {
         });
 
         // Right-side arrow button
-        const rightArrowButton = statusBarEl.createEl("button", {
-          cls: "status-bar-button",
+        const rightArrowButton = this.statusBarEl.createEl("span", {
+          cls: "notes-explorer-status-bar-button",
         });
-        rightArrowButton.innerHTML = `<i class="${rightSideArrow}"></i>`;
+        setIcon(rightArrowButton, rightSideArrow);
         rightArrowButton.addEventListener("click", () => {
           if (get(currentPage) < get(totalPages)) {
             store.currentPage.set(get(currentPage) + 1);
