@@ -175,6 +175,10 @@ export class CardsViewPluginView extends ItemView {
         // Status text
         const statusBarText = statusBarEl.createEl("span", {
           text: "Page : " + get(currentPage),
+          cls: "notes-explorer-statuBarSpanEl",
+        });
+        store.currentPage.subscribe(() => {
+          statusBarText.textContent = "Page : " + get(currentPage);
         });
 
         // Right-side arrow button
