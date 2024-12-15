@@ -21,6 +21,7 @@
     showActionBar,
     totalPages,
     currentPage,
+    cardsPerBatch,
   } from "./store";
   import { Sort } from "src/settings";
 
@@ -44,6 +45,7 @@
 
   function goToPage(page: number) {
     store.currentPage.set(page);
+    store.displayedFilesInBatchCount.set(cardsPerBatch);
   }
 
   export function nextPage() {

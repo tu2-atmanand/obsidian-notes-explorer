@@ -206,7 +206,11 @@ export const displayedCount = writable(50);
 //   },
 // );
 
+export const pagesView = writable();
+
 export const currentPage = writable(1);
+export const cardsPerBatch = 30;
+
 export const totalPages = derived(
   [sortedFiles, searchQuery, searchResultFiles, settings],
   ([$sortedFiles, $searchQuery, $searchResultFiles, $settings]) => {
@@ -221,33 +225,56 @@ export const totalPages = derived(
     }
   },
 );
-export const pagesView = writable();
 
-export const displayedFiles = derived(
+export const displayedFilesInBatchCount = writable(30);
+export const displayedFilesInBatch = derived(
   [
     filteredFiles,
     searchResultFiles,
-    currentPage,
-    pagesView,
     searchQuery,
-    displayedCount,
+    displayedFilesInBatchCount,
+    currentPage,
     settings,
   ],
   ([
     $filteredFiles,
     $searchResultFiles,
-    $currentPage,
-    $pagesView,
     $searchQuery,
-    $displayedCount,
+    $displayedFilesInBatchCount,
+    $currentPage,
     $settings,
   ]) => {
+    console.log("Since displayedFilesInBatchCount updated, recalculating...");
     const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
+    const start = ($currentPage - 1) * $settings.cardsPerPage;
+    return filesToDisplay.slice(start, start + $displayedFilesInBatchCount);
+  },
+);
 
+export const displayedFiles = derived(
+  [
+    filteredFiles,
+    searchResultFiles,
+    searchQuery,
+    pagesView,
+    displayedCount,
+    settings,
+    displayedFilesInBatch,
+  ],
+  ([
+    $filteredFiles,
+    $searchResultFiles,
+    $searchQuery,
+    $pagesView,
+    $displayedCount,
+    $settings,
+    $displayedFilesInBatch,
+  ]) => {
     if ($pagesView && $settings.cardsPerPage) {
-      const start = ($currentPage - 1) * $settings.cardsPerPage;
-      return filesToDisplay.slice(start, start + $settings.cardsPerPage);
+      console.log("Since displayedFilesInBatch updated, recalculating...");
+      return $displayedFilesInBatch;
     } else {
+      const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
       return filesToDisplay.slice(0, $displayedCount);
     }
   },
@@ -299,4 +326,7 @@ export default {
   currentPage,
   showActionBar,
   totalPages,
+  cardsPerBatch,
+  displayedFilesInBatchCount,
+  displayedFilesInBatch,
 };
