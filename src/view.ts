@@ -16,6 +16,7 @@ import Root from "./components/Root.svelte";
 import { get } from "svelte/store";
 import store, {
   allAllowedFiles,
+  cardsPerBatch,
   currentPage,
   displayedCount,
   folderName,
@@ -75,6 +76,7 @@ export class CardsViewPluginView extends ItemView {
     store.viewIsVisible.set(false);
     store.searchQuery.set("");
     store.displayedCount.set(50);
+    store.displayedFilesInBatchCount.set(cardsPerBatch);
 
     if (this.statusBarEl) {
       this.statusBarEl.remove();
@@ -151,15 +153,16 @@ export class CardsViewPluginView extends ItemView {
 
   private renderMoreOnScroll() {
     store.pagesView.set(this.settings.pagesView);
+    const cardsContainer = this.viewContent.children[1];
+
     if (!this.settings.pagesView) {
       // Add status bar showing the number of cards rendered inside the view.
       const statusBarItemEl = this.plugin.addStatusBarItem();
       store.displayedCount.subscribe(() => {
-        const statusBarText = "Total Cards :" + get(displayedCount);
+        const statusBarText = "Current cards : " + get(displayedCount);
         statusBarItemEl.setText(statusBarText);
       });
 
-      const cardsContainer = this.viewContent.children[1];
       if (cardsContainer) {
         // Apply the scroll event to cardsContainer
         cardsContainer.addEventListener("scroll", async () => {
@@ -187,6 +190,7 @@ export class CardsViewPluginView extends ItemView {
         leftArrowButton.addEventListener("click", () => {
           if (get(currentPage) > 1) {
             store.currentPage.set(get(currentPage) - 1);
+            store.displayedFilesInBatchCount.set(cardsPerBatch);
           }
         });
         leftArrowButton.setAttribute("aria-label", "Go to previous page");
@@ -211,6 +215,7 @@ export class CardsViewPluginView extends ItemView {
         rightArrowButton.addEventListener("click", () => {
           if (get(currentPage) < get(totalPages)) {
             store.currentPage.set(get(currentPage) + 1);
+            store.displayedFilesInBatchCount.set(cardsPerBatch);
           }
         });
         rightArrowButton.setAttribute("aria-label", "Go to next page");
@@ -226,6 +231,42 @@ export class CardsViewPluginView extends ItemView {
             pageBarContainer.classList.remove("page-bar-visible");
           }
         });
+
+        if (cardsContainer && this.settings.cardsPerPage >= cardsPerBatch) {
+          // Apply the scroll event to cardsContainer
+          cardsContainer.addEventListener("scroll", async () => {
+            console.log(
+              "Cards currently in displayedFilesInBatch :",
+              get(store.displayedFilesInBatch).length,
+              "\nRemaining cards :",
+              this.settings.cardsPerPage -
+                get(store.displayedFilesInBatch).length
+            );
+            if (
+              cardsContainer.scrollTop + cardsContainer.clientHeight >
+              cardsContainer.scrollHeight - 100
+            ) {
+              const remainingCardsInCurrentPage =
+                this.settings.cardsPerPage -
+                get(store.displayedFilesInBatch).length;
+              if (remainingCardsInCurrentPage >= cardsPerBatch) {
+                store.skipNextTransition.set(true);
+                store.displayedFilesInBatchCount.set(
+                  get(store.displayedFilesInBatch).length + cardsPerBatch
+                );
+              } else {
+                store.skipNextTransition.set(true);
+                store.displayedFilesInBatchCount.set(
+                  get(store.displayedFilesInBatch).length +
+                    remainingCardsInCurrentPage
+                );
+              }
+            }
+          });
+        } else {
+          console.log("Seting displayedFilesInBatchCount to :", this.settings.cardsPerPage);
+          store.displayedFilesInBatchCount.set(this.settings.cardsPerPage);
+        }
       } else {
         console.error("cardsContainer is undefined");
       }
