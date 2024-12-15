@@ -27,24 +27,7 @@ export const skipNextTransition = writable(true);
 export const refreshSignal = writable<boolean>(false);
 export const refreshOnResize = writable<boolean>(false);
 export const showActionBar = writable<boolean>(true);
-
 export const sort = writable<Sort>();
-
-// export const allAllowedFiles = derived(
-//   [settings, refreshSignal, folderName],
-//   ([$settings, $refreshSignal, $folderName]) => {
-//     console.log(
-//       "allAllowedFiles : Setting or Refresh signal, reading all files again.\nThis function should NOT run on resizing events",
-//     );
-//     const allFiles = get(app).vault.getMarkdownFiles();
-//     const filteredFiles = allFiles.filter((file) => {
-//       return !$settings.excludedFolders.some(
-//         (excludeFolder) => file.path.startsWith(excludeFolder), // TODO : I know I am going to get error here and the fix is, I have to march whether file.parentFolderName is there in excludeFolder or not.
-//       );
-//     });
-//     return filteredFiles;
-//   },
-// );
 
 export const allAllowedFiles = derived(
   [settings, refreshSignal, folderName],
@@ -198,14 +181,6 @@ export const filteredFiles = createFilteredFiles();
 
 export const displayedCount = writable(50);
 
-// export const displayedFiles = derived(
-//   [filteredFiles, searchResultFiles, displayedCount, searchQuery],
-//   ([$filteredFiles, $searchResultFiles, $displayedCount, $searchQuery]) => {
-//     const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
-//     return filesToDisplay.slice(0, $displayedCount);
-//   },
-// );
-
 export const pagesView = writable();
 
 export const currentPage = writable(1);
@@ -227,29 +202,6 @@ export const totalPages = derived(
 );
 
 export const displayedFilesInBatchCount = writable(30);
-export const displayedFilesInBatch = derived(
-  [
-    filteredFiles,
-    searchResultFiles,
-    searchQuery,
-    displayedFilesInBatchCount,
-    currentPage,
-    settings,
-  ],
-  ([
-    $filteredFiles,
-    $searchResultFiles,
-    $searchQuery,
-    $displayedFilesInBatchCount,
-    $currentPage,
-    $settings,
-  ]) => {
-    console.log("Since displayedFilesInBatchCount updated, recalculating...");
-    const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
-    const start = ($currentPage - 1) * $settings.cardsPerPage;
-    return filesToDisplay.slice(start, start + $displayedFilesInBatchCount);
-  },
-);
 
 export const displayedFiles = derived(
   [
@@ -259,7 +211,8 @@ export const displayedFiles = derived(
     pagesView,
     displayedCount,
     settings,
-    displayedFilesInBatch,
+    currentPage,
+    displayedFilesInBatchCount,
   ],
   ([
     $filteredFiles,
@@ -268,13 +221,16 @@ export const displayedFiles = derived(
     $pagesView,
     $displayedCount,
     $settings,
-    $displayedFilesInBatch,
+    $currentPage,
+    $displayedFilesInBatchCount,
   ]) => {
+    const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
+
     if ($pagesView && $settings.cardsPerPage) {
-      console.log("Since displayedFilesInBatch updated, recalculating...");
-      return $displayedFilesInBatch;
+      console.log("Since displayedFilesInBatchCount updated, recalculating...");
+      const start = ($currentPage - 1) * $settings.cardsPerPage;
+      return filesToDisplay.slice(start, start + $displayedFilesInBatchCount);
     } else {
-      const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
       return filesToDisplay.slice(0, $displayedCount);
     }
   },
@@ -328,5 +284,4 @@ export default {
   totalPages,
   cardsPerBatch,
   displayedFilesInBatchCount,
-  displayedFilesInBatch,
 };

@@ -236,29 +236,26 @@ export class CardsViewPluginView extends ItemView {
           // Apply the scroll event to cardsContainer
           cardsContainer.addEventListener("scroll", async () => {
             console.log(
-              "Cards currently in displayedFilesInBatch :",
-              get(store.displayedFilesInBatch).length,
+              "Cards currently in displayedFiles :",
+              get(store.displayedFiles).length,
               "\nRemaining cards :",
-              this.settings.cardsPerPage -
-                get(store.displayedFilesInBatch).length
+              this.settings.cardsPerPage - get(store.displayedFiles).length
             );
             if (
               cardsContainer.scrollTop + cardsContainer.clientHeight >
               cardsContainer.scrollHeight - 100
             ) {
               const remainingCardsInCurrentPage =
-                this.settings.cardsPerPage -
-                get(store.displayedFilesInBatch).length;
+                this.settings.cardsPerPage - get(store.displayedFiles).length;
               if (remainingCardsInCurrentPage >= cardsPerBatch) {
                 store.skipNextTransition.set(true);
                 store.displayedFilesInBatchCount.set(
-                  get(store.displayedFilesInBatch).length + cardsPerBatch
+                  get(store.displayedFiles).length + cardsPerBatch
                 );
               } else {
                 store.skipNextTransition.set(true);
                 store.displayedFilesInBatchCount.set(
-                  get(store.displayedFilesInBatch).length +
-                    remainingCardsInCurrentPage
+                  get(store.displayedFiles).length + remainingCardsInCurrentPage
                 );
               }
             }
