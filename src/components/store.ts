@@ -161,7 +161,6 @@ const isEmptyFile = async (file: TFile) => {
   return contentWfrontmatter === 0;
 };
 
-// Async filter for non-empty files
 const createFilteredFiles = () =>
   readable<TFile[]>([], (set) => {
     const unsubscribe = sortedFiles.subscribe(async ($sortedFiles) => {
