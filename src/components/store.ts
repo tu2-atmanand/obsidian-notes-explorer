@@ -30,22 +30,6 @@ export const showActionBar = writable<boolean>(true);
 
 export const sort = writable<Sort>();
 
-// export const allAllowedFiles = derived(
-//   [settings, refreshSignal, folderName],
-//   ([$settings, $refreshSignal, $folderName]) => {
-//     console.log(
-//       "allAllowedFiles : Setting or Refresh signal, reading all files again.\nThis function should NOT run on resizing events",
-//     );
-//     const allFiles = get(app).vault.getMarkdownFiles();
-//     const filteredFiles = allFiles.filter((file) => {
-//       return !$settings.excludedFolders.some(
-//         (excludeFolder) => file.path.startsWith(excludeFolder), // TODO : I know I am going to get error here and the fix is, I have to march whether file.parentFolderName is there in excludeFolder or not.
-//       );
-//     });
-//     return filteredFiles;
-//   },
-// );
-
 export const allAllowedFiles = derived(
   [settings, refreshSignal, folderName],
   ([$settings, $refreshSignal, $folderName]) => {
