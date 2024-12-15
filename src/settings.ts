@@ -107,7 +107,7 @@ export const DEFAULT_SETTINGS: NotesExplorerSettings = {
   openViewOnFolderClick: false,
   excludedFolders: [],
   pagesView: true,
-  cardsPerPage: 50,
+  cardsPerPage: 100,
 };
 
 export class NotesExplorerSettingsTab extends PluginSettingTab {
@@ -127,8 +127,8 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     new Setting(containerEl).setName("General features").setHeading();
 
     new Setting(containerEl)
-      .setName("DEV : Page View")
-      .setDesc("Show pages instead of contineous scrolling.")
+      .setName("Page view mode")
+      .setDesc("Show cards into multiple pages instead of contineous scrolling.")
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.settings.pagesView)
@@ -146,11 +146,11 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       )
       .addText((text) =>
         text
-          .setPlaceholder("eg.: 50")
+          .setPlaceholder("eg.: 100")
           .setValue(this.plugin.settings.cardsPerPage?.toString() || "")
           .onChange(async (value) => {
             if (value.trim() === "") {
-              this.plugin.settings.cardsPerPage = 50;
+              this.plugin.settings.cardsPerPage = 100;
             } else if (!isNaN(parseInt(value))) {
               this.plugin.settings.cardsPerPage = parseInt(value);
             } else {
