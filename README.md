@@ -1,4 +1,4 @@
-p# Notes Explorer
+# Notes Explorer
 
 This is a plugin for [Obsidian.md](https://obsidian.md) that displays all your notes as cards for better visual navigation and revision of your notes. Explore your vault using the explorer view by using various filters.
 
@@ -26,7 +26,7 @@ This is a plugin for [Obsidian.md](https://obsidian.md) that displays all your n
 
 **Step 1 : (Optional)** The support for **Cards View (Beta)** plugin as been ended, so unistall it, if you had installed it through BRAT.
 
-**Step 2:** Install [**Brat plugin**](obsidian://show-plugin?id=obsidian42-brat).
+**Step 2:** Install [**BRAT plugin**](obsidian://show-plugin?id=obsidian42-brat).
 
 `Open Obsidian settings` > `Community plugins` > `click on Browse button` > `search for Brat` > `Install and Enable`.
 
@@ -43,7 +43,7 @@ https://github.com/tu2-atmanand/obsidian-notes-explorer
 
 ## Contributing
 
-Pull requests and any suggestion for features or improvements are always welcome. Create your new request in the Issues section, to start the discussion : [Notes Explorer Issues](https://github.com/tu2-atmanand/obsidian-notes-explorer).
+Pull requests and any suggestion for features or improvements are always welcome. Create your new request in the Issues section, to start the discussion : [Notes Explorer Issues section](https://github.com/tu2-atmanand/obsidian-notes-explorer).
 
 ## License
 
@@ -59,6 +59,4 @@ This project uses the following dependencies:
 
 If you liked the additional features and enjoyed using this plugin. Please consider sponsoring my work through small donation using the below links to keep the development and support for this plugin alive.
 
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/tu2-atmanand?label=Sponsor&logo=GitHub%20Sponsors&style=for-the-badge)](https://github.com/sponsors/tu2-atmanand)
-
-<a href="https://www.buymeacoffee.com/tu2_atmanand"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a book&emoji=📖&slug=tu2_atmanand&button_colour=BD5FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" /></a>
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/tu2-atmanand?label=Sponsors&logo=GitHub%20Sponsors&style=for-the-badge)](https://github.com/sponsors/tu2-atmanand)    <a href="https://www.buymeacoffee.com/tu2_atmanand"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a book&emoji=📖&slug=tu2_atmanand&button_colour=BD5FFF&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00"/></a>
