@@ -231,7 +231,6 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
           .addOptions({
             [DeleteFileMode.System]: "Move to system trash",
             [DeleteFileMode.Trash]: "Move to vault trash folder (.trash)",
-            [DeleteFileMode.Permanent]: "Permanently delete",
           })
           .setValue(this.plugin.settings.deleteFileMode)
           .onChange(async (value) => {
