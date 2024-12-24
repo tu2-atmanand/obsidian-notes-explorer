@@ -27,7 +27,6 @@ export const skipNextTransition = writable(true);
 export const refreshSignal = writable<boolean>(false);
 export const refreshOnResize = writable<boolean>(false);
 export const showActionBar = writable<boolean>(true);
-
 export const sort = writable<Sort>();
 
 export const allAllowedFiles = derived(
@@ -162,7 +161,6 @@ const isEmptyFile = async (file: TFile) => {
   return contentWfrontmatter === 0;
 };
 
-// Async filter for non-empty files
 const createFilteredFiles = () =>
   readable<TFile[]>([], (set) => {
     const unsubscribe = sortedFiles.subscribe(async ($sortedFiles) => {
@@ -181,14 +179,6 @@ const createFilteredFiles = () =>
 export const filteredFiles = createFilteredFiles();
 
 export const displayedCount = writable(50);
-
-// export const displayedFiles = derived(
-//   [filteredFiles, searchResultFiles, displayedCount, searchQuery],
-//   ([$filteredFiles, $searchResultFiles, $displayedCount, $searchQuery]) => {
-//     const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
-//     return filesToDisplay.slice(0, $displayedCount);
-//   },
-// );
 
 export const pagesView = writable();
 
@@ -211,29 +201,6 @@ export const totalPages = derived(
 );
 
 export const displayedFilesInBatchCount = writable(30);
-export const displayedFilesInBatch = derived(
-  [
-    filteredFiles,
-    searchResultFiles,
-    searchQuery,
-    displayedFilesInBatchCount,
-    currentPage,
-    settings,
-  ],
-  ([
-    $filteredFiles,
-    $searchResultFiles,
-    $searchQuery,
-    $displayedFilesInBatchCount,
-    $currentPage,
-    $settings,
-  ]) => {
-    console.log("Since displayedFilesInBatchCount updated, recalculating...");
-    const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
-    const start = ($currentPage - 1) * $settings.cardsPerPage;
-    return filesToDisplay.slice(start, start + $displayedFilesInBatchCount);
-  },
-);
 
 export const displayedFiles = derived(
   [
@@ -243,7 +210,8 @@ export const displayedFiles = derived(
     pagesView,
     displayedCount,
     settings,
-    displayedFilesInBatch,
+    currentPage,
+    displayedFilesInBatchCount,
   ],
   ([
     $filteredFiles,
@@ -252,13 +220,16 @@ export const displayedFiles = derived(
     $pagesView,
     $displayedCount,
     $settings,
-    $displayedFilesInBatch,
+    $currentPage,
+    $displayedFilesInBatchCount,
   ]) => {
+    const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
+
     if ($pagesView && $settings.cardsPerPage) {
-      console.log("Since displayedFilesInBatch updated, recalculating...");
-      return $displayedFilesInBatch;
+      console.log("Since displayedFilesInBatchCount updated, recalculating...");
+      const start = ($currentPage - 1) * $settings.cardsPerPage;
+      return filesToDisplay.slice(start, start + $displayedFilesInBatchCount);
     } else {
-      const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
       return filesToDisplay.slice(0, $displayedCount);
     }
   },
@@ -312,5 +283,4 @@ export default {
   totalPages,
   cardsPerBatch,
   displayedFilesInBatchCount,
-  displayedFilesInBatch,
 };
