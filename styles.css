@@ -224,12 +224,12 @@
     gap: 0.5rem;
     margin-top: 1rem;
     overflow-x: auto;
-    position: absolute;
+    position: sticky;
     z-index: var(--layer-status-bar);
     bottom: 2.4em;
     right: 1em;
     padding-inline: 1em;
-    max-width: 94vw;
+    max-width: 95vw;
 
     opacity: 0;
     transform: translateY(100%);
