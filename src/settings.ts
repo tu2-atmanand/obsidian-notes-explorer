@@ -127,8 +127,22 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     new Setting(containerEl).setName("General features").setHeading();
 
     new Setting(containerEl)
+      .setName("Launch on start")
+      .setDesc("Open the notes explorer board when Obsidian starts")
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.launchOnStart)
+          .onChange(async (value) => {
+            this.plugin.settings.launchOnStart = value;
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
       .setName("Page view mode")
-      .setDesc("Show cards into multiple pages instead of contineous scrolling.")
+      .setDesc(
+        "Show cards into multiple pages instead of contineous scrolling."
+      )
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.settings.pagesView)
@@ -161,18 +175,6 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
           })
       )
       .setDisabled(!this.plugin.settings.pagesView);
-
-    new Setting(containerEl)
-      .setName("Launch on start")
-      .setDesc("Open the notes explorer board when Obsidian starts")
-      .addToggle((toggle) =>
-        toggle
-          .setValue(this.plugin.settings.launchOnStart)
-          .onChange(async (value) => {
-            this.plugin.settings.launchOnStart = value;
-            await this.plugin.saveSettings();
-          })
-      );
 
     // new Setting(containerEl)
     //   .setName("Open board on tag click from Tag Tree")
