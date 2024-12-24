@@ -235,12 +235,6 @@ export class CardsViewPluginView extends ItemView {
         if (cardsContainer && this.settings.cardsPerPage >= cardsPerBatch) {
           // Apply the scroll event to cardsContainer
           cardsContainer.addEventListener("scroll", async () => {
-            console.log(
-              "Cards currently in displayedFiles :",
-              get(store.displayedFiles).length,
-              "\nRemaining cards :",
-              this.settings.cardsPerPage - get(store.displayedFiles).length
-            );
             if (
               cardsContainer.scrollTop + cardsContainer.clientHeight >
               cardsContainer.scrollHeight - 100
@@ -261,7 +255,6 @@ export class CardsViewPluginView extends ItemView {
             }
           });
         } else {
-          console.log("Seting displayedFilesInBatchCount to :", this.settings.cardsPerPage);
           store.displayedFilesInBatchCount.set(this.settings.cardsPerPage);
         }
       } else {

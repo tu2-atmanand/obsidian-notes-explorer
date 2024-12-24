@@ -226,7 +226,6 @@ export const displayedFiles = derived(
     const filesToDisplay = $searchQuery ? $searchResultFiles : $filteredFiles;
 
     if ($pagesView && $settings.cardsPerPage) {
-      console.log("Since displayedFilesInBatchCount updated, recalculating...");
       const start = ($currentPage - 1) * $settings.cardsPerPage;
       return filesToDisplay.slice(start, start + $displayedFilesInBatchCount);
     } else {
