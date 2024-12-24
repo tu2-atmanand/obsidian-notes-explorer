@@ -9,7 +9,7 @@ This is a plugin for [Obsidian.md](https://obsidian.md) that displays all your n
 <P align="center"><b>Gallery view</b> - fixed card height</p>
 
 >[!IMPORTANT]
-> **Notice :** Initially started as simple fork from the [Cards View plugin](https://github.com/jillro/obsidian-cards-view-plugin), now has become a highly functional plugin in itself with a lot of new functionalities. I started integrating all these new features to explore vault efficiently. Although, now after hearing few suggestions from the users, I have decided to publish this fork plugin with all these new changes to Obsidian marketplace, as I presume, the author of the Cards View plugin might not be interested in integrating all these new features. This Beta version will be now published with a new name : **Notes Explorer**.
+> **Notice :** Initially started as simple fork from the [Cards View plugin](https://github.com/jillro/obsidian-cards-view-plugin), now has become a highly functional plugin in itself with a lot of new functionalities. I started integrating all these new features for my personal use-case. But, now after hearing the suggestions from few of the users, I have decided to publish this fork plugin with all these new changes to Obsidian marketplace, as I presume, the future development plan of Cards view plugin might not align with my changes. This Beta version will be now published with a new name : **Notes Explorer**.
 
 ## Features
 
@@ -22,9 +22,9 @@ This is a plugin for [Obsidian.md](https://obsidian.md) that displays all your n
 
 ## Installation
 
-> This plugin is in the process of being published on the Obsidian plugin marketplace. However, until it is approved, use the following steps to install this plugin most easily.
+> This plugin is in the process of being published on the Obsidian plugin marketplace. However, until it is approved, use the following steps to install this plugin, the easiest way.
 
-**Step 1 : (Optional)** The support for **Cards View (Beta)** plugin as been ended, so unistall it, if you had installed it through BRAT.
+**Step 1 : (Optional)** The support for **Cards View (Beta)** plugin as been ended, so unistall it, if you had installed it earlier through BRAT.
 
 **Step 2:** Install [**BRAT plugin**](obsidian://show-plugin?id=obsidian42-brat).
 
@@ -39,7 +39,7 @@ This is a plugin for [Obsidian.md](https://obsidian.md) that displays all your n
 https://github.com/tu2-atmanand/obsidian-notes-explorer
 ```
 
-**Step 4 :** Thats it! Now you can open the Cards View, as usual from the ribbon icon.
+**Step 4 :** Thats it! Now you can open the Notes explorer board from the ribbon icon.
 
 ## Contributing
 
