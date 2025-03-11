@@ -104,9 +104,11 @@
   //   // TODO : I have to find out how many words will fit in the card, when a max-hight option has been set, to add the '...' at the end.
   //   const lastElText = element.children[lastBlockIndex].lastChild?.textContent;
   //   if (lastElText != null) {
+  //     const lastChild = element.children[lastBlockIndex].lastChild;
+  //     assert(!is<null>(lastChild));
+  //     assert(!is<null>(lastElText));
   //     const cut = Math.min(50, 200 - (charCount - lastElText.length));
-  //     (element.children[lastBlockIndex].lastChild as Child).textContent =
-  //       `${lastElText.slice(0, cut)} ...`;
+  //     lastChild.textContent = `${lastElText.slice(0, cut)} ...`;
   //   }
   // }
 
@@ -137,6 +139,38 @@
 
     // Join the truncated lines
     return truncatedLines.join("\n").trim();
+  };
+
+  // Post-process rendered content for optimizations
+  const postProcessRenderedContent = (element: HTMLElement) => {
+    // TODO : The below feature not working. Also add another option to remove both title and filename from the card header :
+    if ($settings.displayTitle === TitleDisplayMode.Filename) {
+      const firstChild = element.firstElementChild;
+      if (firstChild?.tagName === "H1") {
+        firstChild.remove();
+      }
+    }
+
+    // Add shadows to embeds and dataview blocks
+    element
+      .querySelectorAll(".internal-embed, .block-language-dataview")
+      .forEach((embed) => {
+        embed.appendChild(document.createElement("div")).className =
+          "embed-shadow";
+      });
+
+    // Truncate the preview if needed
+    // let charCount = 0;
+    // Array.from(element.children).forEach((child, index) => {
+    //   charCount += child.textContent?.length || 0;
+    //   if (charCount > 200) {
+    //     truncateLastBlock(child, charCount, 200);
+    //     // Remove extra siblings
+    //     while (child.nextSibling) {
+    //       child.nextSibling.remove();
+    //     }
+    //   }
+    // });
   };
 
   const renderNoteCard = async (el: HTMLElement): Promise<void> => {
@@ -176,38 +210,6 @@
 
   const parentNoteHoverPreview = async (event: MouseEvent, el: HTMLElement) => {
     markdownButtonHoverPreviewEvent($app, event, el, file.path);
-  };
-
-  // Post-process rendered content for optimizations
-  const postProcessRenderedContent = (element: HTMLElement) => {
-    // TODO : The below feature not working. Also add another option to remove both title and filename from the card header :
-    if ($settings.displayTitle === TitleDisplayMode.Filename) {
-      const firstChild = element.firstElementChild;
-      if (firstChild?.tagName === "H1") {
-        firstChild.remove();
-      }
-    }
-
-    // Add shadows to embeds and dataview blocks
-    element
-      .querySelectorAll(".internal-embed, .block-language-dataview")
-      .forEach((embed) => {
-        embed.appendChild(document.createElement("div")).className =
-          "embed-shadow";
-      });
-
-    // Truncate the preview if needed
-    // let charCount = 0;
-    // Array.from(element.children).forEach((child, index) => {
-    //   charCount += child.textContent?.length || 0;
-    //   if (charCount > 200) {
-    //     truncateLastBlock(child, charCount, 200);
-    //     // Remove extra siblings
-    //     while (child.nextSibling) {
-    //       child.nextSibling.remove();
-    //     }
-    //   }
-    // });
   };
 
   // // Truncate the last block to fit within the character limit
