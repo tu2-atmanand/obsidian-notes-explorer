@@ -34,7 +34,12 @@ export enum NoteMetadata {
 export enum NoteOpenLayout {
   Right = "right",
   NewTab = "tab",
+  SameTab = "sameTab",
   NewWindow = "window",
+}
+export enum ClickMode {
+  Single = "single",
+  Double = "double",
 }
 export enum TagPostionForCardColor {
   frontmatter = "frontmatter",
@@ -82,6 +87,7 @@ export interface NotesExplorerSettings {
   excludedFolders: string[];
   pagesView: boolean;
   cardsPerPage: number;
+  clickMode: string;
 }
 
 export const DEFAULT_SETTINGS: NotesExplorerSettings = {
@@ -108,6 +114,7 @@ export const DEFAULT_SETTINGS: NotesExplorerSettings = {
   excludedFolders: [],
   pagesView: true,
   cardsPerPage: 100,
+  clickMode: "single",
 };
 
 export class NotesExplorerSettingsTab extends PluginSettingTab {
@@ -203,6 +210,24 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     //         await this.plugin.saveSettings();
     //       })
     //   );
+
+    new Setting(containerEl)
+      .setName("Click mode")
+      .setDesc(
+        "Select whether to use single click or double click to open the note from the card."
+      )
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOptions({
+            [ClickMode.Single]: "Single click",
+            [ClickMode.Double]: "Double click",
+          })
+          .setValue(this.plugin.settings.clickMode)
+          .onChange(async (value) => {
+            this.plugin.settings.clickMode = value as ClickMode;
+            await this.plugin.saveSettings();
+          })
+      );
 
     new Setting(containerEl)
       .setName("Open note layout")

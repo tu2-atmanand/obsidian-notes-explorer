@@ -15,7 +15,7 @@
   } from "obsidian";
   import { afterUpdate, createEventDispatcher, onMount } from "svelte";
   import { skipNextTransition, app, view, settings, plugin } from "./store";
-  import { TitleDisplayMode } from "../settings";
+  import { ClickMode, TitleDisplayMode } from "../settings";
   import { openDeleteConfirmationModal } from "src/utils/helpers";
   import {
     hookMarkdownLinkMouseEventHandlers,
@@ -344,7 +344,7 @@
         //   await newLeaf.openFile(file);
         // }
       } else {
-      await $app.workspace.getLeaf("split", "vertical").openFile(file);
+        await $app.workspace.getLeaf("split", "vertical").openFile(file);
       }
     } else if ($settings.openNoteLayout === "tab") {
       await $app.workspace.getLeaf("tab").openFile(file);
@@ -456,6 +456,10 @@
     ? "footer-metadata"
     : "clickable-icon footer-metadata";
 
+  // Reactive statement to determine the event handler
+  $: clickHandler =
+    $settings.clickMode === ClickMode.Single ? "click" : "dblclick";
+
   const dispatch = createEventDispatcher();
   onMount(async () => {
     await renderNoteCard(contentDiv);
@@ -492,7 +496,8 @@
       : '4px'};
     {$settings.fixedCardHeight ? 'overflow-y: clip;' : ''}
   "
-    on:dblclick={openFile}
+    on:click|preventDefault={clickHandler === "click" ? openFile : null}
+    on:dblclick|preventDefault={clickHandler === "dblclick" ? openFile : null}
     bind:this={contentDiv}
     role="presentation"
   ></div>
