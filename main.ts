@@ -5,7 +5,7 @@ import {
   NotesExplorerSettingsTab,
   DEFAULT_SETTINGS,
 } from "./src/settings";
-import { CardsViewPluginView, PLUGIN_VIEW_TYPE } from "./src/view";
+import { NotesExplorerView, PLUGIN_VIEW_TYPE } from "./src/view";
 import store from "./src/components/store";
 import "./styles.css";
 import { pluginIcon } from "src/icons";
@@ -37,7 +37,7 @@ export default class NotesExplorerPlugin extends Plugin {
 
       this.registerView(
         PLUGIN_VIEW_TYPE,
-        (leaf) => new CardsViewPluginView(this, this.settings, leaf)
+        (leaf) => new NotesExplorerView(this, this.settings, leaf)
       );
 
       if (this.settings.launchOnStart) {

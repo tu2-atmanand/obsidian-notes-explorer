@@ -27,7 +27,7 @@ import { leftSideArrow, rightSideArrow, topBarIcon } from "./icons";
 
 export const PLUGIN_VIEW_TYPE = "notes-explorer";
 
-export class CardsViewPluginView extends ItemView {
+export class NotesExplorerView extends ItemView {
   private settings: NotesExplorerSettings;
   private svelteRoot: Root | null;
   private plugin: NotesExplorerPlugin;
