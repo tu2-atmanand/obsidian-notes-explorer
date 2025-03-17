@@ -309,50 +309,42 @@
   // };
 
   const openFile = async (evt: UserEvent) => {
-    console.log("Keymap : ", evt);
+    const layoutEntries = Object.entries($app.workspace.getLayout());
+    const mainEntry = layoutEntries.find(([key]) => key === "main");
+    const children =
+      (mainEntry && (mainEntry[1] as any)?.children[0]?.children) || [];
+    const hasNotesExplorer = children.some(
+      (child: any) =>
+        child.type === "leaf" && child.state?.type === "notes-explorer",
+    );
+
     if ($settings.openNoteLayout === "right") {
-      const layout = $app.workspace.getLayout();
-      console.log("The layout is : ", layout);
-
-      if (layout.main?.children.length > 1) {
-        const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
-        await newLeaf.openFile(file);
-
-        // if (evt.ctrlKey) {
-        //   // if (secondTabGroup.type === "tabs") {
-        //   //   const activeLeafId =
-        //   //     secondTabGroup.children[secondTabGroup.currentTab].id;
-        //   //   const leaf = $app.workspace.getLeafById(activeLeafId);
-        //   //   await leaf?.openFile(file);
-        //   // } else {
-        //   //   await $app.workspace.getLeaf("split", "vertical").openFile(file);
-        //   // }
-
-        //   const parentLeaf = secondTabGroup;
-        //   console.log("Right split : ", parentLeaf);
-        //   const leaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
-        //   leaf.openFile(file);
-        //   // const newLeaf = $app.workspace.createLeafInParent(
-        //   //   $app.workspace.getLayout()?.main?.children[1],
-        //   //   secondTabGroup?.currentTab + 1,
-        //   // );
-        // } else {
-        //   // const parentLeaf = secondTabGroup;
-        //   // console.log("Right split : ", parentLeaf);
-        //   // // const newLeaf = $app.workspace.createLeafInParent($app.workspace, secondTabGroup.currentTab + 1);
-        //   const newLeaf = $app.workspace.getLeaf();
-        //   await newLeaf.openFile(file);
-        // }
-      } else {
-        await $app.workspace.getLeaf("split", "vertical").openFile(file);
+      if (mainEntry) {
+        if ((mainEntry[1] as any)?.children?.length > 1) {
+          const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
+          await newLeaf.openFile(file);
+        } else {
+          if (hasNotesExplorer) {
+            await $app.workspace.getLeaf("split", "vertical").openFile(file);
+          } else {
+            const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
+            await newLeaf.openFile(file);
+          }
+        }
       }
     } else if ($settings.openNoteLayout === "tab") {
       await $app.workspace.getLeaf("tab").openFile(file);
     } else if ($settings.openNoteLayout === "sameTab") {
       // TODO : When the user will navigte back, they should see the scrolled position.
-      const activeView = $app.workspace.getActiveViewOfType(NotesExplorerView);
-      console.log("markdownView : ", activeView);
-      await activeView?.leaf.openFile(file);
+      if (hasNotesExplorer) {
+        const activeView =
+          $app.workspace.getActiveViewOfType(NotesExplorerView);
+        await activeView?.leaf.openFile(file);
+        return;
+      } else {
+        const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
+        await newLeaf.openFile(file);
+      }
       return;
     } else if ($settings.openNoteLayout === "window") {
       await $app.workspace.getLeaf("window").openFile(file);
