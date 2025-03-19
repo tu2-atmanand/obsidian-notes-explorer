@@ -41,7 +41,7 @@ export default class NotesExplorerPlugin extends Plugin {
       );
 
       if (this.settings.launchOnStart) {
-        this.activateView();
+        this.activateView("main");
       }
     });
   }
@@ -54,14 +54,17 @@ export default class NotesExplorerPlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
-  async activateView() {
+  async activateView(layout: string) {
     const { workspace } = this.app;
 
-    let leaf: WorkspaceLeaf | null;
+    let leaf: WorkspaceLeaf;
     const leaves = workspace.getLeavesOfType(PLUGIN_VIEW_TYPE);
+    console.log("activateView : leaves :", leaves);
 
     if (leaves.length) {
       leaf = leaves[0];
+    } else if (layout === "left") {
+      leaf = workspace.getLeftLeaf(false) || workspace.getLeaf("tab");
     } else {
       leaf = workspace.getLeaf("tab");
     }
@@ -151,17 +154,25 @@ export default class NotesExplorerPlugin extends Plugin {
 
   private async registerCommands() {
     this.addCommand({
-      id: "notes-explorer-plugin",
-      name: "Open card view",
+      id: "notes-explorer-view-in-main-window",
+      name: "Open notes explorer in main window",
       callback: () => {
-        this.activateView();
+        this.activateView("main");
+      },
+    });
+
+    this.addCommand({
+      id: "notes-explorer-view-in-sidebar",
+      name: "Open notes explorer in left sidebar",
+      callback: () => {
+        this.activateView("left");
       },
     });
   }
 
   private async registerPluginRibbonIcon() {
     this.addRibbonIcon(pluginIcon, "Notes Explorer", () => {
-      this.activateView();
+      this.activateView("main");
     });
   }
 
@@ -228,7 +239,7 @@ export default class NotesExplorerPlugin extends Plugin {
       store.folderName.set(folder.name);
     }
 
-    await this.activateView();
+    await this.activateView("main");
   }
 
   // async openTagInCardsView(tagName: string) {
