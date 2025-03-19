@@ -256,58 +256,6 @@
     }
   };
 
-  // const openFile = async (evt : Keymap) => {
-  //   console.log("Keymap : ", evt);
-  //   if ($settings.openNoteLayout === "right") {
-  //     const layout = $app.workspace.getLayout() as LayoutStructure;
-  //     console.log("The layout is : ", layout);
-
-  //     if (layout.main?.children.length > 1) {
-  //       const secondTabGroup = layout.main?.children[1];
-
-  //       if ($settings.reusetabs) {
-  //         if (secondTabGroup.type === "tabs") {
-  //           const activeLeafId =
-  //             secondTabGroup.children[secondTabGroup.currentTab].id;
-  //           const leaf = $app.workspace.getLeafById(activeLeafId);
-  //           await leaf?.openFile(file);
-  //         } else {
-  //           await $app.workspace.getLeaf("split", "vertical").openFile(file);
-  //         }
-  //       } else {
-  //         const parentLeaf = secondTabGroup;
-  //         console.log("Right split : ", parentLeaf);
-  //         // const newLeaf = $app.workspace.createLeafInParent($app.workspace, secondTabGroup.currentTab + 1);
-  //         const newLeaf = $app.workspace.getLeaf();
-  //         await newLeaf.openFile(file);
-  //       }
-  //     } else {
-  //       await $app.workspace.getLeaf("split", "vertical").openFile(file);
-  //     }
-  //   } else if ($settings.openNoteLayout === "tab") {
-  //     if ($settings.reusetabs) {
-  //       // TODO : When the user will navigte back, they should see the scrolled position.
-  //       const activeView =
-  //         $app.workspace.getActiveViewOfType(NotesExplorerView);
-  //       console.log("markdownView : ", activeView);
-  //       await activeView?.leaf.openFile(file);
-  //       return;
-  //     } else {
-  //       await $app.workspace.getLeaf("tab").openFile(file);
-  //     }
-  //   } else if ($settings.openNoteLayout === "window") {
-  //     if ($settings.reusetabs) {
-  //       const leaf = $app.workspace.getLeaf();
-  //       if (leaf.view instanceof MarkdownView) {
-  //         await leaf.openFile(file);
-  //         return;
-  //       }
-  //     } else {
-  //       await $app.workspace.getLeaf("window").openFile(file);
-  //     }
-  //   }
-  // };
-
   const openFile = async (evt: UserEvent) => {
     const layoutEntries = Object.entries($app.workspace.getLayout());
     const mainEntry = layoutEntries.find(([key]) => key === "main");
