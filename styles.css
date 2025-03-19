@@ -620,3 +620,13 @@
 .card-content .task-list-item {
     margin-inline-start: 1.8em;
 }
+
+.card-content span:not([class]) {
+    display: flex;
+    justify-content: center;
+}
+
+.card-content span.token {
+    display: flex;
+    justify-content: left;
+}
