@@ -23,7 +23,7 @@ import store, {
   showActionBar,
   totalPages,
 } from "./components/store";
-import { leftSideArrow, rightSideArrow, topBarIcon } from "./icons";
+import { leftSideArrow, pluginIcon, rightSideArrow, topBarIcon } from "./icons";
 
 export const PLUGIN_VIEW_TYPE = "notes-explorer";
 
@@ -44,6 +44,7 @@ export class NotesExplorerView extends ItemView {
     this.settings = settings;
     this.svelteRoot = null;
     this.viewContent = this.containerEl.children[1];
+    this.icon = pluginIcon;
   }
 
   getViewType() {
