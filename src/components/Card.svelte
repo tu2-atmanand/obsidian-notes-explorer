@@ -282,18 +282,6 @@
       }
     } else if ($settings.openNoteLayout === "tab") {
       await $app.workspace.getLeaf("tab").openFile(file);
-    } else if ($settings.openNoteLayout === "sameTab") {
-      // TODO : When the user will navigte back, they should see the scrolled position.
-      if (hasNotesExplorer) {
-        const activeView =
-          $app.workspace.getActiveViewOfType(NotesExplorerView);
-        await activeView?.leaf.openFile(file);
-        return;
-      } else {
-        const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
-        await newLeaf.openFile(file);
-      }
-      return;
     } else if ($settings.openNoteLayout === "window") {
       await $app.workspace.getLeaf("window").openFile(file);
     }

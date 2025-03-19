@@ -34,7 +34,6 @@ export enum NoteMetadata {
 export enum NoteOpenLayout {
   Right = "right",
   NewTab = "tab",
-  SameTab = "sameTab",
   NewWindow = "window",
 }
 export enum ClickMode {
@@ -239,7 +238,6 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
           .addOptions({
             [NoteOpenLayout.Right]: "Open note on right side",
             [NoteOpenLayout.NewTab]: "Open note in new tab",
-            [NoteOpenLayout.SameTab]: "Open note in same tab",
             [NoteOpenLayout.NewWindow]: "Open note in new window",
           })
           .setValue(this.plugin.settings.openNoteLayout)
