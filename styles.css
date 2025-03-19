@@ -193,6 +193,7 @@
     flex-direction: column;
     /* margin-top: 3em; */
     margin-bottom: 2em;
+    min-height: 1080px;
 }
 
 .cards-container :global(*) {
@@ -612,4 +613,20 @@
 .deleteTaskCancelmBtn:hover {
     background-color: green !important;
     /* Change background to red on hover */
+}
+
+/* Style fixes for Obsidian generated elements */
+
+.card-content .task-list-item {
+    margin-inline-start: 1.8em;
+}
+
+.card-content span:not([class]) {
+    display: flex;
+    justify-content: center;
+}
+
+.card-content span.token {
+    display: flex;
+    justify-content: left;
 }

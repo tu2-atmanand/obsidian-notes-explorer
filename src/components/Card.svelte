@@ -2,20 +2,27 @@
 
 <script lang="ts">
   import {
+    Keymap,
     type MarkdownPostProcessorContext,
     MarkdownPreviewRenderer,
     MarkdownRenderer,
+    MarkdownView,
     setIcon,
     TFile,
+    type UserEvent,
+    View,
+    Workspace,
   } from "obsidian";
   import { afterUpdate, createEventDispatcher, onMount } from "svelte";
   import { skipNextTransition, app, view, settings, plugin } from "./store";
-  import { TitleDisplayMode } from "../settings";
+  import { ClickMode, TitleDisplayMode } from "../settings";
   import { openDeleteConfirmationModal } from "src/utils/helpers";
   import {
     hookMarkdownLinkMouseEventHandlers,
     markdownButtonHoverPreviewEvent,
   } from "src/utils/MarkdownHoverPreview";
+  import { NotesExplorerView } from "src/view";
+  import { WorkspaceSplit } from "obsidian";
 
   export let file: TFile;
   let displayFilename: boolean =
@@ -249,11 +256,44 @@
     }
   };
 
-  const openFile = async () => {
+  const openFile = async (evt: UserEvent) => {
+    const layoutEntries = Object.entries($app.workspace.getLayout());
+    const mainEntry = layoutEntries.find(([key]) => key === "main");
+    const children =
+      (mainEntry && (mainEntry[1] as any)?.children[0]?.children) || [];
+    const hasNotesExplorer = children.some(
+      (child: any) =>
+        child.type === "leaf" && child.state?.type === "notes-explorer",
+    );
+
     if ($settings.openNoteLayout === "right") {
-      await $app.workspace.getLeaf("split", "vertical").openFile(file);
+      if (mainEntry) {
+        if ((mainEntry[1] as any)?.children?.length > 1) {
+          const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
+          await newLeaf.openFile(file);
+        } else {
+          if (hasNotesExplorer) {
+            await $app.workspace.getLeaf("split", "vertical").openFile(file);
+          } else {
+            const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
+            await newLeaf.openFile(file);
+          }
+        }
+      }
     } else if ($settings.openNoteLayout === "tab") {
       await $app.workspace.getLeaf("tab").openFile(file);
+    } else if ($settings.openNoteLayout === "sameTab") {
+      // TODO : When the user will navigte back, they should see the scrolled position.
+      if (hasNotesExplorer) {
+        const activeView =
+          $app.workspace.getActiveViewOfType(NotesExplorerView);
+        await activeView?.leaf.openFile(file);
+        return;
+      } else {
+        const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
+        await newLeaf.openFile(file);
+      }
+      return;
     } else if ($settings.openNoteLayout === "window") {
       await $app.workspace.getLeaf("window").openFile(file);
     }
@@ -356,6 +396,10 @@
     ? "footer-metadata"
     : "clickable-icon footer-metadata";
 
+  // Reactive statement to determine the event handler
+  $: clickHandler =
+    $settings.clickMode === ClickMode.Single ? "click" : "dblclick";
+
   const dispatch = createEventDispatcher();
   onMount(async () => {
     await renderNoteCard(contentDiv);
@@ -392,7 +436,8 @@
       : '4px'};
     {$settings.fixedCardHeight ? 'overflow-y: clip;' : ''}
   "
-    on:dblclick={openFile}
+    on:click|preventDefault={clickHandler === "click" ? openFile : null}
+    on:dblclick|preventDefault={clickHandler === "dblclick" ? openFile : null}
     bind:this={contentDiv}
     role="presentation"
   ></div>

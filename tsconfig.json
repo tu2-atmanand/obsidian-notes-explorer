@@ -3,7 +3,8 @@
   "compilerOptions": {
     "types": [
       "svelte",
-      "node"
+      "node",
+      "obsidian-typings"
     ],
     "baseUrl": ".",
     "inlineSources": true,
@@ -20,10 +21,10 @@
       "ES5",
       "ES6",
       "ES7"
-    ],
+    ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ]
 }
