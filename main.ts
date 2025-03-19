@@ -118,7 +118,7 @@ export default class NotesExplorerPlugin extends Plugin {
 
         // Event to open the Cards View on Folder click, just like Folder Notes plugin
         const elemTarget = evt.target as Element;
-        var Tfolder = this.setByFolderElement(elemTarget);
+        const Tfolder = this.setByFolderElement(elemTarget);
 
         // open it
         if (Tfolder && Tfolder instanceof TFolder) {
@@ -167,11 +167,11 @@ export default class NotesExplorerPlugin extends Plugin {
 
   // set by folder element
   private setByFolderElement(folderItemEl: Element) {
-    var folderPath = "";
-    var folderName = "";
+    let folderPath = "";
+    let folderName = "";
 
-    var className = folderItemEl.className.toString();
-    var folderElem = folderItemEl;
+    const className = folderItemEl.className.toString();
+    let folderElem = folderItemEl;
     if (className.contains("nav-folder-title-content")) {
       folderName = folderElem.getText();
       if (folderItemEl.parentElement) {
@@ -189,8 +189,8 @@ export default class NotesExplorerPlugin extends Plugin {
 
     // fix the folder path
     if (folderPath.length > 0) {
-      var slashLast = folderPath.lastIndexOf("/");
-      var folderPathLast = folderPath.split("/").pop();
+      const slashLast = folderPath.lastIndexOf("/");
+      const folderPathLast = folderPath.split("/").pop();
       if (folderPathLast != folderName) {
         folderPath = folderPath.substring(0, slashLast + 1) + folderName;
       }
