@@ -272,14 +272,28 @@
           const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
           await newLeaf.openFile(file);
         } else {
-          if (hasNotesExplorer) {
-            await $app.workspace.getLeaf("split", "vertical").openFile(file);
-          } else {
-            const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
-            await newLeaf.openFile(file);
-          }
+          await $app.workspace.getLeaf("split", "vertical").openFile(file);
         }
       }
+    } else if ($settings.openNoteLayout === "sameTab") {
+      if (hasNotesExplorer) {
+        if (mainEntry && (mainEntry[1] as any)?.children?.length > 1) {
+          const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
+          await newLeaf.openFile(file);
+        } else {
+          await $app.workspace.getLeaf("split", "vertical").openFile(file);
+        }
+
+        // NOTE : The below method will simply be not worked on because its very expensive to render the cards again and again and also remembering the scroll position and going back to the same. Unless I found out some method in future to cache the view.
+        // const activeView =
+        //   $app.workspace.getActiveViewOfType(NotesExplorerView);
+        // await activeView?.leaf.openFile(file);
+        return;
+      } else {
+        const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
+        await newLeaf.openFile(file);
+      }
+      return;
     } else if ($settings.openNoteLayout === "tab") {
       await $app.workspace.getLeaf("tab").openFile(file);
     } else if ($settings.openNoteLayout === "window") {
