@@ -614,3 +614,9 @@
     background-color: green !important;
     /* Change background to red on hover */
 }
+
+/* Style fixes for Obsidian generated elements */
+
+.card-content .task-list-item {
+    margin-inline-start: 1.8em;
+}
