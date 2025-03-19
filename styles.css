@@ -193,6 +193,7 @@
     flex-direction: column;
     /* margin-top: 3em; */
     margin-bottom: 2em;
+    min-height: 1080px;
 }
 
 .cards-container :global(*) {
