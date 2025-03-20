@@ -16,8 +16,8 @@ This is a plugin for [Obsidian.md](https://obsidian.md) that displays all your n
 - Display notes as cards arranged in a masonry view or Gallery view.
 - Sorts by last modified time, created time and note filename either as ascending or descending order.
 - Filters to show/hide empty notes.
-- See notes from specificc folders using **Folder tag**. Also use sub-folder filter to view all notes from even the sub-folders.
-- Click on folder name from file explorer to open the explorer board for notes within that folder.
+- See notes from specific folders using **Folder tag**. Also use sub-folder filter to view all notes from even the sub-folders.
+- Click on folder name from file explorer to open the explorer board to see notes within that folder only.
 - Two different types of tag based color indicators (background color and sidebars).
 
 ## Installation
