@@ -630,3 +630,7 @@
     display: flex;
     justify-content: left;
 }
+
+.card-content ol {
+    padding-inline-start: 14px;
+}
