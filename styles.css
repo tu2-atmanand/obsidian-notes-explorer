@@ -621,7 +621,7 @@
     margin-inline-start: 1.8em;
 }
 
-.card-content span:not([class]) {
+.card-content span {
     display: flex;
     justify-content: center;
 }
