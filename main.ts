@@ -59,12 +59,9 @@ export default class NotesExplorerPlugin extends Plugin {
 
     let leaf: WorkspaceLeaf;
     const leaves = workspace.getLeavesOfType(PLUGIN_VIEW_TYPE);
-    console.log("activateView : leaves :", leaves);
 
     if (leaves.length) {
       leaf = leaves[0];
-    } else if (layout === "left") {
-      leaf = workspace.getLeftLeaf(false) || workspace.getLeaf("tab");
     } else {
       leaf = workspace.getLeaf("tab");
     }
@@ -143,7 +140,7 @@ export default class NotesExplorerPlugin extends Plugin {
           // console.log("The value :", file.children);
           menu.addItem((item) => {
             item
-              .setTitle("Open folder in Cards View")
+              .setTitle("Open folder in notes explorer")
               .setIcon(pluginIcon)
               .onClick(() => this.openAllFilesInFolder(file));
           });
@@ -160,18 +157,10 @@ export default class NotesExplorerPlugin extends Plugin {
         this.activateView("main");
       },
     });
-
-    this.addCommand({
-      id: "notes-explorer-view-in-sidebar",
-      name: "Open notes explorer in left sidebar",
-      callback: () => {
-        this.activateView("left");
-      },
-    });
   }
 
   private async registerPluginRibbonIcon() {
-    this.addRibbonIcon(pluginIcon, "Notes Explorer", () => {
+    this.addRibbonIcon(pluginIcon, "Notes explorer", () => {
       this.activateView("main");
     });
   }

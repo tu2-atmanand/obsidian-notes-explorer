@@ -3,15 +3,10 @@
 <script lang="ts">
   import {
     Keymap,
-    type MarkdownPostProcessorContext,
-    MarkdownPreviewRenderer,
     MarkdownRenderer,
-    MarkdownView,
     setIcon,
     TFile,
     type UserEvent,
-    View,
-    Workspace,
   } from "obsidian";
   import { afterUpdate, createEventDispatcher, onMount } from "svelte";
   import { skipNextTransition, app, view, settings, plugin } from "./store";
@@ -21,8 +16,6 @@
     hookMarkdownLinkMouseEventHandlers,
     markdownButtonHoverPreviewEvent,
   } from "src/utils/MarkdownHoverPreview";
-  import { NotesExplorerView } from "src/view";
-  import { WorkspaceSplit } from "obsidian";
 
   export let file: TFile;
   let displayFilename: boolean =
@@ -209,7 +202,7 @@
       }
     } else {
       el.createEl("div", {
-        text: "File is Empty",
+        text: "File is empty",
         cls: "card-content-empty",
       });
     }

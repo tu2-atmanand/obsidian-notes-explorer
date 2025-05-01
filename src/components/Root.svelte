@@ -101,7 +101,7 @@
     sortMenu.addSeparator();
 
     sortMenu.addItem((item) => {
-      item.setTitle("Edited (Newest First)");
+      item.setTitle("Edited (newest first)");
       item.setChecked($sort == Sort.EditedDesc);
       item.onClick(async () => {
         $sort = Sort.EditedDesc;
@@ -110,7 +110,7 @@
       });
     });
     sortMenu.addItem((item) => {
-      item.setTitle("Edited (Oldest First)");
+      item.setTitle("Edited (oldest first)");
       item.setChecked($sort == Sort.EditedAsc);
       item.onClick(async () => {
         $sort = Sort.EditedAsc;
@@ -120,7 +120,7 @@
     });
     sortMenu.addSeparator();
     sortMenu.addItem((item) => {
-      item.setTitle("Created (Newest First)");
+      item.setTitle("Created (newest first)");
       item.setChecked($sort == Sort.CreatedDesc);
       item.onClick(async () => {
         $sort = Sort.CreatedDesc;
@@ -129,7 +129,7 @@
       });
     });
     sortMenu.addItem((item) => {
-      item.setTitle("Created (Oldest First)");
+      item.setTitle("Created (oldest first)");
       item.setChecked($sort == Sort.CreatedAsc);
       item.onClick(async () => {
         $sort = Sort.CreatedAsc;

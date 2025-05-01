@@ -57,10 +57,10 @@ export interface TagSetting {
 export enum Sort {
   NameAsc = "Title (A-Z)",
   NameDesc = "Title (Z-A)",
-  EditedDesc = "Edited (Newest First)",
-  EditedAsc = "Edited (Oldest First)",
-  CreatedDesc = "Created (Newest First)",
-  CreatedAsc = "Created (Oldest First)",
+  EditedDesc = "Edited (newest first)",
+  EditedAsc = "Edited (oldest first)",
+  CreatedDesc = "Created (newest first)",
+  CreatedAsc = "Created (oldest first)",
 }
 
 export interface NotesExplorerSettings {
@@ -130,8 +130,6 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-
-    new Setting(containerEl).setName("General features").setHeading();
 
     new Setting(containerEl)
       .setName("Launch on start")
@@ -214,7 +212,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Click mode")
       .setDesc(
-        "Select whether to use single click or double click to open the note from the card."
+        "Select whether to use single click or double click on the card to open the note."
       )
       .addDropdown((dropdown) =>
         dropdown
@@ -232,7 +230,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Open note layout")
       .setDesc(
-        "Select how should the parent note open. Double click on the card to open the note."
+        "Select how should the parent note be opened from the card."
       )
       .addDropdown((dropdown) =>
         dropdown
@@ -268,7 +266,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Note's content interactions")
       .setDesc(
-        "Enable this feature if you like to have in-card interactions, such as opening internal links and getting hover preview. NOTE : Obsidian restart required for this setting."
+        "Enable this feature if you like to have in-card interactions, such as opening internal links and getting hover preview. \nNOTE : Obsidian restart required for this setting to take effect."
       )
       .addToggle((toggle) =>
         toggle
@@ -282,7 +280,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Open board on folder click")
       .setDesc(
-        "Enable this if you want to open the notes explorer board with all the notes from a folder, when you will click on the folder from file explorer. You also have same option using right-click menu, if you dont like this feature.\nNOTE : Obsidian restart required for this setting."
+        "Enable this if you want to open the notes explorer board with all the notes from a folder, when you will click on the folder from file explorer. You also have same option using right-click menu, if you dont like this feature.\nNOTE : Obsidian restart required for this setting to take effect."
       )
       .addToggle((toggle) =>
         toggle
@@ -293,7 +291,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
           })
       );
 
-    new Setting(containerEl).setName("Cards UI").setHeading();
+    new Setting(containerEl).setName("Cards ui").setHeading();
 
     new Setting(containerEl)
       .setName("Title display mode")
@@ -302,8 +300,8 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
         dropdown
           .addOptions({
             [TitleDisplayMode.Both]: "Both title and filename",
-            [TitleDisplayMode.Title]: "Title",
-            [TitleDisplayMode.Filename]: "Filename",
+            [TitleDisplayMode.Title]: "Title only",
+            [TitleDisplayMode.Filename]: "Filename only",
           })
           .setValue(this.plugin.settings.displayTitle)
           .onChange(async (value) => {
@@ -377,7 +375,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Show delete button")
       .setDesc(
-        "Disable this option to remove the delete button, so you dont delete any note accidentally."
+        "Disable this option to remove the delete button."
       )
       .addToggle((toggle) =>
         toggle
@@ -389,7 +387,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Note's Metadata")
+      .setName("Note's metadata")
       .setDesc(
         "Select the property of the note that you want to see in the cards footer. If selected the 'frontmatter' option, enter the frontmatter-tag in the below text input box."
       )
@@ -413,7 +411,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       );
 
     const frontmatterTagSetting = new Setting(containerEl)
-      .setName("Frontmatter Tag")
+      .setName("Frontmatter tag")
       .setDesc("Enter the name of the frontmatter tag to display its value.")
       .addText((text) =>
         text
@@ -491,6 +489,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       ghostClass: "notes-explorer-sortable-ghost",
       chosenClass: "notes-explorer-sortable-chosen",
       dragClass: "notes-explorer-sortable-drag",
+      handle: ".notes-explorer-tag-container-tag-row-drag",
       dragoverBubble: true,
       forceFallback: true,
       fallbackClass: "notes-explorer-sortable-fallback",
@@ -532,6 +531,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
             drag
               .setTooltip("Hold and drag")
               .setIcon("grip-horizontal")
+              .setClass("notes-explorer-tag-container-tag-row-drag")
               .buttonEl.setCssStyles({ backgroundColor: tag.color })
           )
           .addText((text) =>
@@ -550,7 +550,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
           .addText((input) => {
             rgbaInput = input;
             input
-              .setPlaceholder("RGBA Color")
+              .setPlaceholder("RGBA color")
               .setValue(tag.color)
               .onChange(async (value) => {
                 tag.color = value;
@@ -647,7 +647,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
         })
     );
 
-    new Setting(containerEl).setName("Exclude Folders").setHeading();
+    new Setting(containerEl).setName("Exclude folders").setHeading();
 
     new Setting(containerEl)
       .setName("Folder name")

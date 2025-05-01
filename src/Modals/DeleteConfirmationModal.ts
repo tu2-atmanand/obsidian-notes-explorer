@@ -38,13 +38,13 @@ export class DeleteConfirmationModal extends Modal {
     let trashLocMssg = "";
     if (get(settings).deleteFileMode === DeleteFileMode.System) {
       trashLocMssg =
-        "The note file will be moved in the System Trash. You can easily restore it later if required.";
+        "The note file will be moved in the system trash. You can easily restore it later if required.";
     } else if (get(settings).deleteFileMode === DeleteFileMode.Trash) {
       trashLocMssg =
-        "The note file will be moved in the Vault's Trash folder. You can easily restore it later from the .trash folder from your vault folder.";
+        "The note file will be moved in the vault's trash folder. You can easily restore it later from the .trash folder in your vault folder.";
     } else {
       trashLocMssg =
-        "Even though the delete file mode is set as Permanent. Still to avoid any accidental data loss, the file will be moved to System's Trash. You can delete it from there permanently.";
+        "Even though the delete file mode is set as permanent. Still to avoid any accidental data loss, the file will be moved to system's trash. You can delete it from there permanently.";
     }
     const homeComponent = contentEl.createEl("span", {
       cls: "deleteConfirmationModalHome",

@@ -52,7 +52,7 @@ export class NotesExplorerView extends ItemView {
   }
 
   getDisplayText() {
-    return "Notes Explorer";
+    return "Notes explorer";
   }
 
   async onOpen() {
@@ -160,7 +160,7 @@ export class NotesExplorerView extends ItemView {
       // Add status bar showing the number of cards rendered inside the view.
       const statusBarItemEl = this.plugin.addStatusBarItem();
       store.displayedCount.subscribe(() => {
-        const statusBarText = "Current cards : " + get(displayedCount);
+        const statusBarText = "Visible cards : " + get(displayedCount);
         statusBarItemEl.setText(statusBarText);
       });
 
