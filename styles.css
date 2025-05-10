@@ -526,6 +526,10 @@
     transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
+.notes-explorer-tag-container-tag-row-drag {
+    cursor: grab;
+}
+
 .notes-explorer-exclude-folders-list-item:hover {
     background-color: var(--interactive-accent);
     transform: scale(1.02);

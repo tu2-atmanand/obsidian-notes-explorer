@@ -229,9 +229,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Open note layout")
-      .setDesc(
-        "Select how should the parent note be opened from the card."
-      )
+      .setDesc("Select how should the parent note be opened from the card.")
       .addDropdown((dropdown) =>
         dropdown
           .addOptions({
@@ -374,9 +372,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Show delete button")
-      .setDesc(
-        "Disable this option to remove the delete button."
-      )
+      .setDesc("Disable this option to remove the delete button.")
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.settings.showDeleteButton)
@@ -477,6 +473,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
             this.plugin.settings.tagColorIndicatorType =
               value as TagCardColorIndicatorType;
             await this.plugin.saveSettings();
+            renderCardColorsSettings();
           })
       );
 
@@ -514,121 +511,155 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       },
     });
 
-    // Render existing tags
-    this.plugin.settings.tagColors
-      .sort((a, b) => a.order - b.order)
-      .forEach((tag, index) => {
-        const row = tagContainer.createDiv({
-          cls: "notes-explorer-tag-container-tag-row",
-          attr: { "data-tag-name": tag.name },
-        });
-        // row.style.backgroundColor = tag.color;
+    const renderCardColorsSettings = () => {
+      tagContainer.empty(); // Clear existing rendered rows
+      // Render existing tags
+      this.plugin.settings.tagColors
+        .sort((a, b) => a.order - b.order)
+        .forEach((tag, index) => {
+          const row = tagContainer.createDiv({
+            cls: "notes-explorer-tag-container-tag-row",
+            attr: { "data-tag-name": tag.name },
+          });
+          // row.style.backgroundColor = tag.color;
 
-        let rgbaInput: any;
-        new Setting(row)
-          .setClass("notes-explorer-tag-container-tag-row-element")
-          .addButton((drag) =>
-            drag
-              .setTooltip("Hold and drag")
-              .setIcon("grip-horizontal")
-              .setClass("notes-explorer-tag-container-tag-row-drag")
-              .buttonEl.setCssStyles({ backgroundColor: tag.color })
-          )
-          .addText((text) =>
-            text
-              .setPlaceholder("Tag Name")
-              .setValue(tag.name)
-              .onChange(async (value) => {
-                tag.name = value;
-                row.setAttribute("data-tag-name", value);
-                await this.plugin.saveSettings();
-              })
-              .inputEl.setCssStyles({
-                backgroundColor: tag.color,
-              })
-          )
-          .addText((input) => {
-            rgbaInput = input;
-            input
-              .setPlaceholder("RGBA color")
-              .setValue(tag.color)
-              .onChange(async (value) => {
-                tag.color = value;
-                row.setAttribute(
-                  "data-tag-color",
-                  "notes-explorer-tag-color-data"
-                );
-                row.style.backgroundColor = value;
-                await this.plugin.saveSettings();
+          let rgbaInput: any;
+          new Setting(row)
+            .setClass("notes-explorer-tag-container-tag-row-element")
+            .addButton((drag) =>
+              drag
+                .setTooltip("Hold and drag")
+                .setIcon("grip-horizontal")
+                .setClass("notes-explorer-tag-container-tag-row-drag")
+                .buttonEl.setCssStyles({
+                  backgroundColor:
+                    this.plugin.settings.tagColorIndicatorType ===
+                    TagCardColorIndicatorType.background
+                      ? tag.color
+                      : "",
+                  border:
+                    this.plugin.settings.tagColorIndicatorType ===
+                    TagCardColorIndicatorType.sidebars
+                      ? `1px solid ${tag.color}`
+                      : "",
+                })
+            )
+            .addText((text) =>
+              text
+                .setPlaceholder("Tag Name")
+                .setValue(tag.name)
+                .onChange(async (value) => {
+                  tag.name = value;
+                  row.setAttribute("data-tag-name", value);
+                  await this.plugin.saveSettings();
+                })
+                .inputEl.setCssStyles({
+                  backgroundColor:
+                    this.plugin.settings.tagColorIndicatorType ===
+                    TagCardColorIndicatorType.background
+                      ? tag.color
+                      : "",
+                  border:
+                    this.plugin.settings.tagColorIndicatorType ===
+                    TagCardColorIndicatorType.sidebars
+                      ? `1px solid ${tag.color}`
+                      : "",
+                })
+            )
+            .addText((input) => {
+              rgbaInput = input;
+              input
+                .setPlaceholder("RGBA color")
+                .setValue(tag.color)
+                .onChange(async (value) => {
+                  tag.color = value;
+                  row.setAttribute(
+                    "data-tag-color",
+                    "notes-explorer-tag-color-data"
+                  );
+                  row.style.backgroundColor = value;
+                  await this.plugin.saveSettings();
+                });
+              input.inputEl.setCssStyles({
+                backgroundColor:
+                  this.plugin.settings.tagColorIndicatorType ===
+                  TagCardColorIndicatorType.background
+                    ? tag.color
+                    : "",
+                border:
+                  this.plugin.settings.tagColorIndicatorType ===
+                  TagCardColorIndicatorType.sidebars
+                    ? `1px solid ${tag.color}`
+                    : "",
+                width: "100%",
               });
-            input.inputEl.setCssStyles({
-              backgroundColor: tag.color,
-              width: "100%",
-            });
-          })
-          .addButton((button) => {
-            const pickr = new Pickr({
-              el: button.buttonEl,
-              theme: "nano",
-              default: tag.color || "rgba(255, 0, 0, 1)", // Default alpha to 1
-              components: {
-                preview: true,
-                opacity: true,
-                hue: true,
-                interaction: {
-                  rgba: true,
-                  input: true,
-                  clear: true,
-                  cancel: true,
-                  save: false,
+            })
+            .addButton((button) => {
+              const pickr = new Pickr({
+                el: button.buttonEl,
+                theme: "nano",
+                default: tag.color || "rgba(255, 0, 0, 1)", // Default alpha to 1
+                components: {
+                  preview: true,
+                  opacity: true,
+                  hue: true,
+                  interaction: {
+                    rgba: true,
+                    input: true,
+                    clear: true,
+                    cancel: true,
+                    save: false,
+                  },
                 },
-              },
-            });
-
-            pickr
-              .on("change", (color: any) => {
-                const rgbaColor = `rgba(${color
-                  .toRGBA()
-                  .map((value: any, index: number) =>
-                    index < 3 ? Math.round(value) : value
-                  )
-                  .join(", ")})`; // Construct valid rgba format
-                tag.color = rgbaColor;
-                row.style.backgroundColor = rgbaColor;
-                rgbaInput.setValue(rgbaColor);
-              })
-              // .on("save", (color: any) => {
-              //   pickr.hide();
-              //   const rgbaColor = `rgba(${color
-              //     .toRGBA()
-              //     .map((value: number, index: number) =>
-              //       index < 3 ? Math.round(value) : value
-              //     )
-              //     .join(", ")})`; // Construct valid rgba format
-              //   tag.color = rgbaColor;
-              //   row.style.backgroundColor = rgbaColor;
-              //   rgbaInput.setValue(rgbaColor);
-              //   this.plugin.saveSettings();
-              // })
-              .on("cancel", () => {
-                pickr.hide(); // Close the picker when cancel is pressed
               });
 
-            pickr.on("clear", () => pickr.hide());
-          })
+              pickr
+                .on("change", (color: any) => {
+                  const rgbaColor = `rgba(${color
+                    .toRGBA()
+                    .map((value: any, index: number) =>
+                      index < 3 ? Math.round(value) : value
+                    )
+                    .join(", ")})`; // Construct valid rgba format
+                  tag.color = rgbaColor;
+                  row.style.backgroundColor = rgbaColor;
+                  rgbaInput.setValue(rgbaColor);
+                })
+                // .on("save", (color: any) => {
+                //   pickr.hide();
+                //   const rgbaColor = `rgba(${color
+                //     .toRGBA()
+                //     .map((value: number, index: number) =>
+                //       index < 3 ? Math.round(value) : value
+                //     )
+                //     .join(", ")})`; // Construct valid rgba format
+                //   tag.color = rgbaColor;
+                //   row.style.backgroundColor = rgbaColor;
+                //   rgbaInput.setValue(rgbaColor);
+                //   this.plugin.saveSettings();
+                // })
+                .on("cancel", () => {
+                  pickr.hide(); // Close the picker when cancel is pressed
+                });
 
-          .addButton((deleteButton) =>
-            deleteButton
-              .setButtonText("Delete")
-              .setIcon("trash")
-              .setCta()
-              .onClick(async () => {
-                this.plugin.settings.tagColors.splice(index, 1);
-                await this.plugin.saveSettings();
-                this.display();
-              })
-          );
-      });
+              pickr.on("clear", () => pickr.hide());
+            })
+
+            .addButton((deleteButton) =>
+              deleteButton
+                .setButtonText("Delete")
+                .setIcon("trash")
+                .setCta()
+                .onClick(async () => {
+                  this.plugin.settings.tagColors.splice(index, 1);
+                  await this.plugin.saveSettings();
+                  this.display();
+                })
+            );
+        });
+    };
+
+    renderCardColorsSettings();
 
     // Add "Add Tag" button
     new Setting(containerEl).addButton((button) =>
