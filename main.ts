@@ -151,8 +151,8 @@ export default class NotesExplorerPlugin extends Plugin {
 
   private async registerCommands() {
     this.addCommand({
-      id: "notes-explorer-view-in-main-window",
-      name: "Open notes explorer in main window",
+      id: "view-in-main-window",
+      name: "Open in main window",
       callback: () => {
         this.activateView("main");
       },
