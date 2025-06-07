@@ -1,6 +1,8 @@
 import { AbstractInputSuggest, App, TFile, TFolder } from "obsidian";
 
+import { get } from "svelte/store";
 import { initialPlaceholderSuggestionsMap } from "src/utils/SearchQueryHelpers";
+import { searchHistoryEntries } from "src/components/store";
 
 export class MultiSuggest extends AbstractInputSuggest<string> {
   content: Set<string>;
@@ -16,15 +18,37 @@ export class MultiSuggest extends AbstractInputSuggest<string> {
   }
 
   getSuggestions(inputStr: string): string[] {
-    inputStr = inputStr
-      .trim()
-      .replace(/^file:|parent:|tag:/, "")
-      .trim();
-    // console.log("Input String: '", inputStr, "'");
-    const lowerCaseInputStr = inputStr.toLocaleLowerCase();
-    return [...this.content].filter((content) =>
-      content.toLocaleLowerCase().includes(lowerCaseInputStr)
-    );
+    if (inputStr === "") {
+      let initialPlaceholderSuggestions = [
+        `file:${initialPlaceholderSuggestionsMap.get("file:")}`,
+        `parent:${initialPlaceholderSuggestionsMap.get("parent:")}`,
+        `tag:${initialPlaceholderSuggestionsMap.get("tag:")}`,
+      ];
+      initialPlaceholderSuggestions = [
+        ...initialPlaceholderSuggestions,
+        ...get(searchHistoryEntries),
+      ];
+      return initialPlaceholderSuggestions;
+    } else if (inputStr.trim().startsWith("file:")) {
+      return [...this.content].filter((file) =>
+        file.toLocaleLowerCase().includes(inputStr.toLocaleLowerCase())
+      );
+    } else if (inputStr.trim().startsWith("parent:")) {
+      return [...this.content].filter((folder) =>
+        folder.toLocaleLowerCase().includes(inputStr.toLocaleLowerCase())
+      );
+    } else if (inputStr.trim().startsWith("tag:")) {
+      return [...this.content].filter((tag) =>
+        tag.toLocaleLowerCase().includes(inputStr.toLocaleLowerCase())
+      );
+    } else {
+      // TODO : Actually here if the user is simply searching somthing, that means I hae to check it with the content of all the notes and additionally it cann be this filters. But on pressing enter there wont be any suggestions for simple content search, suggestions should be only for the special filters which starts with the predefined labels.
+      //   const lowerCaseInputStr = inputStr.toLocaleLowerCase();
+      //   return [...this.content].filter((content) =>
+      //     content.toLocaleLowerCase().includes(lowerCaseInputStr)
+      //   );
+      return [];
+    }
   }
 
   renderSuggestion(content: string, el: HTMLElement): void {
@@ -33,38 +57,60 @@ export class MultiSuggest extends AbstractInputSuggest<string> {
 
   selectSuggestion(content: string, evt?: MouseEvent | KeyboardEvent): void {
     const oldSearchContent = this.inputEl.value;
+    const selectFlag = false;
     let finalSearchContent = content;
-    if (oldSearchContent.trim() == "file:") {
-      finalSearchContent = `file: ${content}`;
-    } else if (oldSearchContent.trim() == "parent:") {
-      finalSearchContent = `parent: ${content}`;
-    } else if (oldSearchContent.trim() == "tag:") {
-      finalSearchContent = `tag: ${content}`;
+    console.log(
+      "selectSuggestion called with content:",
+      content,
+      "\nOld search content:",
+      oldSearchContent
+    );
+    if (oldSearchContent.trim().startsWith("file:")) {
+      //   finalSearchContent = `file: ${content}`;
+      this.inputEl.blur();
+      this.onSelectCb(content);
+      this.inputEl.value = "";
+      this.close();
+    } else if (oldSearchContent.trim().startsWith("parent:")) {
+      //   finalSearchContent = `parent: ${content}`;
+      this.inputEl.blur();
+      this.onSelectCb(content);
+      this.inputEl.value = "";
+      this.close();
+    } else if (oldSearchContent.trim().startsWith("tag:")) {
+      //   finalSearchContent = `tag: ${content}`;
+      this.inputEl.blur();
+      this.onSelectCb(content);
+      this.inputEl.value = "";
+      this.close();
     } else if (
-      oldSearchContent.trim() ===
-      `file:${initialPlaceholderSuggestionsMap.get("file:")}`
+      content.trim() === `file:${initialPlaceholderSuggestionsMap.get("file:")}`
     ) {
       finalSearchContent = `file: `;
+      this.inputEl.value = finalSearchContent;
+      this.close();
+      this.getSuggestions(finalSearchContent);
     } else if (
-      oldSearchContent.trim() ===
+      content.trim() ===
       `parent:${initialPlaceholderSuggestionsMap.get("parent:")}`
     ) {
       finalSearchContent = `parent: `;
+      this.inputEl.value = finalSearchContent;
+      this.close();
+      this.getSuggestions(finalSearchContent);
     } else if (
-      oldSearchContent.trim() ===
-      `tag:${initialPlaceholderSuggestionsMap.get("tag:")}`
+      content.trim() === `tag:${initialPlaceholderSuggestionsMap.get("tag:")}`
     ) {
       finalSearchContent = `tag: `;
+      this.inputEl.value = finalSearchContent;
+      this.close();
+      this.getSuggestions(finalSearchContent);
+    } else {
     }
-    this.inputEl.value = finalSearchContent;
-    this.inputEl.blur();
-    this.onSelectCb(content);
-    this.inputEl.value = "";
-    this.close();
   }
 
   destroy(): void {
-	super.close();
+    super.close();
   }
 }
 
@@ -85,7 +131,7 @@ export function getFolderSuggestions(app: App): string[] {
   const folders = app.vault
     .getAllLoadedFiles()
     .filter((f) => f instanceof TFolder && f.path !== "/")
-    .map((f) => f.path);
+    .map((f) => `parent: ${f.path}`);
 
   return folders;
 }
@@ -95,7 +141,7 @@ export function getFileSuggestions(app: App): string[] {
   const files = app.vault
     .getAllLoadedFiles()
     .filter((f) => f instanceof TFile && f.extension === "md")
-    .map((f) => f.path);
+    .map((f) => `file: ${f.path}`);
 
   return files;
 }
@@ -106,21 +152,7 @@ export function getTagSuggestions(app: App): string[] {
   const tagsArray = Object.entries(allTagsDict)
     .filter(([tag]) => tag.startsWith("#"))
     .sort(([, countA], [, countB]) => countB - countA) // Sort by number of occurrences in descending order
-    .map(([tag]) => tag); // Extract the tag names
+    .map(([tag]) => `tag: ${tag}`); // Extract the tag names
 
   return tagsArray;
-}
-
-export function getQuickAddPluginChoices(
-  app: App,
-  quickAddPluginObj: any
-): string[] {
-  const quickAddPlugin = app.plugins.getPlugin("quickadd");
-  if (!quickAddPlugin) return [];
-
-  const choices = quickAddPluginObj.settings.choices;
-  console.log("QuickAdd Choices:", quickAddPluginObj);
-  return Object.keys(choices)
-    .filter((key) => choices[key].type === "Capture")
-    .map((key) => choices[key].name);
 }

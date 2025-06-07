@@ -6,7 +6,7 @@
     overflow: unset;
     padding-block-start: 0 !important;
     padding-right: 5px;
-    padding-block-end: 4em;
+    /* padding-block-end: 4em; */
 }
 
 /* View.ts  */
@@ -103,7 +103,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-top: 8px;
+    margin-bottom: 7px;
 }
 
 .filter-label {
@@ -111,7 +111,7 @@
     align-items: center;
     border: 1px solid;
     border-radius: 12px;
-    padding: 4px 8px;
+    /* padding: 4px 8px; */
     font-size: 0.85rem;
     background: transparent;
 }

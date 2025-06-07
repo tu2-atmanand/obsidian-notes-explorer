@@ -33,7 +33,7 @@
     MultiSuggest,
   } from "src/services/MultiSuggest";
   import { get } from "svelte/store";
-    import { initialPlaceholderSuggestionsMap } from "src/utils/SearchQueryHelpers";
+  import { initialPlaceholderSuggestionsMap } from "src/utils/SearchQueryHelpers";
 
   export let cardsContainer: HTMLElement;
   let notesGrid: MiniMasonry;
@@ -76,33 +76,28 @@
     const inputEl = search.inputEl;
     let activeSuggest: MultiSuggest | null = null;
     let activeSuggester = "";
+    const appInstance = get(plugin)?.app;
+    const fileSuggestions = new Set(getFileSuggestions(appInstance));
+    const tagSuggestions = new Set(getTagSuggestions(appInstance));
+    const parentSuggestions = new Set(getFolderSuggestions(appInstance));
+    const finalSuggestions = new Set([
+      ...fileSuggestions,
+      ...tagSuggestions,
+      ...parentSuggestions,
+    ]);
 
     const updateSuggestions = (value: string) => {
-      const appInstance = get(plugin)?.app;
       if (!appInstance) return;
 
-      // Always close the previous suggest before creating a new one
-      if (activeSuggest) {
-        activeSuggest.destroy();
-        activeSuggest = null;
-      }
-
-      let content: Set<string> = new Set();
-
-      if (value === "" && activeSuggester !== "main") {
-        let initialPlaceholderSuggestions = [
-          `file:${initialPlaceholderSuggestionsMap.get("file:")}`,
-          `parent:${initialPlaceholderSuggestionsMap.get("parent:")}`,
-          `tag:${initialPlaceholderSuggestionsMap.get("tag:")}`,
-        ];
-        initialPlaceholderSuggestions = [
-          ...initialPlaceholderSuggestions,
-          ...get(searchHistoryEntries),
-        ];
-        content = new Set(initialPlaceholderSuggestions);
+      // // Always close the previous suggest before creating a new one
+      // if (activeSuggest) {
+      //   activeSuggest.destroy();
+      //   activeSuggest = null;
+      // }
+      if (!activeSuggest) {
         activeSuggest = new MultiSuggest(
           inputEl,
-          content,
+          finalSuggestions,
           (selected) => {
             console.log(
               "Selected:",
@@ -112,78 +107,119 @@
               "\n Is first check true : ",
               inputEl.value === "",
             );
-            activeSuggester = "";
-            // if (inputEl.value.trim().startsWith("file:")) {
-            //     "file: " + selected.replace("file:", "").trim();
-            // } else if (inputEl.value.trim().startsWith("parent:")) {
-            //   finalSearchQuery = "parent: ";
-            // } else if (inputEl.value.trim().startsWith("tag:")) {
-            //   finalSearchQuery = "tag: ";
-            // } else {
-            //   finalSearchQuery = "";
-            // }
-            // $searchQuery = selected;
+            if(!selected) return;
+
+            const filters = get(searchFilters);
+            searchFilters.set({
+              cf: filters.cf,
+              nf: [...filters.nf, selected],
+            });
+            console.log("Updated search filters:", get(searchFilters));
           },
           appInstance,
         );
-
-        activeSuggest.getSuggestions(inputEl.value);
-        activeSuggester = "main";
-        // suggest.selectSuggestion(finalSearchQuery);
-        // activeSuggest.close();
-      } else if (value.trim().startsWith("file:")  && activeSuggester !== "file") {
-        content = new Set(getFileSuggestions(appInstance));
-        console.log("Content for suggestions:", content);
-        let finalSearchQuery = "";
-        activeSuggest = new MultiSuggest(
-          inputEl,
-          content,
-          (selected) => {
-            console.log(
-              "Selected:",
-              selected,
-              "\nValue inside inputEl:",
-              inputEl.value,
-              "\n Is first check true : ",
-              inputEl.value === "",
-            );
-            if (inputEl.value.trim() === "") {
-              console.log("Is this even running...?");
-              if (selected.trim().startsWith("file:")) {
-                finalSearchQuery = "file: ";
-              } else if (selected.trim().startsWith("parent:")) {
-                finalSearchQuery = "parent: ";
-              } else if (selected.trim().startsWith("tag:")) {
-                finalSearchQuery = "tag: ";
-              } else {
-                finalSearchQuery = "";
-              }
-            } else {
-              console.log("Input value on Enter:", inputEl.value);
-              const filters = get(searchFilters);
-              searchFilters.set({
-                cf: filters.cf,
-                nf: [...filters.nf, inputEl.value],
-              });
-              console.log("Updated search filters:", get(searchFilters));
-            }
-            activeSuggester = "";
-            // $searchQuery = selected;
-          },
-          appInstance,
-        );
-
-        activeSuggest.getSuggestions(inputEl.value);
-        activeSuggester = "file";
-        // suggest.selectSuggestion(finalSearchQuery);
-        // activeSuggest.close();
-      } else if (value.trim().startsWith("parent:")) {
-        content = new Set(getFolderSuggestions(appInstance));
-      } else if (value.trim().startsWith("tag:")) {
-        content = new Set(getTagSuggestions(appInstance));
-      } else {
-        content = new Set(get(searchHistoryEntries));
       }
+
+      activeSuggest.getSuggestions(inputEl.value);
+      // suggest.selectSuggestion(finalSearchQuery);
+      // activeSuggest.close();
+
+      // let content: Set<string> = new Set();
+      // if (value === "" && activeSuggester !== "main") {
+      //   let initialPlaceholderSuggestions = [
+      //     `file:${initialPlaceholderSuggestionsMap.get("file:")}`,
+      //     `parent:${initialPlaceholderSuggestionsMap.get("parent:")}`,
+      //     `tag:${initialPlaceholderSuggestionsMap.get("tag:")}`,
+      //   ];
+      //   initialPlaceholderSuggestions = [
+      //     ...initialPlaceholderSuggestions,
+      //     ...get(searchHistoryEntries),
+      //   ];
+      //   content = new Set(initialPlaceholderSuggestions);
+      //   activeSuggest = new MultiSuggest(
+      //     inputEl,
+      //     content,
+      //     (selected) => {
+      //       console.log(
+      //         "Selected:",
+      //         selected,
+      //         "\nValue inside inputEl:",
+      //         inputEl.value,
+      //         "\n Is first check true : ",
+      //         inputEl.value === "",
+      //       );
+      //       activeSuggester = "";
+      //       // if (inputEl.value.trim().startsWith("file:")) {
+      //       //     "file: " + selected.replace("file:", "").trim();
+      //       // } else if (inputEl.value.trim().startsWith("parent:")) {
+      //       //   finalSearchQuery = "parent: ";
+      //       // } else if (inputEl.value.trim().startsWith("tag:")) {
+      //       //   finalSearchQuery = "tag: ";
+      //       // } else {
+      //       //   finalSearchQuery = "";
+      //       // }
+      //       // $searchQuery = selected;
+      //     },
+      //     appInstance,
+      //   );
+
+      //   activeSuggest.getSuggestions(inputEl.value);
+      //   activeSuggester = "main";
+      //   // suggest.selectSuggestion(finalSearchQuery);
+      //   // activeSuggest.close();
+      // } else if (value.trim().startsWith("file:")  && activeSuggester !== "file") {
+      //   content = new Set(getFileSuggestions(appInstance));
+      //   console.log("Content for suggestions:", content);
+      //   let finalSearchQuery = "";
+      //   activeSuggest = new MultiSuggest(
+      //     inputEl,
+      //     content,
+      //     (selected) => {
+      //       console.log(
+      //         "Selected:",
+      //         selected,
+      //         "\nValue inside inputEl:",
+      //         inputEl.value,
+      //         "\n Is first check true : ",
+      //         inputEl.value === "",
+      //       );
+      //       if (inputEl.value.trim() === "") {
+      //         console.log("Is this even running...?");
+      //         if (selected.trim().startsWith("file:")) {
+      //           finalSearchQuery = "file: ";
+      //         } else if (selected.trim().startsWith("parent:")) {
+      //           finalSearchQuery = "parent: ";
+      //         } else if (selected.trim().startsWith("tag:")) {
+      //           finalSearchQuery = "tag: ";
+      //         } else {
+      //           finalSearchQuery = "";
+      //         }
+      //       } else {
+      //         console.log("Input value on Enter:", inputEl.value);
+      //         const filters = get(searchFilters);
+      //         searchFilters.set({
+      //           cf: filters.cf,
+      //           nf: [...filters.nf, inputEl.value],
+      //         });
+      //         console.log("Updated search filters:", get(searchFilters));
+      //       }
+      //       activeSuggester = "";
+      //       // $searchQuery = selected;
+      //     },
+      //     appInstance,
+      //   );
+
+      //   activeSuggest.getSuggestions(inputEl.value);
+      //   activeSuggester = "file";
+      //   // suggest.selectSuggestion(finalSearchQuery);
+      //   // activeSuggest.close();
+      // } else if (value.trim().startsWith("parent:")) {
+      //   content = new Set(getFolderSuggestions(appInstance));
+      // } else if (value.trim().startsWith("tag:")) {
+      //   content = new Set(getTagSuggestions(appInstance));
+      // } else {
+      //   content = new Set(get(searchHistoryEntries));
+      // }
     };
 
     inputEl.addEventListener("focus", () => updateSuggestions(inputEl.value));
@@ -208,16 +244,19 @@
         //   return;
         // }
 
-        console.log("Input value on Enter:", inputVal);
-        const filters = get(searchFilters);
-        searchFilters.set({
-          cf: filters.cf,
-          nf: [...filters.nf, inputVal],
-        });
-        console.log("Updated search filters:", get(searchFilters));
+        // console.log("Input value on Enter:", inputVal);
+        // const filters = get(searchFilters);
+        // searchFilters.set({
+        //   cf: filters.cf,
+        //   nf: [...filters.nf, inputVal],
+        // });
+        // console.log("Updated search filters:", get(searchFilters));
 
-        // $searchQuery = inputVal.replace(/^(file:|tag:|parent:)/, "").trim();
-        inputEl.value = "";
+
+        // TODO : Here first I will check if the cotent entered inside the fields starts with file:, parent: or tag: and then I will add the content to the searchFilters. Otherwise it will be like a simple search, hence this content should not be removed from this input element and the content should be searched inside the notes content like the older normal search functionality.
+
+        // $searchQuery = inputVal;
+        // inputEl.value = "";
       }
     });
 
