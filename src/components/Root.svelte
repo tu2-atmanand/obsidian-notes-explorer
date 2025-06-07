@@ -22,8 +22,18 @@
     totalPages,
     currentPage,
     cardsPerBatch,
+    searchHistoryEntries,
+    searchFilters,
   } from "./store";
   import { Sort } from "src/settings";
+  import {
+    getFileSuggestions,
+    getFolderSuggestions,
+    getTagSuggestions,
+    MultiSuggest,
+  } from "src/services/MultiSuggest";
+  import { get } from "svelte/store";
+    import { initialPlaceholderSuggestionsMap } from "src/utils/SearchQueryHelpers";
 
   export let cardsContainer: HTMLElement;
   let notesGrid: MiniMasonry;
@@ -61,15 +71,166 @@
     store.files.set($allAllowedFiles);
   }
 
-  const searchInput = (element: HTMLElement) => {
-    const searchInput = new SearchComponent(element);
-    searchInput.onChange((value) => {
-      $searchQuery = value;
+  function searchInput(el: HTMLElement) {
+    const search = new SearchComponent(el);
+    const inputEl = search.inputEl;
+    let activeSuggest: MultiSuggest | null = null;
+    let activeSuggester = "";
+
+    const updateSuggestions = (value: string) => {
+      const appInstance = get(plugin)?.app;
+      if (!appInstance) return;
+
+      // Always close the previous suggest before creating a new one
+      if (activeSuggest) {
+        activeSuggest.destroy();
+        activeSuggest = null;
+      }
+
+      let content: Set<string> = new Set();
+
+      if (value === "" && activeSuggester !== "main") {
+        let initialPlaceholderSuggestions = [
+          `file:${initialPlaceholderSuggestionsMap.get("file:")}`,
+          `parent:${initialPlaceholderSuggestionsMap.get("parent:")}`,
+          `tag:${initialPlaceholderSuggestionsMap.get("tag:")}`,
+        ];
+        initialPlaceholderSuggestions = [
+          ...initialPlaceholderSuggestions,
+          ...get(searchHistoryEntries),
+        ];
+        content = new Set(initialPlaceholderSuggestions);
+        activeSuggest = new MultiSuggest(
+          inputEl,
+          content,
+          (selected) => {
+            console.log(
+              "Selected:",
+              selected,
+              "\nValue inside inputEl:",
+              inputEl.value,
+              "\n Is first check true : ",
+              inputEl.value === "",
+            );
+            activeSuggester = "";
+            // if (inputEl.value.trim().startsWith("file:")) {
+            //     "file: " + selected.replace("file:", "").trim();
+            // } else if (inputEl.value.trim().startsWith("parent:")) {
+            //   finalSearchQuery = "parent: ";
+            // } else if (inputEl.value.trim().startsWith("tag:")) {
+            //   finalSearchQuery = "tag: ";
+            // } else {
+            //   finalSearchQuery = "";
+            // }
+            // $searchQuery = selected;
+          },
+          appInstance,
+        );
+
+        activeSuggest.getSuggestions(inputEl.value);
+        activeSuggester = "main";
+        // suggest.selectSuggestion(finalSearchQuery);
+        // activeSuggest.close();
+      } else if (value.trim().startsWith("file:")  && activeSuggester !== "file") {
+        content = new Set(getFileSuggestions(appInstance));
+        console.log("Content for suggestions:", content);
+        let finalSearchQuery = "";
+        activeSuggest = new MultiSuggest(
+          inputEl,
+          content,
+          (selected) => {
+            console.log(
+              "Selected:",
+              selected,
+              "\nValue inside inputEl:",
+              inputEl.value,
+              "\n Is first check true : ",
+              inputEl.value === "",
+            );
+            if (inputEl.value.trim() === "") {
+              console.log("Is this even running...?");
+              if (selected.trim().startsWith("file:")) {
+                finalSearchQuery = "file: ";
+              } else if (selected.trim().startsWith("parent:")) {
+                finalSearchQuery = "parent: ";
+              } else if (selected.trim().startsWith("tag:")) {
+                finalSearchQuery = "tag: ";
+              } else {
+                finalSearchQuery = "";
+              }
+            } else {
+              console.log("Input value on Enter:", inputEl.value);
+              const filters = get(searchFilters);
+              searchFilters.set({
+                cf: filters.cf,
+                nf: [...filters.nf, inputEl.value],
+              });
+              console.log("Updated search filters:", get(searchFilters));
+            }
+            activeSuggester = "";
+            // $searchQuery = selected;
+          },
+          appInstance,
+        );
+
+        activeSuggest.getSuggestions(inputEl.value);
+        activeSuggester = "file";
+        // suggest.selectSuggestion(finalSearchQuery);
+        // activeSuggest.close();
+      } else if (value.trim().startsWith("parent:")) {
+        content = new Set(getFolderSuggestions(appInstance));
+      } else if (value.trim().startsWith("tag:")) {
+        content = new Set(getTagSuggestions(appInstance));
+      } else {
+        content = new Set(get(searchHistoryEntries));
+      }
+    };
+
+    inputEl.addEventListener("focus", () => updateSuggestions(inputEl.value));
+    inputEl.addEventListener("input", () => {
+      // console.log("Input changed:", inputEl.value);
+      updateSuggestions(inputEl.value);
     });
-    searchQuery.subscribe((value) => {
-      searchInput.inputEl.value = value;
+    inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        const inputVal = inputEl.value.trim();
+        if (!inputVal) return;
+
+        // let finalVal = inputVal;
+        // if (inputVal.startsWith("file:")) {
+        //   finalVal = "file: " + inputVal.slice(5).trim();
+        // } else if (inputVal.startsWith("parent:")) {
+        //   finalVal = "parent: " + inputVal.slice(7).trim();
+        // } else if (inputVal.startsWith("tag:")) {
+        //   finalVal = "tag: " + inputVal.slice(4).trim();
+        // } else {
+        //   inputEl.value = ""; // Ignore and reset unknown formats
+        //   return;
+        // }
+
+        console.log("Input value on Enter:", inputVal);
+        const filters = get(searchFilters);
+        searchFilters.set({
+          cf: filters.cf,
+          nf: [...filters.nf, inputVal],
+        });
+        console.log("Updated search filters:", get(searchFilters));
+
+        // $searchQuery = inputVal.replace(/^(file:|tag:|parent:)/, "").trim();
+        inputEl.value = "";
+      }
     });
-  };
+
+    // searchQuery.subscribe((val) => {
+    //   inputEl.value = val;
+    // });
+    searchFilters.subscribe((filters) => {
+      // if (filters.cf.length > 0 || filters.nf.length > 0) {
+      //   inputEl.value = "";
+      // }
+      console.log("Search filters updated:", filters);
+    });
+  }
 
   function sortMenu(event: MouseEvent) {
     const sortMenu = new Menu();
@@ -178,6 +339,22 @@
     notesGrid.layout();
   }
 
+  function removeFilter(index: number, type: "cf" | "nf") {
+    searchFilters.update((filters) => {
+      filters[type].splice(index, 1);
+      return { ...filters };
+    });
+  }
+
+  function moveFilter(index: number, type: "cf" | "nf") {
+    searchFilters.update((filters) => {
+      const item = filters[type].splice(index, 1)[0];
+      const otherType = type === "cf" ? "nf" : "cf";
+      filters[otherType].push(item);
+      return { ...filters };
+    });
+  }
+
   onMount(() => {
     $sort = $settings.defaultSort;
     columns = Math.floor(viewContent.clientWidth / $settings.minCardWidth) + 1;
@@ -232,27 +409,55 @@
         on:click={sortMenu}
       />
     </div>
-    <div class="action-bar__tags">
-      <div class="action-bar__tags__list">
-        {#each $tags as tag}
-          <button class="action-bar__tag" on:click={() => ($searchQuery = tag)}
-            >{tag}</button
-          >
-        {/each}
-      </div>
-    </div>
-    {#if $folderName}
-      <div class="action-bar_folder">
-        <div style="align-content: center;">{$folderName}</div>
-        <div class="action-bar_folder_closeButton">
-          <button
-            class="clickable-icon"
-            use:closeIcon
-            on:click={clearFolderFilter}
-          />
+    <div class="action-bar_labelSection">
+      {#if $folderName}
+        <div class="action-bar_folder">
+          <div style="align-content: center;">{$folderName}</div>
+          <div class="action-bar_folder_closeButton">
+            <button
+              class="clickable-icon"
+              use:closeIcon
+              on:click={clearFolderFilter}
+            />
+          </div>
         </div>
-      </div>
-    {/if}
+      {:else if $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
+        <div class="filter-labels">
+          {#each $searchFilters.cf as filter, index}
+            <div class="filter-label cf">
+              <button
+                class="toggle"
+                on:click={() => moveFilter(index, "cf")}
+                title="Move to Normal Filter">⮌</button
+              >
+              <span>{filter}</span>
+              <button class="close" on:click={() => removeFilter(index, "cf")}
+                >×</button
+              >
+            </div>
+          {/each}
+          {#each $searchFilters.nf as filter, index}
+            <div class="filter-label nf">
+              <button
+                class="toggle"
+                on:click={() => moveFilter(index, "nf")}
+                title="Move to Compulsory Filter">⮌</button
+              >
+              <span>{filter}</span>
+              <button class="close" on:click={() => removeFilter(index, "nf")}
+                >×</button
+              >
+            </div>
+          {/each}
+        </div>
+      {:else}
+        <div class="action-bar_tags">
+          <!-- {#each $tags as tag}
+            <span class="tag">{tag}</span>
+          {/each} -->
+        </div>
+      {/if}
+    </div>
   </div>
 </div>
 
@@ -260,7 +465,7 @@
   bind:this={cardsContainer}
   class="cards-container"
   style="--columns: {columns};"
-  style:padding-top={$showActionBar ? "3.6em" : "0"}
+  style:padding-top={$showActionBar ? "4em" : "0"}
 >
   {#each $displayedFiles as file (file.path)}
     <Card {file} on:loaded={() => notesGrid.layout()} />

@@ -70,6 +70,10 @@
     }
 }
 
+.action-bar_labelSection {
+    width: 100%;
+}
+
 .action-bar_folder {
     display: flex;
     gap: 0.5rem;
@@ -93,6 +97,50 @@
     border: 0 !important;
     border-radius: 4px !important;
     cursor: pointer;
+}
+
+.filter-labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.filter-label {
+    display: flex;
+    align-items: center;
+    border: 1px solid;
+    border-radius: 12px;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    background: transparent;
+}
+
+.filter-label.cf {
+    border-color: #2196f3;
+    color: #2196f3;
+}
+
+.filter-label.nf {
+    border-color: #fbc02d;
+    color: #fbc02d;
+}
+
+.filter-label button {
+    background: none;
+    border: none;
+    margin: 0 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.filter-label .toggle {
+    font-weight: bold;
+    margin-left: 0;
+}
+
+.filter-label .close {
+    margin-right: 0;
 }
 
 /* .action-bar .action-bar__tags {

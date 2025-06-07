@@ -11,7 +11,7 @@
   import { afterUpdate, createEventDispatcher, onMount } from "svelte";
   import { skipNextTransition, app, view, settings, plugin } from "./store";
   import { ClickMode, TitleDisplayMode } from "../settings";
-  import { openDeleteConfirmationModal } from "src/utils/helpers";
+  import { openDeleteConfirmationModal } from "src/utils/ModalHelpers";
   import {
     hookMarkdownLinkMouseEventHandlers,
     markdownButtonHoverPreviewEvent,
