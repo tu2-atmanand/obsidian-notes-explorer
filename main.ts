@@ -12,9 +12,10 @@ import {
   DEFAULT_SETTINGS,
 } from "./src/settings";
 import { NotesExplorerView, PLUGIN_VIEW_TYPE } from "./src/view";
-import store from "./src/components/store";
+import store, { settings } from "./src/components/store";
 import "./styles.css";
 import { pluginIcon } from "src/icons";
+import { get } from "svelte/store";
 
 export default class NotesExplorerPlugin extends Plugin {
   settings: NotesExplorerSettings = Object.assign({}, DEFAULT_SETTINGS);
@@ -261,7 +262,7 @@ export default class NotesExplorerPlugin extends Plugin {
         const args = JSON.parse(path.args) || "";
         const layout = args.layout || "modal";
         console.log("Path from Obsidian URI:", args);
-        store.serachFilters.set(args);
+        store.searchFilters.set(args);
 
         // Method 1 = Joes Approach
         // const params = new URLSearchParams({

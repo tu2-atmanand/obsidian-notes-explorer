@@ -13,6 +13,8 @@ import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "./icons";
 import NotesExplorerPlugin from "../main";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
+import { get } from "svelte/store";
+import { settings } from "./components/store";
 
 export enum TitleDisplayMode {
   Both = "Both",
@@ -88,6 +90,7 @@ export interface NotesExplorerSettings {
   pagesView: boolean;
   cardsPerPage: number;
   clickMode: string;
+  searchHistoryEntries: string[];
 }
 
 export const DEFAULT_SETTINGS: NotesExplorerSettings = {
@@ -115,6 +118,7 @@ export const DEFAULT_SETTINGS: NotesExplorerSettings = {
   pagesView: true,
   cardsPerPage: 100,
   clickMode: "single",
+  searchHistoryEntries: [],
 };
 
 export class NotesExplorerSettingsTab extends PluginSettingTab {
@@ -138,7 +142,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
         toggle
           .setValue(this.plugin.settings.launchOnStart)
           .onChange(async (value) => {
-            this.plugin.settings.launchOnStart = value;
+            get(settings).launchOnStart = value;
             await this.plugin.saveSettings();
           })
       );

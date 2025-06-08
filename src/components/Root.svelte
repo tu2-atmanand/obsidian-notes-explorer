@@ -22,7 +22,6 @@
     totalPages,
     currentPage,
     cardsPerBatch,
-    searchHistoryEntries,
     searchFilters,
   } from "./store";
   import { Sort } from "src/settings";
@@ -33,7 +32,10 @@
     MultiSuggest,
   } from "src/services/MultiSuggest";
   import { get } from "svelte/store";
-  import { initialPlaceholderSuggestionsMap } from "src/utils/SearchQueryHelpers";
+  import {
+    addToSearchHistory,
+    initialPlaceholderSuggestionsMap,
+  } from "src/utils/SearchQueryHelpers";
 
   export let cardsContainer: HTMLElement;
   let notesGrid: MiniMasonry;
@@ -48,6 +50,15 @@
   };
   const closeIcon = (element: HTMLElement) => {
     setIcon(element, "x");
+  };
+  const cumpulsoryFilterIcon = (element: HTMLElement) => {
+    setIcon(element, "lock-keyhole");
+  };
+  const normalFilterIcon = (element: HTMLElement) => {
+    setIcon(element, "lock-open");
+  };
+  const closeCircleIcon = (element: HTMLElement) => {
+    setIcon(element, "circle-x");
   };
 
   let currentPageLocal = 1;
@@ -71,11 +82,13 @@
     store.files.set($allAllowedFiles);
   }
 
+  let searchInputElValue: string = "";
+
   function searchInput(el: HTMLElement) {
     const search = new SearchComponent(el);
     const inputEl = search.inputEl;
+    searchInputElValue = inputEl.value;
     let activeSuggest: MultiSuggest | null = null;
-    let activeSuggester = "";
     const appInstance = get(plugin)?.app;
     const fileSuggestions = new Set(getFileSuggestions(appInstance));
     const tagSuggestions = new Set(getTagSuggestions(appInstance));
@@ -107,14 +120,25 @@
               "\n Is first check true : ",
               inputEl.value === "",
             );
-            if(!selected) return;
+            if (!selected) return;
 
-            const filters = get(searchFilters);
-            searchFilters.set({
-              cf: filters.cf,
-              nf: [...filters.nf, selected],
-            });
+            const oldSearchFilters = get(searchFilters);
+            if (
+              !oldSearchFilters.cf.includes(selected) &&
+              !oldSearchFilters.nf.includes(selected)
+            ) {
+              searchFilters.set({
+                cf: oldSearchFilters.cf,
+                nf: [...oldSearchFilters.nf, selected],
+              });
+            } else {
+              console.warn(
+                "The selected item is already present in the search filters.",
+              );
+              new Notice("The filter is already added to the view.");
+            }
             console.log("Updated search filters:", get(searchFilters));
+            addToSearchHistory(selected);
           },
           appInstance,
         );
@@ -229,34 +253,24 @@
     });
     inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key === "Enter") {
+        console.log("Enter pressed in search input:", inputEl.value);
         const inputVal = inputEl.value.trim();
         if (!inputVal) return;
 
-        // let finalVal = inputVal;
-        // if (inputVal.startsWith("file:")) {
-        //   finalVal = "file: " + inputVal.slice(5).trim();
-        // } else if (inputVal.startsWith("parent:")) {
-        //   finalVal = "parent: " + inputVal.slice(7).trim();
-        // } else if (inputVal.startsWith("tag:")) {
-        //   finalVal = "tag: " + inputVal.slice(4).trim();
-        // } else {
-        //   inputEl.value = ""; // Ignore and reset unknown formats
-        //   return;
-        // }
+        addToSearchHistory(inputVal);
 
-        // console.log("Input value on Enter:", inputVal);
-        // const filters = get(searchFilters);
-        // searchFilters.set({
-        //   cf: filters.cf,
-        //   nf: [...filters.nf, inputVal],
-        // });
-        // console.log("Updated search filters:", get(searchFilters));
-
-
-        // TODO : Here first I will check if the cotent entered inside the fields starts with file:, parent: or tag: and then I will add the content to the searchFilters. Otherwise it will be like a simple search, hence this content should not be removed from this input element and the content should be searched inside the notes content like the older normal search functionality.
-
-        // $searchQuery = inputVal;
-        // inputEl.value = "";
+        if (
+          !(
+            inputVal.trim().startsWith("file:") &&
+            inputVal.trim().startsWith("parent:") &&
+            inputVal.trim().startsWith("tag:")
+          )
+        ) {
+          $searchQuery = inputVal;
+        } else {
+          // console.warn("The entered value is not a valid filter.");
+          // new Notice("The entered value is not a valid filter.");
+        }
       }
     });
 
@@ -467,12 +481,15 @@
               <button
                 class="toggle"
                 on:click={() => moveFilter(index, "cf")}
-                title="Move to Normal Filter">⮌</button
-              >
+                use:cumpulsoryFilterIcon
+                title="Convert to Normal Filter"
+              ></button>
               <span>{filter}</span>
-              <button class="close" on:click={() => removeFilter(index, "cf")}
-                >×</button
-              >
+              <button
+                class="close"
+                on:click={() => removeFilter(index, "cf")}
+                use:closeCircleIcon
+              />
             </div>
           {/each}
           {#each $searchFilters.nf as filter, index}
@@ -480,12 +497,15 @@
               <button
                 class="toggle"
                 on:click={() => moveFilter(index, "nf")}
-                title="Move to Compulsory Filter">⮌</button
-              >
+                use:normalFilterIcon
+                title="Convert to Compulsory Filter"
+              />
               <span>{filter}</span>
-              <button class="close" on:click={() => removeFilter(index, "nf")}
-                >×</button
-              >
+              <button
+                class="close"
+                on:click={() => removeFilter(index, "nf")}
+                use:closeCircleIcon
+              />
             </div>
           {/each}
         </div>
