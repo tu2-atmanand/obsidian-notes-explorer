@@ -104,7 +104,10 @@ export const sortedFiles = derived(
 );
 
 export const searchQuery = writable<string>("");
-export const searchFilters = writable<{ cf: string[]; nf: string[] }>({ cf: [], nf: [] });
+export const searchFilters = writable<{ cf: string[]; nf: string[] }>({
+  cf: [],
+  nf: [],
+});
 export const preparedSearch = derived(searchQuery, ($searchQuery) =>
   $searchQuery ? prepareFuzzySearch($searchQuery) : null,
 );
@@ -257,11 +260,10 @@ export const tags = derived(
   },
 );
 
-export const searchHistoryEntries = writable<string[]>([]);
-
 export default {
   app,
   plugin,
+  settings,
   files,
   allAllowedFiles,
   folderName,
@@ -278,7 +280,6 @@ export default {
   refreshOnResize,
   tags,
   view,
-  settings,
   appCache,
   pagesView,
   currentPage,
@@ -286,5 +287,4 @@ export default {
   totalPages,
   cardsPerBatch,
   displayedFilesInBatchCount,
-  searchHistoryEntries,
 };
