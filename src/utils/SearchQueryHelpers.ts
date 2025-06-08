@@ -18,5 +18,5 @@ export function addToSearchHistory(entry: string) {
     // Add the new entry at the top
     updatedSetting.searchHistoryEntries.unshift(entry);
 
-    store.settings.set(updatedSetting);
+    store.settings.set(updatedSetting); // TODO : As an optimization you can store the history inside local storage and only save it to the disk once in a day or when first time the application start, maybe after few seconds.
 }

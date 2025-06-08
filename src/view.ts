@@ -15,11 +15,13 @@ import { type NotesExplorerSettings } from "./settings";
 import Root from "./components/Root.svelte";
 import { get } from "svelte/store";
 import store, {
-  allAllowedFiles,
   cardsPerBatch,
   currentPage,
   displayedCount,
+  displayedFilesCount,
+  allAllowedFiles,
   folderName,
+  settings,
   showActionBar,
   totalPages,
 } from "./components/store";
@@ -153,7 +155,6 @@ export class NotesExplorerView extends ItemView {
   }
 
   private renderMoreOnScroll() {
-    store.pagesView.set(this.settings.pagesView);
     const cardsContainer = this.viewContent.children[1];
 
     if (!this.settings.pagesView) {
@@ -203,7 +204,12 @@ export class NotesExplorerView extends ItemView {
           cls: "notes-explorer-statuBarSpanEl",
         });
         store.currentPage.subscribe(() => {
-          statusBarText.textContent = "Page : " + get(currentPage);
+          statusBarText.textContent =
+            "Page : " + get(currentPage) + " of " + get(totalPages);
+        });
+        store.totalPages.subscribe(() => {
+          statusBarText.textContent =
+            "Page : " + get(currentPage) + " of " + get(totalPages);
         });
         statusBarText.setAttribute("aria-label", "Open page navigation bar");
         statusBarText.setAttribute("aria-label-position", "top");

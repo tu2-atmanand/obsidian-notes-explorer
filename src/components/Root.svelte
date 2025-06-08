@@ -6,7 +6,7 @@
   import MiniMasonry from "minimasonry";
   import Card from "./Card.svelte";
   import store, {
-    tags,
+    // tags,
     displayedFiles,
     searchQuery,
     skipNextTransition,
@@ -16,13 +16,13 @@
     refreshSignal,
     plugin,
     folderName,
-    allAllowedFiles,
     refreshOnResize,
     showActionBar,
     totalPages,
     currentPage,
     cardsPerBatch,
     searchFilters,
+    allAllowedFiles,
   } from "./store";
   import { Sort } from "src/settings";
   import {
@@ -36,6 +36,7 @@
     addToSearchHistory,
     initialPlaceholderSuggestionsMap,
   } from "src/utils/SearchQueryHelpers";
+  import { refreshView } from "src/utils/GeneralHelpers";
 
   export let cardsContainer: HTMLElement;
   let notesGrid: MiniMasonry;
@@ -77,17 +78,9 @@
     if (currentPageLocal > 1) goToPage(currentPageLocal - 1);
   }
 
-  function refreshView() {
-    store.refreshSignal.set(!$refreshSignal);
-    store.files.set($allAllowedFiles);
-  }
-
-  let searchInputElValue: string = "";
-
   function searchInput(el: HTMLElement) {
     const search = new SearchComponent(el);
     const inputEl = search.inputEl;
-    searchInputElValue = inputEl.value;
     let activeSuggest: MultiSuggest | null = null;
     const appInstance = get(plugin)?.app;
     const fileSuggestions = new Set(getFileSuggestions(appInstance));
@@ -127,17 +120,17 @@
               !oldSearchFilters.cf.includes(selected) &&
               !oldSearchFilters.nf.includes(selected)
             ) {
-              searchFilters.set({
+              store.searchFilters.set({
                 cf: oldSearchFilters.cf,
                 nf: [...oldSearchFilters.nf, selected],
               });
+              refreshView();
             } else {
               console.warn(
                 "The selected item is already present in the search filters.",
               );
               new Notice("The filter is already added to the view.");
             }
-            console.log("Updated search filters:", get(searchFilters));
             addToSearchHistory(selected);
           },
           appInstance,
@@ -145,111 +138,19 @@
       }
 
       activeSuggest.getSuggestions(inputEl.value);
-      // suggest.selectSuggestion(finalSearchQuery);
-      // activeSuggest.close();
-
-      // let content: Set<string> = new Set();
-      // if (value === "" && activeSuggester !== "main") {
-      //   let initialPlaceholderSuggestions = [
-      //     `file:${initialPlaceholderSuggestionsMap.get("file:")}`,
-      //     `parent:${initialPlaceholderSuggestionsMap.get("parent:")}`,
-      //     `tag:${initialPlaceholderSuggestionsMap.get("tag:")}`,
-      //   ];
-      //   initialPlaceholderSuggestions = [
-      //     ...initialPlaceholderSuggestions,
-      //     ...get(searchHistoryEntries),
-      //   ];
-      //   content = new Set(initialPlaceholderSuggestions);
-      //   activeSuggest = new MultiSuggest(
-      //     inputEl,
-      //     content,
-      //     (selected) => {
-      //       console.log(
-      //         "Selected:",
-      //         selected,
-      //         "\nValue inside inputEl:",
-      //         inputEl.value,
-      //         "\n Is first check true : ",
-      //         inputEl.value === "",
-      //       );
-      //       activeSuggester = "";
-      //       // if (inputEl.value.trim().startsWith("file:")) {
-      //       //     "file: " + selected.replace("file:", "").trim();
-      //       // } else if (inputEl.value.trim().startsWith("parent:")) {
-      //       //   finalSearchQuery = "parent: ";
-      //       // } else if (inputEl.value.trim().startsWith("tag:")) {
-      //       //   finalSearchQuery = "tag: ";
-      //       // } else {
-      //       //   finalSearchQuery = "";
-      //       // }
-      //       // $searchQuery = selected;
-      //     },
-      //     appInstance,
-      //   );
-
-      //   activeSuggest.getSuggestions(inputEl.value);
-      //   activeSuggester = "main";
-      //   // suggest.selectSuggestion(finalSearchQuery);
-      //   // activeSuggest.close();
-      // } else if (value.trim().startsWith("file:")  && activeSuggester !== "file") {
-      //   content = new Set(getFileSuggestions(appInstance));
-      //   console.log("Content for suggestions:", content);
-      //   let finalSearchQuery = "";
-      //   activeSuggest = new MultiSuggest(
-      //     inputEl,
-      //     content,
-      //     (selected) => {
-      //       console.log(
-      //         "Selected:",
-      //         selected,
-      //         "\nValue inside inputEl:",
-      //         inputEl.value,
-      //         "\n Is first check true : ",
-      //         inputEl.value === "",
-      //       );
-      //       if (inputEl.value.trim() === "") {
-      //         console.log("Is this even running...?");
-      //         if (selected.trim().startsWith("file:")) {
-      //           finalSearchQuery = "file: ";
-      //         } else if (selected.trim().startsWith("parent:")) {
-      //           finalSearchQuery = "parent: ";
-      //         } else if (selected.trim().startsWith("tag:")) {
-      //           finalSearchQuery = "tag: ";
-      //         } else {
-      //           finalSearchQuery = "";
-      //         }
-      //       } else {
-      //         console.log("Input value on Enter:", inputEl.value);
-      //         const filters = get(searchFilters);
-      //         searchFilters.set({
-      //           cf: filters.cf,
-      //           nf: [...filters.nf, inputEl.value],
-      //         });
-      //         console.log("Updated search filters:", get(searchFilters));
-      //       }
-      //       activeSuggester = "";
-      //       // $searchQuery = selected;
-      //     },
-      //     appInstance,
-      //   );
-
-      //   activeSuggest.getSuggestions(inputEl.value);
-      //   activeSuggester = "file";
-      //   // suggest.selectSuggestion(finalSearchQuery);
-      //   // activeSuggest.close();
-      // } else if (value.trim().startsWith("parent:")) {
-      //   content = new Set(getFolderSuggestions(appInstance));
-      // } else if (value.trim().startsWith("tag:")) {
-      //   content = new Set(getTagSuggestions(appInstance));
-      // } else {
-      //   content = new Set(get(searchHistoryEntries));
-      // }
     };
 
     inputEl.addEventListener("focus", () => updateSuggestions(inputEl.value));
     inputEl.addEventListener("input", () => {
       // console.log("Input changed:", inputEl.value);
-      updateSuggestions(inputEl.value);
+      if (inputEl.value.trim() === "") {
+        $searchQuery = "";
+      } else {
+        updateSuggestions(inputEl.value);
+      }
+    });
+    search.clearButtonEl.addEventListener("click", (e: Event) => {
+      $searchQuery = "";
     });
     inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key === "Enter") {
@@ -277,11 +178,8 @@
     // searchQuery.subscribe((val) => {
     //   inputEl.value = val;
     // });
-    searchFilters.subscribe((filters) => {
-      // if (filters.cf.length > 0 || filters.nf.length > 0) {
-      //   inputEl.value = "";
-      // }
-      console.log("Search filters updated:", filters);
+    store.searchFilters.subscribe((filters) => {
+      console.log("Root.svelte : SearchFilters Subscriber:", filters);
     });
   }
 
@@ -393,10 +291,11 @@
   }
 
   function removeFilter(index: number, type: "cf" | "nf") {
-    searchFilters.update((filters) => {
+    store.searchFilters.update((filters) => {
       filters[type].splice(index, 1);
       return { ...filters };
     });
+    refreshView();
   }
 
   function moveFilter(index: number, type: "cf" | "nf") {

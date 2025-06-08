@@ -23,7 +23,6 @@ export class MultiSuggest extends AbstractInputSuggest<string> {
   ) {
     super(app, inputEl);
     this.content = content;
-    console.log(this);
   }
 
   getSuggestions(inputStr: string): string[] {
@@ -104,7 +103,10 @@ export class MultiSuggest extends AbstractInputSuggest<string> {
 
   selectSuggestion(content: string, evt?: MouseEvent | KeyboardEvent): void {
     // If the user presses enter, we close the suggester
-    if (evt?.type === "keydown") this.close();
+    if (evt?.type === "keydown") {
+      this.close();
+      return;
+    }
 
     const oldSearchContent = this.inputEl.value;
     let finalSearchContent = content;
