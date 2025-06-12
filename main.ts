@@ -52,6 +52,14 @@ export default class NotesExplorerPlugin extends Plugin {
       if (this.settings.launchOnStart) {
         this.activateView("main");
       }
+
+      // Registering a subscription to refresh the view when files change
+      store.allAllowedFiles.subscribe(($allAllowedFiles) => {
+        console.info(
+          "allAllowedFiles changed, refreshing the view by assigning all these files to files store..."
+        );
+        store.files.set($allAllowedFiles);
+      });
     });
   }
 
@@ -210,30 +218,30 @@ export default class NotesExplorerPlugin extends Plugin {
 
   async openAllFilesInFolder(folder: TFolder) {
     if (folder instanceof TFolder) {
-      let files: TFile[] = [];
+      // let files: TFile[] = [];
 
-      if (this.settings.showSubFolders) {
-        // Helper function to recursively fetch files
-        const collectFiles = (currentFolder: TFolder) => {
-          currentFolder.children.forEach((child) => {
-            if (child instanceof TFile && child.extension === "md") {
-              files.push(child);
-            } else if (child instanceof TFolder) {
-              collectFiles(child); // Recursively process subfolder
-            }
-          });
-        };
+      // if (this.settings.showSubFolders) {
+      //   // Helper function to recursively fetch files
+      //   const collectFiles = (currentFolder: TFolder) => {
+      //     currentFolder.children.forEach((child) => {
+      //       if (child instanceof TFile && child.extension === "md") {
+      //         files.push(child);
+      //       } else if (child instanceof TFolder) {
+      //         collectFiles(child); // Recursively process subfolder
+      //       }
+      //     });
+      //   };
 
-        collectFiles(folder);
-      } else {
-        // Only fetch files in the current folder
-        files = folder.children.filter(
-          (child): child is TFile =>
-            child instanceof TFile && child.extension === "md"
-        );
-      }
+      //   collectFiles(folder);
+      // } else {
+      //   // Only fetch files in the current folder
+      //   files = folder.children.filter(
+      //     (child): child is TFile =>
+      //       child instanceof TFile && child.extension === "md"
+      //   );
+      // }
 
-      store.files.set(files);
+      // store.files.set(files);
       store.folderName.set(folder.name);
     }
 

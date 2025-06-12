@@ -126,7 +126,7 @@
                 cf: oldSearchFilters.cf,
                 nf: [...oldSearchFilters.nf, selected],
               });
-              refreshView();
+              // refreshView();
             } else {
               console.warn(
                 "The selected item is already present in the search filters.",
@@ -202,7 +202,7 @@
               nf: [...oldSearchFilters.nf, inputVal],
             });
             inputEl.value = "";
-            refreshView();
+            // refreshView();
           } else {
             console.warn(
               "The selected item is already present in the search filters.",
@@ -220,7 +220,7 @@
     // });
     store.searchFilters.subscribe((filters) => {
       console.log("Root.svelte : SearchFilters Subscriber:", filters);
-      refreshView();
+      // refreshView();
     });
   }
 
@@ -318,7 +318,7 @@
       item.setChecked($settings.showSubFolders);
       item.onClick(() => {
         $settings.showSubFolders = !$settings.showSubFolders;
-        refreshView();
+        // refreshView();
       });
     });
 
@@ -336,7 +336,7 @@
       filters[type].splice(index, 1);
       return { ...filters };
     });
-    refreshView();
+    // refreshView();
   }
 
   function moveFilter(index: number, type: "cf" | "nf") {
