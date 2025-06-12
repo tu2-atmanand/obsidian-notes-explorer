@@ -87,6 +87,11 @@ export const allAllowedFiles = derived(
         const [type, val] = fstr.split(/:\s*(.*)/).map((str) => str.trim());
         filteredFiles.forEach((file) => {
           switch (type) {
+            case "file":
+              if (file.basename.includes(val))
+                cumpulsoryFilteredFilesSet.add(file);
+              break;
+
             case "parent":
               if (file.path.startsWith(val))
                 cumpulsoryFilteredFilesSet.add(file);
@@ -97,6 +102,17 @@ export const allAllowedFiles = derived(
                 get(appCache).getFileCache(file) as CachedMetadata,
               );
               if (tags?.includes(val)) cumpulsoryFilteredFilesSet.add(file);
+              break;
+
+            case "content":
+              // Check if the file content contains the specified value
+              get(app)
+                .vault.cachedRead(file)
+                .then((content) => {
+                  if (content.includes(val)) {
+                    cumpulsoryFilteredFilesSet.add(file);
+                  }
+                });
               break;
 
             // date filters
@@ -116,6 +132,71 @@ export const allAllowedFiles = derived(
               if (file.stat.mtime > new Date(val).getTime())
                 cumpulsoryFilteredFilesSet.add(file);
               break;
+
+            default:
+              if (fstr.startsWith("[") && fstr.endsWith("]")) {
+                // Handle frontmatter filters
+                const frontMatterKey = fstr.slice(1, -1).split(":")[0].trim();
+                const frontMatterValue = fstr.slice(1, -1).split(":")[1].trim();
+                const fileCache = get(appCache).getFileCache(file);
+                if (fileCache && fileCache.frontmatter) {
+                  const fmValue =
+                    fileCache.frontmatter[frontMatterKey.replace(`"`, "")];
+                  console.log(
+                    "fmValue : ",
+                    fmValue,
+                    "\nfrontMatterValue : ",
+                    frontMatterValue,
+                    "\nfile : ",
+                    file.path,
+                    "frontmatter key : ",
+                    frontMatterKey.replace(`"`, ""),
+                    "\nFile frontmatter : ",
+                    fileCache.frontmatter,
+                  );
+                  // if (fmValue === frontMatterValue) {
+                  //   cumpulsoryFilteredFilesSet.add(file);
+                  // }
+                  const conditionFlag = fmValue.split(" ")[0].trim();
+                  switch (conditionFlag) {
+                    case "ABOVE":
+                      if (
+                        Number(fmValue.split(" ")[1]) > Number(frontMatterValue)
+                      ) {
+                        cumpulsoryFilteredFilesSet.add(file);
+                      }
+                      break;
+                    case "BELOW":
+                      if (
+                        Number(fmValue.split(" ")[1]) < Number(frontMatterValue)
+                      ) {
+                        cumpulsoryFilteredFilesSet.add(file);
+                      }
+                      break;
+                    case "BEFORE":
+                      if (
+                        new Date(fmValue.split(" ")[1]).getTime() <
+                        new Date(frontMatterValue).getTime()
+                      ) {
+                        cumpulsoryFilteredFilesSet.add(file);
+                      }
+                      break;
+                    case "AFTER":
+                      if (
+                        new Date(fmValue.split(" ")[1]).getTime() >
+                        new Date(frontMatterValue).getTime()
+                      ) {
+                        cumpulsoryFilteredFilesSet.add(file);
+                      }
+                      break;
+                    default:
+                      if (fmValue === frontMatterValue) {
+                        cumpulsoryFilteredFilesSet.add(file);
+                      }
+                      break;
+                  }
+                }
+              }
           }
         });
       });
@@ -342,23 +423,16 @@ export const searchResultFiles = derived(
     Promise.all(
       $sortedFiles.map(async (file) => {
         const content = await file.vault.cachedRead(file);
-        const tags =
-          getAllTags($appCache.getFileCache(file) as CachedMetadata) || [];
-        return [
-          $preparedSearch(content),
-          $preparedSearch(file.name),
-          $preparedSearch(`#${tags.join(" #")}`),
-        ];
+        return [$preparedSearch(content), $preparedSearch(file.name)];
       }),
     ).then((searchResults) => {
       set(
         $sortedFiles.filter((file, index) => {
-          const [contentMatch, nameMatch, tagsMatch] = searchResults[index];
+          const [contentMatch, nameMatch] = searchResults[index];
 
           return (
-            (contentMatch && contentMatch.score > -2) ||
-            (nameMatch && nameMatch.score > -2) ||
-            (tagsMatch && tagsMatch.score > -2)
+            (contentMatch && contentMatch.score > -4) ||
+            (nameMatch && nameMatch.score > -4)
           );
         }),
       );

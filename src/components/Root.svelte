@@ -29,6 +29,7 @@
     getFileSuggestions,
     getFolderSuggestions,
     getTagSuggestions,
+    getYAMLPropertySuggestions,
     MultiSuggest,
   } from "src/services/MultiSuggest";
   import { get } from "svelte/store";
@@ -78,28 +79,29 @@
     if (currentPageLocal > 1) goToPage(currentPageLocal - 1);
   }
 
+  let activeSuggest: MultiSuggest | null = null;
   function searchInput(el: HTMLElement) {
     const search = new SearchComponent(el);
     const inputEl = search.inputEl;
-    let activeSuggest: MultiSuggest | null = null;
     const appInstance = get(plugin)?.app;
     const fileSuggestions = new Set(getFileSuggestions(appInstance));
     const tagSuggestions = new Set(getTagSuggestions(appInstance));
     const parentSuggestions = new Set(getFolderSuggestions(appInstance));
+    const yamlPropertiesSuggestions = new Set(
+      getYAMLPropertySuggestions(appInstance),
+    );
+    console.log("Yaml Properties Suggestions:", yamlPropertiesSuggestions);
     const finalSuggestions = new Set([
       ...fileSuggestions,
       ...tagSuggestions,
       ...parentSuggestions,
+      ...yamlPropertiesSuggestions,
     ]);
 
     const updateSuggestions = (value: string) => {
+      console.log("User has clicked inside the inputEl:", value);
       if (!appInstance) return;
 
-      // // Always close the previous suggest before creating a new one
-      // if (activeSuggest) {
-      //   activeSuggest.destroy();
-      //   activeSuggest = null;
-      // }
       if (!activeSuggest) {
         activeSuggest = new MultiSuggest(
           inputEl,
@@ -135,13 +137,25 @@
           },
           appInstance,
         );
+        inputEl.blur();
+        activeSuggest.getSuggestions(inputEl.value);
+        inputEl.focus();
+      } else {
+        activeSuggest.getSuggestions(inputEl.value);
       }
-
-      activeSuggest.getSuggestions(inputEl.value);
     };
 
-    inputEl.addEventListener("focus", () => updateSuggestions(inputEl.value));
+    // inputEl.addEventListener("focus", () => updateSuggestions(inputEl.value));
+    inputEl.addEventListener("click", () => {
+      console.log("User has clicked inside the inputEl:", inputEl.value);
+      if (activeSuggest) {
+        activeSuggest.getSuggestions(inputEl.value);
+      } else {
+        updateSuggestions(inputEl.value);
+      }
+    });
     inputEl.addEventListener("input", () => {
+      console.log("This will only be called when the input changes.");
       // console.log("Input changed:", inputEl.value);
       if (inputEl.value.trim() === "") {
         $searchQuery = "";
@@ -160,17 +174,43 @@
 
         addToSearchHistory(inputVal);
 
+        const regex = /^\[.*:.*\]$/;
+        console.log(
+          "Valid filter format detected:",
+          inputVal,
+          "If condition: ",
+          regex.test(inputVal),
+        );
         if (
-          !(
-            inputVal.trim().startsWith("file:") &&
-            inputVal.trim().startsWith("parent:") &&
-            inputVal.trim().startsWith("tag:")
-          )
+          regex.test(inputVal) ||
+          /^file:\s*\S+$/.test(inputVal) ||
+          /^parent:\s*\S+$/.test(inputVal) ||
+          /^tag:\s*\S+$/.test(inputVal) ||
+          /^content:\s*\S+$/.test(inputVal) ||
+          /^created-before:\s*\S+$/.test(inputVal) ||
+          /^created-after:\s*\S+$/.test(inputVal) ||
+          /^modified-before:\s*\S+$/.test(inputVal) ||
+          /^modified-after:\s*\S+$/.test(inputVal)
         ) {
-          $searchQuery = inputVal;
+          const oldSearchFilters = get(searchFilters);
+          if (
+            !oldSearchFilters.cf.includes(inputVal) &&
+            !oldSearchFilters.nf.includes(inputVal)
+          ) {
+            store.searchFilters.set({
+              cf: oldSearchFilters.cf,
+              nf: [...oldSearchFilters.nf, inputVal],
+            });
+            inputEl.value = "";
+            refreshView();
+          } else {
+            console.warn(
+              "The selected item is already present in the search filters.",
+            );
+            new Notice("The filter is already added to the view.");
+          }
         } else {
-          // console.warn("The entered value is not a valid filter.");
-          // new Notice("The entered value is not a valid filter.");
+          $searchQuery = inputVal;
         }
       }
     });
@@ -180,6 +220,7 @@
     // });
     store.searchFilters.subscribe((filters) => {
       console.log("Root.svelte : SearchFilters Subscriber:", filters);
+      refreshView();
     });
   }
 
