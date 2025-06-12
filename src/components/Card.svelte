@@ -16,6 +16,7 @@
     hookMarkdownLinkMouseEventHandlers,
     markdownButtonHoverPreviewEvent,
   } from "src/utils/MarkdownHoverPreview";
+  import { isFileEmpty } from "src/utils/GeneralHelpers";
 
   export let file: TFile;
   let displayFilename: boolean =
@@ -174,9 +175,11 @@
   };
 
   const renderNoteCard = async (el: HTMLElement): Promise<void> => {
-    const content = await file.vault.cachedRead(file);
-    if (content.trim().length > 0) {
+    console.log("Rendering note card for file:", file.path);
+    const fileEmptyCondition = await isFileEmpty(file);
+    if (!fileEmptyCondition) {
       const maxLiness = $settings.maxLines || 20;
+      const content = await file.vault.cachedRead(file);
       const truncatedContent = truncateContent(content, maxLiness);
 
       await MarkdownRenderer.render(

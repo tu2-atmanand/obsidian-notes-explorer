@@ -14,6 +14,7 @@ import {
 import { derived, get, readable, writable } from "svelte/store";
 import { Sort, type NotesExplorerSettings } from "../settings";
 import NotesExplorerPlugin from "main";
+import { isFileEmpty } from "src/utils/GeneralHelpers";
 
 export const app = writable<App>();
 export const plugin = writable<NotesExplorerPlugin>();
@@ -441,29 +442,12 @@ export const searchResultFiles = derived(
   get(sortedFiles),
 );
 
-// Helper function to determine if a file is empty
-const isEmptyFile = async (file: TFile) => {
-  const content = await file.vault.cachedRead(file);
-  // console.log("Content with frontmatter :\n", content);
-  const frontMatter = getFrontMatterInfo(content).exists
-    ? getFrontMatterInfo(content).frontmatter
-    : "";
-  const contentWfrontmatter = content
-    .replace(`---\n${frontMatter}\n---`, "")
-    .trim().length;
-  // console.log(
-  //   "Only frontmatter :\n",frontMatter,
-  //   "\nContent without frontmatter :\n",contentWfrontmatter,
-  // );
-  return contentWfrontmatter === 0;
-};
-
 const createFilteredFiles = () =>
   readable<TFile[]>([], (set) => {
     const unsubscribe = sortedFiles.subscribe(async ($sortedFiles) => {
       const nonEmptyFiles = [];
       for (const file of $sortedFiles) {
-        const emptiness = await isEmptyFile(file);
+        const emptiness = await isFileEmpty(file);
         if (get(settings).showEmptyNotes || !emptiness) {
           nonEmptyFiles.push(file);
         }
