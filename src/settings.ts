@@ -84,7 +84,7 @@ export interface NotesExplorerSettings {
   pinnedFiles: string[];
   tagColors: TagSetting[];
   tagColorIndicatorType: TagCardColorIndicatorType;
-  defaultSort: Sort;
+  defaultSort: string;
   openViewOnFolderClick: boolean;
   excludedFolders: string[];
   pagesView: boolean;

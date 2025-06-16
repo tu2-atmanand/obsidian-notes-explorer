@@ -3,17 +3,15 @@
 <script lang="ts">
   import { debounce, Menu, SearchComponent, setIcon } from "obsidian";
   import { afterUpdate, onMount } from "svelte";
+  import { slide } from "svelte/transition";
   import MiniMasonry from "minimasonry";
   import Card from "./Card.svelte";
   import store, {
-    // tags,
     displayedFiles,
     searchQuery,
     skipNextTransition,
-    sort,
     viewIsVisible,
     settings,
-    refreshSignal,
     plugin,
     folderName,
     refreshOnResize,
@@ -23,6 +21,7 @@
     cardsPerBatch,
     searchFilters,
     allAllowedFiles,
+    allTags,
   } from "./store";
   import { Sort } from "src/settings";
   import {
@@ -82,6 +81,18 @@
   let activeSuggest: MultiSuggest | null = null;
   function searchInput(el: HTMLElement) {
     const search = new SearchComponent(el);
+    search.addRightDecorator((rightDecoratorEl) => {
+      const sortButton = document.createElement("button");
+      sortButton.className = "clickable-icon";
+      setIcon(sortButton, "search");
+      sortButton.addEventListener(
+        "click",
+        () => ($searchQuery = search.inputEl.value),
+      );
+      rightDecoratorEl.appendChild(sortButton);
+    });
+    console.log("SearchComponent initialized:", search);
+    search.setClass("action-bar__search-input");
     const inputEl = search.inputEl;
     const appInstance = get(plugin)?.app;
     const fileSuggestions = new Set(getFileSuggestions(appInstance));
@@ -90,7 +101,7 @@
     const yamlPropertiesSuggestions = new Set(
       getYAMLPropertySuggestions(appInstance),
     );
-    console.log("Yaml Properties Suggestions:", yamlPropertiesSuggestions);
+    // console.log("Yaml Properties Suggestions:", yamlPropertiesSuggestions);
     const finalSuggestions = new Set([
       ...fileSuggestions,
       ...tagSuggestions,
@@ -234,19 +245,23 @@
     });
     sortMenu.addItem((item) => {
       item.setTitle("Filename (A-Z)");
-      item.setChecked($sort == Sort.NameAsc);
+      item.setChecked($settings.defaultSort == Sort.NameAsc);
       item.onClick(async () => {
-        $sort = Sort.NameAsc;
-        $settings.defaultSort = Sort.NameAsc;
+        store.settings.update((s) => {
+          s.defaultSort = Sort.NameAsc;
+          return s;
+        });
         await $plugin.saveSettings();
       });
     });
     sortMenu.addItem((item) => {
       item.setTitle("Filename(Z-A)");
-      item.setChecked($sort == Sort.NameDesc);
+      item.setChecked($settings.defaultSort == Sort.NameDesc);
       item.onClick(async () => {
-        $sort = Sort.NameDesc;
-        $settings.defaultSort = Sort.NameDesc;
+        store.settings.update((s) => {
+          s.defaultSort = Sort.NameDesc;
+          return s;
+        });
         await $plugin.saveSettings();
       });
     });
@@ -255,38 +270,46 @@
 
     sortMenu.addItem((item) => {
       item.setTitle("Edited (newest first)");
-      item.setChecked($sort == Sort.EditedDesc);
+      item.setChecked($settings.defaultSort == Sort.EditedDesc);
       item.onClick(async () => {
-        $sort = Sort.EditedDesc;
-        $settings.defaultSort = Sort.EditedDesc;
+        store.settings.update((s) => {
+          s.defaultSort = Sort.EditedDesc;
+          return s;
+        });
         await $plugin.saveSettings();
       });
     });
     sortMenu.addItem((item) => {
       item.setTitle("Edited (oldest first)");
-      item.setChecked($sort == Sort.EditedAsc);
+      item.setChecked($settings.defaultSort == Sort.EditedAsc);
       item.onClick(async () => {
-        $sort = Sort.EditedAsc;
-        $settings.defaultSort = Sort.EditedAsc;
+        store.settings.update((s) => {
+          s.defaultSort = Sort.EditedAsc;
+          return s;
+        });
         await $plugin.saveSettings();
       });
     });
     sortMenu.addSeparator();
     sortMenu.addItem((item) => {
       item.setTitle("Created (newest first)");
-      item.setChecked($sort == Sort.CreatedDesc);
+      item.setChecked($settings.defaultSort == Sort.CreatedDesc);
       item.onClick(async () => {
-        $sort = Sort.CreatedDesc;
-        $settings.defaultSort = Sort.CreatedDesc;
+        store.settings.update((s) => {
+          s.defaultSort = Sort.CreatedDesc;
+          return s;
+        });
         await $plugin.saveSettings();
       });
     });
     sortMenu.addItem((item) => {
       item.setTitle("Created (oldest first)");
-      item.setChecked($sort == Sort.CreatedAsc);
+      item.setChecked($settings.defaultSort == Sort.CreatedAsc);
       item.onClick(async () => {
-        $sort = Sort.CreatedAsc;
-        $settings.defaultSort = Sort.CreatedAsc;
+        store.settings.update((s) => {
+          s.defaultSort = Sort.CreatedAsc;
+          return s;
+        });
         await $plugin.saveSettings();
       });
     });
@@ -327,8 +350,9 @@
 
   function clearFolderFilter(event: MouseEvent) {
     store.folderName.set("");
-    store.files.set($allAllowedFiles);
-    notesGrid.layout();
+    // store.files.set($allAllowedFiles);
+    refreshView();
+    // notesGrid.layout();
   }
 
   function removeFilter(index: number, type: "cf" | "nf") {
@@ -349,7 +373,6 @@
   }
 
   onMount(() => {
-    $sort = $settings.defaultSort;
     columns = Math.floor(viewContent.clientWidth / $settings.minCardWidth) + 1;
     notesGrid = new MiniMasonry({
       container: cardsContainer,
@@ -360,8 +383,11 @@
     });
     notesGrid.layout();
 
+    window.addEventListener("resize", handleResize);
+
     return () => {
       notesGrid.destroy();
+      window.removeEventListener("resize", handleResize);
     };
   });
 
@@ -382,6 +408,16 @@
     }),
   );
 
+  let screenWidth = window.innerWidth;
+  let showFilters = false;
+
+  const handleResize = () => {
+    screenWidth = window.innerWidth;
+    if (screenWidth > 1200) {
+      showFilters = false;
+    }
+  };
+
   $: actionBarStyle = $showActionBar
     ? "action-bar-parent"
     : "action-bar-parent action-bar-parent-hide";
@@ -389,75 +425,149 @@
 
 <div class={actionBarStyle}>
   <div class="action-bar" bind:this={viewContent}>
-    <button
-      class="clickable-icon refresh-button"
-      use:refreshIcon
-      on:click={refreshView}
-    />
-    <div class="search-component">
+    <div class="action-bar-right-section">
+      <div class="action-bar_buttons">
+        <button
+          class="clickable-icon refresh-button"
+          use:refreshIcon
+          on:click={refreshView}
+        />
+        <button
+          class="clickable-icon sort-button"
+          use:sortIcon
+          on:click={sortMenu}
+        />
+      </div>
       <div class="action-bar__search" use:searchInput />
-      <button
-        class="clickable-icon sort-button"
-        use:sortIcon
-        on:click={sortMenu}
-      />
     </div>
-    <div class="action-bar_labelSection">
-      {#if $folderName}
-        <div class="action-bar_folder">
-          <div style="align-content: center;">{$folderName}</div>
-          <div class="action-bar_folder_closeButton">
-            <button
-              class="clickable-icon"
-              use:closeIcon
-              on:click={clearFolderFilter}
-            />
+    {#if screenWidth <= 1200}
+      <button
+        class="filters-toggle-button"
+        on:click={() => (showFilters = !showFilters)}
+      >
+        Filters
+      </button>
+    {:else}
+      <div class="action-bar_labelSection">
+        {#if $folderName || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
+          {#if $folderName}
+            <div class="action-bar_folder">
+              <div style="align-content: center;">{$folderName}</div>
+              <div class="action-bar_folder_closeButton">
+                <button
+                  class="clickable-icon"
+                  use:closeIcon
+                  on:click={clearFolderFilter}
+                />
+              </div>
+            </div>
+          {/if}
+          <div class="filter-labels">
+            {#each $searchFilters.cf as filter, index}
+              <div class="filter-label cf">
+                <button
+                  class="toggle"
+                  on:click={() => moveFilter(index, "cf")}
+                  use:cumpulsoryFilterIcon
+                  title="Convert to Normal Filter"
+                ></button>
+                <span>{filter}</span>
+                <button
+                  class="close"
+                  on:click={() => removeFilter(index, "cf")}
+                  use:closeCircleIcon
+                />
+              </div>
+            {/each}
+            {#each $searchFilters.nf as filter, index}
+              <div class="filter-label nf">
+                <button
+                  class="toggle"
+                  on:click={() => moveFilter(index, "nf")}
+                  use:normalFilterIcon
+                  title="Convert to Compulsory Filter"
+                />
+                <span>{filter}</span>
+                <button
+                  class="close"
+                  on:click={() => removeFilter(index, "nf")}
+                  use:closeCircleIcon
+                />
+              </div>
+            {/each}
           </div>
+        {:else}
+          <div class="action-bar_tags">
+            {#each $allTags as tag}
+              <span class="tag">{tag}</span>
+            {/each}
+          </div>
+        {/if}
+      </div>
+    {/if}
+  </div>
+</div>
+
+<div
+  class="filter-section-small-screens responsive"
+  class:visible={showFilters}
+  transition:slide
+>
+  {#if $folderName || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
+    {#if $folderName}
+      <div class="filter-section-small-screens-folder-label">
+        <div style="align-content: center;">{$folderName}</div>
+        <div class="filter-section-small-screens-folder-label-closeButton">
+          <button
+            class="clickable-icon"
+            use:closeIcon
+            on:click={clearFolderFilter}
+          />
         </div>
-      {:else if $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
-        <div class="filter-labels">
-          {#each $searchFilters.cf as filter, index}
-            <div class="filter-label cf">
-              <button
-                class="toggle"
-                on:click={() => moveFilter(index, "cf")}
-                use:cumpulsoryFilterIcon
-                title="Convert to Normal Filter"
-              ></button>
-              <span>{filter}</span>
-              <button
-                class="close"
-                on:click={() => removeFilter(index, "cf")}
-                use:closeCircleIcon
-              />
-            </div>
-          {/each}
-          {#each $searchFilters.nf as filter, index}
-            <div class="filter-label nf">
-              <button
-                class="toggle"
-                on:click={() => moveFilter(index, "nf")}
-                use:normalFilterIcon
-                title="Convert to Compulsory Filter"
-              />
-              <span>{filter}</span>
-              <button
-                class="close"
-                on:click={() => removeFilter(index, "nf")}
-                use:closeCircleIcon
-              />
-            </div>
-          {/each}
+      </div>
+    {/if}
+    <div class="filter-section-small-screens-filter-labels">
+      {#each $searchFilters.cf as filter, index}
+        <div class="filter-label cf">
+          <button
+            class="toggle"
+            on:click={() => moveFilter(index, "cf")}
+            use:cumpulsoryFilterIcon
+            title="Convert to Normal Filter"
+          ></button>
+          <span>{filter}</span>
+          <button
+            class="close"
+            on:click={() => removeFilter(index, "cf")}
+            use:closeCircleIcon
+          />
         </div>
-      {:else}
-        <div class="action-bar_tags">
-          <!-- {#each $tags as tag}
+      {/each}
+      {#each $searchFilters.nf as filter, index}
+        <div class="filter-label nf">
+          <button
+            class="toggle"
+            on:click={() => moveFilter(index, "nf")}
+            use:normalFilterIcon
+            title="Convert to Compulsory Filter"
+          />
+          <span>{filter}</span>
+          <button
+            class="close"
+            on:click={() => removeFilter(index, "nf")}
+            use:closeCircleIcon
+          />
+        </div>
+      {/each}
+    </div>
+  {:else}
+    No Filters Applied
+    <div class="filter-section-small-screens-tags">
+      <!-- {#each $tags as tag}
             <span class="tag">{tag}</span>
           {/each} -->
-        </div>
-      {/if}
     </div>
-  </div>
+  {/if}
 </div>
 
 <div

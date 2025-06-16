@@ -175,7 +175,7 @@
   };
 
   const renderNoteCard = async (el: HTMLElement): Promise<void> => {
-    console.log("Rendering note card for file:", file.path);
+    // console.log("Rendering note card for file:", file.path);
     const fileEmptyCondition = await isFileEmpty(file);
     if (!fileEmptyCondition) {
       const maxLiness = $settings.maxLines || 20;

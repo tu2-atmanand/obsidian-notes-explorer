@@ -28,7 +28,6 @@ export const skipNextTransition = writable(true);
 export const refreshSignal = writable<boolean>(false);
 export const refreshOnResize = writable<boolean>(false);
 export const showActionBar = writable<boolean>(true);
-export const sort = writable<Sort>();
 
 export const searchFilters = writable<{ cf: string[]; nf: string[] }>({
   cf: [],
@@ -51,6 +50,7 @@ export const allAllowedFiles = derived(
       const folder = get(app).vault.getAbstractFileByPath($folderName);
 
       if (folder instanceof TFolder) {
+        console.log("Value of showSubFolders : ", $settings.showSubFolders);
         if ($settings.showSubFolders) {
           // Helper function to recursively fetch files
           const collectFiles = (currentFolder: TFolder) => {
@@ -64,7 +64,7 @@ export const allAllowedFiles = derived(
           };
           collectFiles(folder);
         } else {
-          // Only fetch files in the current folder
+          // Only fetch files from the current folder
           allFiles = folder.children.filter(
             (child): child is TFile =>
               child instanceof TFile && child.extension === "md",
@@ -143,18 +143,18 @@ export const allAllowedFiles = derived(
                 if (fileCache && fileCache.frontmatter) {
                   const fmValue =
                     fileCache.frontmatter[frontMatterKey.replace(`"`, "")];
-                  console.log(
-                    "fmValue : ",
-                    fmValue,
-                    "\nfrontMatterValue : ",
-                    frontMatterValue,
-                    "\nfile : ",
-                    file.path,
-                    "frontmatter key : ",
-                    frontMatterKey.replace(`"`, ""),
-                    "\nFile frontmatter : ",
-                    fileCache.frontmatter,
-                  );
+                  // console.log(
+                  //   "fmValue : ",
+                  //   fmValue,
+                  //   "\nfrontMatterValue : ",
+                  //   frontMatterValue,
+                  //   "\nfile : ",
+                  //   file.path,
+                  //   "frontmatter key : ",
+                  //   frontMatterKey.replace(`"`, ""),
+                  //   "\nFile frontmatter : ",
+                  //   fileCache.frontmatter,
+                  // );
                   // if (fmValue === frontMatterValue) {
                   //   cumpulsoryFilteredFilesSet.add(file);
                   // }
@@ -384,38 +384,35 @@ export const allAllowedFiles = derived(
 // );
 
 // Sort files based on the selected sort method
-export const sortedFiles = derived(
-  [sort, files, settings],
-  ([$sort, $files, $settings]) => {
-    const isPinned = (path: string) => $settings.pinnedFiles.includes(path);
+export const sortedFiles = derived([files], ([$files]) => {
+  const isPinned = (path: string) => get(settings).pinnedFiles.includes(path);
 
-    const comparePinned = (a: TFile, b: TFile) =>
-      (isPinned(b.path) ? 1 : 0) - (isPinned(a.path) ? 1 : 0);
+  const comparePinned = (a: TFile, b: TFile) =>
+    (isPinned(b.path) ? 1 : 0) - (isPinned(a.path) ? 1 : 0);
 
-    const sortMethods: Record<string, (a: TFile, b: TFile) => number> = {
-      [Sort.NameAsc]: (a, b) => a.basename.localeCompare(b.basename),
-      [Sort.NameDesc]: (a, b) => b.basename.localeCompare(a.basename),
-      [Sort.EditedAsc]: (a, b) => a.stat.mtime - b.stat.mtime,
-      [Sort.EditedDesc]: (a, b) => b.stat.mtime - a.stat.mtime,
-      [Sort.CreatedAsc]: (a, b) => a.stat.ctime - b.stat.ctime,
-      [Sort.CreatedDesc]: (a, b) => b.stat.ctime - a.stat.ctime,
-    };
+  const sortMethods: Record<string, (a: TFile, b: TFile) => number> = {
+    [Sort.NameAsc]: (a, b) => a.basename.localeCompare(b.basename),
+    [Sort.NameDesc]: (a, b) => b.basename.localeCompare(a.basename),
+    [Sort.EditedAsc]: (a, b) => a.stat.mtime - b.stat.mtime,
+    [Sort.EditedDesc]: (a, b) => b.stat.mtime - a.stat.mtime,
+    [Sort.CreatedAsc]: (a, b) => a.stat.ctime - b.stat.ctime,
+    [Sort.CreatedDesc]: (a, b) => b.stat.ctime - a.stat.ctime,
+  };
 
-    const sortFunction = sortMethods[$sort] || (() => 0);
+  const sortFunction = sortMethods[get(settings)?.defaultSort] || (() => 0);
 
-    return [...$files]
-      .filter((file) => !file.path.endsWith(".excalidraw.md"))
-      .sort((a, b) => comparePinned(a, b) || sortFunction(a, b));
-  },
-);
+  return [...$files]
+    .filter((file) => !file.path.endsWith(".excalidraw.md"))
+    .sort((a, b) => comparePinned(a, b) || sortFunction(a, b));
+});
 
 export const searchQuery = writable<string>("");
 export const preparedSearch = derived(searchQuery, ($searchQuery) =>
   $searchQuery ? prepareFuzzySearch($searchQuery) : null,
 );
 export const searchResultFiles = derived(
-  [preparedSearch, sortedFiles, appCache],
-  ([$preparedSearch, $sortedFiles, $appCache], set) => {
+  [preparedSearch, sortedFiles],
+  ([$preparedSearch, $sortedFiles], set) => {
     if ($preparedSearch == null) {
       set($sortedFiles);
       return;
@@ -520,6 +517,27 @@ export const displayedFilesCount = derived(
   },
 );
 
+export const allTags = derived([appCache], ([$appCache]) => {
+  console.log("AppCache changed, calculating all tags...");
+  const tags = $appCache.vault
+    .getMarkdownFiles()
+    .map(
+      (file) =>
+        getAllTags($appCache.getFileCache(file) as CachedMetadata) || [],
+    )
+    .flat();
+
+  const tagCounts = tags.reduce(
+    (acc, tag) => {
+      acc[tag] = (acc[tag] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  return Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]);
+});
+
 export default {
   app,
   plugin,
@@ -528,7 +546,6 @@ export default {
   allAllowedFiles,
   // filteredBySearchFilters,
   folderName,
-  sort,
   searchQuery,
   searchFilters,
   searchResultFiles,
@@ -540,7 +557,7 @@ export default {
   skipNextTransition,
   refreshSignal,
   refreshOnResize,
-  // tags,
+  allTags,
   view,
   appCache,
   currentPage,
