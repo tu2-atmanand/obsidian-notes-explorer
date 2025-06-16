@@ -388,8 +388,8 @@
     notesGrid = new MiniMasonry({
       container: cardsContainer,
       baseWidth: $settings.minCardWidth,
-      gutter: 20,
-      surroundingGutter: false,
+      gutter: $settings.gutterSize,
+      surroundingGutter: $settings.enableSurroundingGutters,
       ultimateGutter: 20,
     });
     notesGrid.layout();
@@ -512,7 +512,8 @@
             {#each $allTags as tag}
               <a
                 class="action-bar_labelSection_tags_tag"
-                on:click={handleTagClick}>{tag}
+                on:click={handleTagClick}
+                >{tag}
               </a>
             {/each}
           </div>

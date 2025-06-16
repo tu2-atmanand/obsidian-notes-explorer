@@ -7,6 +7,7 @@
     padding-block-start: 0 !important;
     padding-right: 5px;
     /* padding-block-end: 4em; */
+    padding-bottom: 0px;
 }
 
 /* View.ts  */
@@ -968,4 +969,9 @@
 
 .card-content blockquote {
     margin-inline: 4px;
+}
+
+ul>li.task-list-item>p>.task-list-item-checkbox,
+ul>li.task-list-item>.task-list-item-checkbox {
+    margin-inline-start: -21px;
 }

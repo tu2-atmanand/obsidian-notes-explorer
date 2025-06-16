@@ -67,6 +67,8 @@ export enum Sort {
 
 export interface NotesExplorerSettings {
   minCardWidth: number;
+  gutterSize: number;
+  enableSurroundingGutters: boolean;
   fixedCardHeight: number | null;
   maxLines: number | null;
   launchOnStart: boolean;
@@ -95,6 +97,8 @@ export interface NotesExplorerSettings {
 
 export const DEFAULT_SETTINGS: NotesExplorerSettings = {
   minCardWidth: 250,
+  gutterSize: 20,
+  enableSurroundingGutters: false,
   fixedCardHeight: null,
   maxLines: null,
   launchOnStart: false,
@@ -294,6 +298,38 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       );
 
     new Setting(containerEl).setName("Cards ui").setHeading();
+
+    new Setting(containerEl)
+      .setName("Gutter size")
+      .setDesc("Set the size of the gutter between cards")
+      .addText((text) =>
+        text
+          .setPlaceholder("eg.: 20")
+          .setValue(this.plugin.settings.gutterSize.toString())
+          .onChange(async (value) => {
+            if (isNaN(parseInt(value))) {
+              new Notice("Invalid number");
+              return;
+            }
+
+            this.plugin.settings.gutterSize = parseInt(value);
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Surrounding gutters")
+      .setDesc(
+        "Enable this option to have gutters on the left and right side of the board, in addition to the gutters between cards."
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.enableSurroundingGutters)
+          .onChange(async (value) => {
+            this.plugin.settings.enableSurroundingGutters = value;
+            await this.plugin.saveSettings();
+          })
+      );
 
     new Setting(containerEl)
       .setName("Title display mode")
