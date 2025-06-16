@@ -94,14 +94,27 @@
 }
 
 /* Force horizontal scrolling inside label section */
+.action-bar_labelSection>.action-bar_labelSection_tags,
 .action-bar_labelSection>.filter-labels,
-.action-bar_labelSection>.action-bar_tags,
 .action-bar_labelSection>.action-bar_folder {
     display: flex;
     flex-wrap: nowrap;
     overflow-x: auto;
     gap: 6px;
     align-items: center;
+}
+
+.action-bar_labelSection_tags_tag {
+    background-color: var(--tag-background);
+    border: var(--tag-border-width) solid var(--tag-border-color);
+    border-radius: var(--tag-radius);
+    color: var(--tag-color);
+    font-size: var(--tag-size);
+    font-weight: var(--tag-weight);
+    text-decoration: var(--tag-decoration);
+    padding: var(--tag-padding-y) var(--tag-padding-x);
+    line-height: 1;
+    cursor: pointer;
 }
 
 .filter-labels {
@@ -201,7 +214,7 @@
 .filter-section-small-screens.responsive.visible {
     opacity: 1;
     transform: translateY(0);
-    
+
     display: flex;
     flex-direction: column;
     position: sticky;
@@ -270,7 +283,7 @@
     }
 
     .action-bar_labelSection>.filter-labels,
-    .action-bar_labelSection>.action-bar_tags,
+    .action-bar_labelSection>.action-bar_labelSection_tags,
     .action-bar_labelSection>.action-bar_folder {
         flex-wrap: nowrap;
         overflow-x: auto;
@@ -354,7 +367,7 @@
     margin-right: 0;
 } */
 
-/* .action-bar .action-bar_tags {
+/* .action-bar .action-bar_labelSection_tags {
     flex-grow: 1;
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -566,7 +579,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-height: 7%;
+    min-height: 1.8em;
 }
 
 .top-bar-fileName {
@@ -648,10 +661,7 @@
     width: 100%;
     height: 100%;
     overflow-x: clip;
-}
-
-.card-content blockquote {
-    margin-inline: 8px;
+    min-height: 7em;
 }
 
 .card-footer-parent {
@@ -892,12 +902,13 @@
 /* Style fixes for Obsidian generated elements */
 
 .card-content .task-list-item {
-    margin-inline-start: 1.8em;
+    margin-inline-start: 1em;
 }
 
 .card-content span {
     display: flex;
     justify-content: center;
+    margin-inline-start: 4px;
 }
 
 .card-content span.token {
@@ -907,4 +918,54 @@
 
 .card-content ol {
     padding-inline-start: 14px;
+    margin-block-start: -1.7rem;
+}
+
+.card-content .task-list-item ol {
+    padding-inline-start: 8px;
+    margin-block-start: -1.7rem;
+}
+
+.card-content h1,
+.card-content h2,
+.card-content h3 {
+    margin: 0.5rem 0;
+}
+
+.card-content h1 {
+    font-size: 1.502em !important;
+}
+
+.card-content h2 {
+    font-size: 1.302em !important;
+}
+
+.card-content h3 {
+    font-size: 1.124em !important;
+}
+
+.card-content h4 {
+    font-size: 1em !important;
+}
+
+.card-content h5 {
+    font-size: 0.905em !important;
+}
+
+.card-content h6 {
+    font-size: 0.85em !important;
+}
+
+.card-content ul {
+    padding-inline-start: 9px;
+    margin: 0.5rem 0;
+}
+
+.card-content p {
+    font-size: 0.8rem !important;
+    margin: 0.5rem 0;
+}
+
+.card-content blockquote {
+    margin-inline: 4px;
 }

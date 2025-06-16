@@ -226,9 +226,6 @@
       }
     });
 
-    // searchQuery.subscribe((val) => {
-    //   inputEl.value = val;
-    // });
     store.searchFilters.subscribe((filters) => {
       console.log("Root.svelte : SearchFilters Subscriber:", filters);
       // refreshView();
@@ -372,6 +369,20 @@
     });
   }
 
+  function handleTagClick(event: MouseEvent) {
+    // $searchQuery = (event.target as HTMLButtonElement).textContent || "";
+    store.searchFilters.update((filters) => {
+      const tag = (event.target as HTMLButtonElement).textContent || "";
+      if (!filters.cf.includes(tag) && !filters.nf.includes(tag)) {
+        filters.nf.push(tag);
+      } else {
+        console.warn("The tag is already present in the search filters.");
+        new Notice("The tag is already added to the view.");
+      }
+      return { ...filters };
+    });
+  }
+
   onMount(() => {
     columns = Math.floor(viewContent.clientWidth / $settings.minCardWidth) + 1;
     notesGrid = new MiniMasonry({
@@ -497,9 +508,12 @@
             {/each}
           </div>
         {:else}
-          <div class="action-bar_tags">
+          <div class="action-bar_labelSection_tags">
             {#each $allTags as tag}
-              <span class="tag">{tag}</span>
+              <a
+                class="action-bar_labelSection_tags_tag"
+                on:click={handleTagClick}>{tag}
+              </a>
             {/each}
           </div>
         {/if}

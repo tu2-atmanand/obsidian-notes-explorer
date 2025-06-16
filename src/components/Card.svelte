@@ -340,7 +340,7 @@
 
       case "folderName":
         return file.parent?.path !== "/"
-          ? file.parent?.path || ""
+          ? file.parent?.path.split("/").pop() || ""
           : "Root folder";
 
       case "editedTime":
@@ -469,7 +469,13 @@
         {:else if $settings.noteMetadata === "folderName"}
           <span use:vaultIcon />
         {/if}
-        <div class="card-footer-text">{getFooterMetadata()}</div>
+        <div
+          class="card-footer-text"
+          title={file && file.parent ? file.parent.path : ""}
+          role="tooltip"
+        >
+          {getFooterMetadata()}
+        </div>
       </div>
       {#if $settings.showDeleteButton}
         <button

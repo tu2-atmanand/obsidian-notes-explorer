@@ -155,7 +155,7 @@ export class NotesExplorerView extends ItemView {
   }
 
   private renderMoreOnScroll() {
-    const cardsContainer = this.viewContent.children[1];
+    const cardsContainer = this.viewContent.children[2];
 
     if (!this.settings.pagesView) {
       // Add status bar showing the number of cards rendered inside the view.
@@ -180,7 +180,7 @@ export class NotesExplorerView extends ItemView {
         console.error("cardsContainer is undefined");
       }
     } else {
-      const pageBarContainer = this.viewContent.children[2];
+      const pageBarContainer = this.viewContent.children[3];
       if (pageBarContainer) {
         this.statusBarEl = this.plugin.addStatusBarItem();
 
@@ -244,7 +244,7 @@ export class NotesExplorerView extends ItemView {
           cardsContainer.addEventListener("scroll", async () => {
             if (
               cardsContainer.scrollTop + cardsContainer.clientHeight >
-              cardsContainer.scrollHeight - 100
+              cardsContainer.scrollHeight - 200
             ) {
               const remainingCardsInCurrentPage =
                 this.settings.cardsPerPage - get(store.displayedFiles).length;
