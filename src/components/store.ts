@@ -34,6 +34,8 @@ export const searchFilters = writable<{ cf: string[]; nf: string[] }>({
   nf: [],
 });
 
+export const excludedFilesCount = writable<number>(0);
+
 export const allAllowedFiles = derived(
   [settings, folderName, searchFilters],
   ([$settings, $folderName, $searchFilters]) => {
@@ -79,6 +81,9 @@ export const allAllowedFiles = derived(
         file.path.startsWith(excludeFolder),
       );
     });
+
+    // Exclude files based on the excluded file names
+    excludedFilesCount.set(allFiles.length - filteredFiles.length);
 
     if (!($searchFilters.cf.length === 0 && $searchFilters.nf.length === 0)) {
       let cumpulsoryFilteredFilesSet = new Set<TFile>();
@@ -543,6 +548,7 @@ export default {
   plugin,
   settings,
   files,
+  excludedFilesCount,
   allAllowedFiles,
   // filteredBySearchFilters,
   folderName,

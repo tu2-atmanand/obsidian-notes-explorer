@@ -22,6 +22,7 @@
     searchFilters,
     allAllowedFiles,
     allTags,
+    excludedFilesCount,
   } from "./store";
   import { Sort } from "src/settings";
   import {
@@ -37,6 +38,7 @@
     initialPlaceholderSuggestionsMap,
   } from "src/utils/SearchQueryHelpers";
   import { refreshView } from "src/utils/GeneralHelpers";
+  import { NotesCountStatisticsModal } from "src/modals/NotesCountStatisticsModal";
 
   export let cardsContainer: HTMLElement;
   let notesGrid: MiniMasonry;
@@ -383,6 +385,19 @@
     });
   }
 
+  $: totalNotesCount =
+    $searchQuery === "" &&
+    $folderName === "" &&
+    $searchFilters.cf.length === 0 &&
+    $searchFilters.nf.length === 0
+      ? `${$allAllowedFiles.length}`
+      : `${$displayedFiles.length} / ${get(plugin).app.vault.getMarkdownFiles().length - $excludedFilesCount}`; // Display filtered count vs total count
+
+  function handleCountLabelBtn(event: MouseEvent) {
+    const statisticsModal = new NotesCountStatisticsModal(get(plugin));
+    statisticsModal.open();
+  }
+
   onMount(() => {
     columns = Math.floor(viewContent.clientWidth / $settings.minCardWidth) + 1;
     notesGrid = new MiniMasonry({
@@ -450,6 +465,10 @@
         />
       </div>
       <div class="action-bar__search" use:searchInput />
+      <button
+        class="clickable-icon count-label-button"
+        on:click={handleCountLabelBtn}>{totalNotesCount}</button
+      >
     </div>
     {#if screenWidth <= 1200}
       <button
@@ -510,11 +529,11 @@
         {:else}
           <div class="action-bar_labelSection_tags">
             {#each $allTags as tag}
-              <a
+              <button
                 class="action-bar_labelSection_tags_tag"
                 on:click={handleTagClick}
                 >{tag}
-              </a>
+              </button>
             {/each}
           </div>
         {/if}

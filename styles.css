@@ -106,16 +106,16 @@
 }
 
 .action-bar_labelSection_tags_tag {
-    background-color: var(--tag-background);
-    border: var(--tag-border-width) solid var(--tag-border-color);
-    border-radius: var(--tag-radius);
-    color: var(--tag-color);
-    font-size: var(--tag-size);
-    font-weight: var(--tag-weight);
-    text-decoration: var(--tag-decoration);
-    padding: var(--tag-padding-y) var(--tag-padding-x);
-    line-height: 1;
-    cursor: pointer;
+    background-color: var(--tag-background) !important;
+    border: var(--tag-border-width) solid var(--tag-border-color) !important;
+    border-radius: var(--tag-radius) !important;
+    color: var(--tag-color) !important;
+    font-size: var(--tag-size) !important;
+    font-weight: var(--tag-weight) !important;
+    text-decoration: var(--tag-decoration) !important;
+    padding: var(--tag-padding-y) var(--tag-padding-x) !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
 }
 
 .filter-labels {
@@ -458,6 +458,13 @@
         box-shadow: calc(0px - var(--size-4-5)) 0 var(--size-2-3) var(--size-2-3) var(--background-primary);
     }
 } */
+
+.count-label-button {
+    background-color: var(--icon-color-active) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    font-size: 1.05em !important;
+}
 
 .search-component {
     display: flex;
@@ -898,6 +905,26 @@
 .deleteTaskCancelmBtn:hover {
     background-color: green !important;
     /* Change background to red on hover */
+}
+
+/* NotesCountStatisticsModal.ts */
+
+.notes-explorer-modal-title {
+    text-align: center;
+}
+
+.notes-explorer-modal-text-element {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: space-between;
+}
+
+.notes-explorer-modal-text-element-highlight {
+    font-weight: 700;
+    color: var(--text-accent);
+    font-size: medium;
 }
 
 /* Style fixes for Obsidian generated elements */
