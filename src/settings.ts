@@ -8,6 +8,10 @@ import {
   normalizePath,
   setIcon,
 } from "obsidian";
+import {
+  SimpleMultiSuggestor,
+  getSimpleFolderSuggestions,
+} from "./services/SimpleMultiSuggestor";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "./icons";
 
 import NotesExplorerPlugin from "../main";
@@ -741,11 +745,34 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       .setDesc(
         "Enter the complete folder path and click on save to exclude all notes from this folder from the board. You can also apply filters to board notes from sub-folders from the board filter menu."
       )
-      .addText((text) =>
+      .addText((text) => {
         text.setPlaceholder("Enter folder path").onChange((value) => {
           this.tempFolderName = value; // Temporary field to hold input
-        })
-      )
+        });
+
+        const inputEl = text.inputEl;
+        const suggestionContent = getSimpleFolderSuggestions(this.app);
+        const onSelectCallback = async (selectedPath: string) => {
+          const folderInput = normalizePath(selectedPath);
+          if (
+            folderInput &&
+            !this.plugin.settings.excludedFolders.includes(folderInput)
+          ) {
+            this.plugin.settings.excludedFolders.push(folderInput);
+            this.plugin.saveSettings();
+            this.display();
+          }
+          text.setValue("");
+          await this.plugin.saveSettings();
+        };
+
+        new SimpleMultiSuggestor(
+          inputEl,
+          new Set(suggestionContent),
+          onSelectCallback,
+          this.app
+        );
+      })
       .addButton((button) =>
         button
           .setButtonText("Add")

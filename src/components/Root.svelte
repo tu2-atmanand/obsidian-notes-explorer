@@ -30,8 +30,8 @@
     getFolderSuggestions,
     getTagSuggestions,
     getYAMLPropertySuggestions,
-    MultiSuggest,
-  } from "src/services/MultiSuggest";
+    SearchFiltersMultiSuggestor,
+  } from "src/services/SearchFiltersMultiSuggestor";
   import { get } from "svelte/store";
   import {
     addToSearchHistory,
@@ -80,7 +80,7 @@
     if (currentPageLocal > 1) goToPage(currentPageLocal - 1);
   }
 
-  let activeSuggest: MultiSuggest | null = null;
+  let activeSuggest: SearchFiltersMultiSuggestor | null = null;
   function searchInput(el: HTMLElement) {
     const search = new SearchComponent(el);
     search.addRightDecorator((rightDecoratorEl) => {
@@ -116,10 +116,10 @@
       if (!appInstance) return;
 
       if (!activeSuggest) {
-        activeSuggest = new MultiSuggest(
+        activeSuggest = new SearchFiltersMultiSuggestor(
           inputEl,
           finalSuggestions,
-          (selected) => {
+          (selected: string) => {
             console.log(
               "Selected:",
               selected,
@@ -673,9 +673,9 @@
       folders from setting.
     </div>
   {:else}
-  {#each $displayedFiles as file (file.path)}
-    <Card {file} on:loaded={() => notesGrid.layout()} />
-  {/each}
+    {#each $displayedFiles as file (file.path)}
+      <Card {file} on:loaded={() => notesGrid.layout()} />
+    {/each}
   {/if}
 </div>
 

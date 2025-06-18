@@ -1,4 +1,4 @@
-// /src/services/MultiSuggest.ts
+// /src/services/SearchFiltersSearchFiltersMultiSuggestoror.ts
 
 import {
   AbstractInputSuggest,
@@ -12,7 +12,7 @@ import { get } from "svelte/store";
 import { initialPlaceholderSuggestionsMap } from "src/utils/SearchQueryHelpers";
 import { settings } from "src/components/store";
 
-export class MultiSuggest extends AbstractInputSuggest<string> {
+export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
   content: Set<string>;
   private datePickerEl: HTMLInputElement | null;
 
