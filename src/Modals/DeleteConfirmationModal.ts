@@ -13,7 +13,7 @@ interface DeleteConfirmationModalProps {
   onCancel: () => void;
 }
 
-export class DeleteConfirmationModal extends Modal {
+export default class DeleteConfirmationModal extends Modal {
   mssg: string;
   onConfirm: () => void;
   onCancel: () => void;

@@ -1,7 +1,7 @@
 // /src/utils/ModalHelpers.ts
 
 import type { App } from "obsidian";
-import { DeleteConfirmationModal } from "src/modals/DeleteConfirmationModal";
+import DeleteConfirmationModal from "src/modals/DeleteConfirmationModal";
 
 export const openDeleteConfirmationModal = async (
   app: App
