@@ -1,4 +1,5 @@
 import {
+  Notice,
   Plugin,
   TFile,
   TFolder,
@@ -15,7 +16,6 @@ import { NotesExplorerView, PLUGIN_VIEW_TYPE } from "./src/view";
 import store, { settings } from "./src/components/store";
 import "./styles.css";
 import { pluginIcon } from "src/icons";
-import { get } from "svelte/store";
 
 export default class NotesExplorerPlugin extends Plugin {
   settings: NotesExplorerSettings = Object.assign({}, DEFAULT_SETTINGS);
