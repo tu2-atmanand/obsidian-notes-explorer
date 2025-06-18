@@ -25,7 +25,13 @@ import store, {
   showActionBar,
   totalPages,
 } from "./components/store";
-import { leftSideArrow, pluginIcon, rightSideArrow, topBarIcon } from "./icons";
+import {
+  leftSideArrow,
+  pageNavigationDockIcon,
+  pluginIcon,
+  rightSideArrow,
+  topBarIcon,
+} from "./icons";
 
 export const PLUGIN_VIEW_TYPE = "notes-explorer";
 
@@ -68,9 +74,25 @@ export class NotesExplorerView extends ItemView {
       target: this.viewContent,
     });
 
+    // Add action button to toggle the page navigation bar
+    if (get(settings).pagesView) {
+      this.addAction(
+        pageNavigationDockIcon,
+        "Toggle page navigation bar",
+        () => {
+          const pageBarContainer = this.viewContent.children[3];
+          if (pageBarContainer) {
+            pageBarContainer.classList.toggle("page-bar-visible");
+          }
+        }
+      );
+    }
+
+    // Add action to show/hide the top bar
     this.addAction(topBarIcon, "Show/Hide top bar", () => {
       store.showActionBar.set(!get(showActionBar));
     });
+
 
     this.renderMoreOnScroll();
   }

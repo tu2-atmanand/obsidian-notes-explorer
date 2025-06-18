@@ -67,6 +67,7 @@ export class NoteViewerModal extends Modal {
   }
 
   onClose() {
+    console.log("Closing Note Viewer Modal for file:", this.file.path);
     const { contentEl } = this;
     contentEl.empty();
   }
@@ -79,5 +80,6 @@ export class NoteViewerModal extends Modal {
   private async openNote(evt: UserEvent) {
     const newLeaf = this.plugin.app.workspace.getLeaf(Keymap.isModEvent(evt));
     await newLeaf.openFile(this.file);
+    this.close();
   }
 }
