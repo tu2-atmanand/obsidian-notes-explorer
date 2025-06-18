@@ -12,11 +12,13 @@
   import { skipNextTransition, app, view, settings, plugin } from "./store";
   import { ClickMode, TitleDisplayMode } from "../settings";
   import { openDeleteConfirmationModal } from "src/utils/ModalHelpers";
+  import { isFileEmpty } from "src/utils/GeneralHelpers";
+  import { NoteViewerModal } from "src/modals/NoteViewerModal";
   import {
     hookMarkdownLinkMouseEventHandlers,
     markdownButtonHoverPreviewEvent,
-  } from "src/utils/MarkdownHoverPreview";
-  import { isFileEmpty } from "src/utils/GeneralHelpers";
+    obsidianMarkdownRenderer,
+  } from "src/services/MarkdownUIRenderer";
 
   export let file: TFile;
   let displayFilename: boolean =
@@ -182,7 +184,7 @@
       const content = await file.vault.cachedRead(file);
       const truncatedContent = truncateContent(content, maxLiness);
 
-      await MarkdownRenderer.render(
+      await obsidianMarkdownRenderer(
         $app,
         truncatedContent,
         el,
@@ -195,13 +197,7 @@
       //   display: "Notes Explorer",
       // });
       if ($settings.contentInteractions) {
-        hookMarkdownLinkMouseEventHandlers(
-          $app,
-          $plugin,
-          el,
-          file.path,
-          file.path,
-        );
+        hookMarkdownLinkMouseEventHandlers($plugin, el, file.path, file.path);
       }
     } else {
       el.createEl("div", {
@@ -262,7 +258,11 @@
         child.type === "leaf" && child.state?.type === "notes-explorer",
     );
 
-    if ($settings.openNoteLayout === "right") {
+    if ($settings.openNoteLayout === "modal") {
+      const modal = new NoteViewerModal($plugin, file);
+      modal.open();
+      return;
+    } else if ($settings.openNoteLayout === "right") {
       if (mainEntry) {
         if ((mainEntry[1] as any)?.children?.length > 1) {
           const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
@@ -271,6 +271,7 @@
           await $app.workspace.getLeaf("split", "vertical").openFile(file);
         }
       }
+      return;
     } else if ($settings.openNoteLayout === "sameTab") {
       if (hasNotesExplorer) {
         if (mainEntry && (mainEntry[1] as any)?.children?.length > 1) {
@@ -292,8 +293,10 @@
       return;
     } else if ($settings.openNoteLayout === "tab") {
       await $app.workspace.getLeaf("tab").openFile(file);
+      return;
     } else if ($settings.openNoteLayout === "window") {
       await $app.workspace.getLeaf("window").openFile(file);
+      return;
     }
   };
 

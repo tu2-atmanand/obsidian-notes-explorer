@@ -38,6 +38,7 @@ export enum NoteOpenLayout {
   SameTab = "sameTab",
   NewTab = "tab",
   NewWindow = "window",
+  Modal = "modal",
 }
 export enum ClickMode {
   Single = "single",
@@ -138,6 +139,16 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
+
+    this.navEl = containerEl.createDiv({
+      cls: "setting-tab-header",
+    });
+    this.navEl.createEl("h2", {
+      text: "Notes Explorer Settings",
+    });
+    this.navEl.createEl("p", {
+      text: "Configure the settings for the Notes Explorer plugin.",
+    });
 
     new Setting(containerEl)
       .setName("Launch on start")
@@ -245,6 +256,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
             [NoteOpenLayout.NewTab]: "Open note in new tab",
             [NoteOpenLayout.SameTab]: "Open note in same tab",
             [NoteOpenLayout.NewWindow]: "Open note in new window",
+            [NoteOpenLayout.Modal]: "Open note in quick modal",
           })
           .setValue(this.plugin.settings.openNoteLayout)
           .onChange(async (value) => {
@@ -631,7 +643,6 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
                   TagCardColorIndicatorType.sidebars
                     ? `1px solid ${tag.color}`
                     : "",
-                width: "100%",
               });
             })
             .addButton((button) => {

@@ -927,6 +927,97 @@
     font-size: medium;
 }
 
+
+/* NoteViewerModal.ts */
+
+.modal[data-type="notes-explorer-note"] {
+    max-height: 90vh !important;
+    min-height: 90vh !important;
+    max-width: 95vw !important;
+    min-width: 90vw !important;
+    /* overflow: auto; */
+    padding: 0 !important;
+}
+
+.is-phone .modal[data-type="notes-explorer-note"] {
+    max-height: 90vh !important;
+    min-height: 90vh !important;
+    max-width: 95vw !important;
+    min-width: 90vw !important;
+    /* overflow: auto; */
+    padding: 0 !important;
+}
+
+.modal[data-type="notes-explorer-note"] .modal-header {
+    display: none;
+}
+
+.is-phone .modal[data-type="notes-explorer-note"] .modal-header {
+    display: none;
+}
+
+.modal-content[data-type="notes-explorer-note"] {
+    position: relative;
+    max-height: fit-content;
+    /* min-height: 90vh; */
+    overflow: hidden;
+}
+
+.is-phone .modal-content[data-type="notes-explorer-note"] {
+    position: relative;
+    max-height: fit-content;
+    /* min-height: 90vh; */
+    overflow: hidden;
+    padding: 0 !important;
+}
+
+.note-modal-header {
+    background-color: var(--color-accent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    /* margin: -4px; */
+    position: sticky;
+    top: 0;
+    /* z-index: 301; */
+    border-radius: 10px 10px 0 0;
+}
+
+.note-modal-header-file-name {
+    font-size: 1em;
+    font-weight: 600;
+    color: white;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.note-modal-header-button-container {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.note-modal-header-button-container button {
+    background-color: transparent !important;
+    color: white !important;
+    border: 1px solid white !important;
+    padding-inline: 10px;
+}
+
+.note-modal-content {
+    overflow: auto;
+    max-height: 85vh;
+    padding: 12px;
+    padding-block-end: 5vh;
+}
+
+.note-modal-content code {
+    text-wrap: balance !important;
+}
+
+
 /* Style fixes for Obsidian generated elements */
 
 .card-content .task-list-item {
@@ -946,7 +1037,7 @@
 
 .card-content ol {
     padding-inline-start: 14px;
-    margin-block-start: -1.7rem;
+    /* margin-block-start: -1.7rem; */
 }
 
 .card-content .task-list-item ol {
@@ -1001,4 +1092,17 @@
 ul>li.task-list-item>p>.task-list-item-checkbox,
 ul>li.task-list-item>.task-list-item-checkbox {
     margin-inline-start: -21px;
+}
+
+.card-content code {
+    display: block !important;
+    padding: 1em !important;
+    overflow: none !important;
+    text-wrap: balance !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+}
+
+.card-content code>span {
+    display: inline !important;
 }
