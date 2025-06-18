@@ -654,9 +654,29 @@
   style="--columns: {columns};"
   style:padding-top={$showActionBar ? "4em" : "0"}
 >
+  {#if $displayedFiles.length === 0 && $searchQuery !== ""}
+    <div class="no-files-message">
+      No files found. <br /><br />Please check your search query again and also
+      make sure the notes you are searching are not in the Excluded folders from
+      setting.
+    </div>
+  {:else if $displayedFiles.length === 0 && $folderName !== ""}
+    <div class="no-files-message">
+      No files found in the folder "{$folderName}". <br /><br />Either the
+      folder is empty or you probably have added this folder or its parent
+      folder to excluded folder in settings.
+    </div>
+  {:else if $displayedFiles.length === 0}
+    <div class="no-files-message">
+      No files found !<br /><br />Please check if you have applied any other
+      filters and make sure the notes you are searching are not in the Excluded
+      folders from setting.
+    </div>
+  {:else}
   {#each $displayedFiles as file (file.path)}
     <Card {file} on:loaded={() => notesGrid.layout()} />
   {/each}
+  {/if}
 </div>
 
 <div class="page-bar">

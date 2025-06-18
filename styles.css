@@ -518,6 +518,11 @@
     cursor: pointer;
 }
 
+.no-files-message {
+    font-size: 1.5em;
+    text-align: center;
+}
+
 /* .refresh-button:hover {
     background-color: var(--interactive-accent-hover);
 } */
