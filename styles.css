@@ -145,6 +145,19 @@
     color: #fbc02d;
 }
 
+.filter-label-text {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+}
+
+.filter-label-text-value {
+    font-size: 1.2em;
+    font-weight: 650;
+}
+
 .filter-label button {
     background: none;
     border: none;
@@ -659,10 +672,6 @@
     border-color: var(--background-modifier-border-hover);
 }
 
-.card h3 {
-    word-wrap: break-word;
-}
-
 .card-content {
     /* flex-grow: 1; */
     max-width: 100%;
@@ -1017,6 +1026,10 @@
     text-wrap: balance !important;
 }
 
+.note-modal-content img {
+    max-width: 100%;
+}
+
 
 /* Style fixes for Obsidian generated elements */
 
@@ -1063,6 +1076,10 @@
     font-size: 1.124em !important;
 }
 
+.card h3 {
+    word-wrap: break-word;
+}
+
 .card-content h4 {
     font-size: 1em !important;
 }
@@ -1105,4 +1122,8 @@ ul>li.task-list-item>.task-list-item-checkbox {
 
 .card-content code>span {
     display: inline !important;
+}
+
+.card-content img {
+    max-width: 100% !important;
 }

@@ -398,6 +398,22 @@
     statisticsModal.open();
   }
 
+  function getFilterKeyText(filter: string) {
+    if (filter.startsWith(`["`)) {
+      return filter;
+    } else {
+      return `${filter.split(":")[0].trim()}: `;
+    }
+  }
+
+  function getFilterValueText(filter: string) {
+    if (filter.startsWith(`["`)) {
+      return "";
+    } else {
+      return filter.split(":")[1].trim();
+    }
+  }
+
   onMount(() => {
     columns = Math.floor(viewContent.clientWidth / $settings.minCardWidth) + 1;
     notesGrid = new MiniMasonry({
@@ -501,7 +517,14 @@
                   use:cumpulsoryFilterIcon
                   title="Convert to Normal Filter"
                 ></button>
-                <span>{filter}</span>
+                <div class="filter-label-text">
+                  <div class="filter-label-text-key">
+                    {getFilterKeyText(filter)}
+                  </div>
+                  <div class="filter-label-text-value">
+                    {getFilterValueText(filter)}
+                  </div>
+                </div>
                 <button
                   class="close"
                   on:click={() => removeFilter(index, "cf")}
@@ -517,7 +540,14 @@
                   use:normalFilterIcon
                   title="Convert to Compulsory Filter"
                 />
-                <span>{filter}</span>
+                <div class="filter-label-text">
+                  <div class="filter-label-text-key">
+                    {getFilterKeyText(filter)}
+                  </div>
+                  <div class="filter-label-text-value">
+                    {getFilterValueText(filter)}
+                  </div>
+                </div>
                 <button
                   class="close"
                   on:click={() => removeFilter(index, "nf")}
@@ -569,7 +599,14 @@
             use:cumpulsoryFilterIcon
             title="Convert to Normal Filter"
           ></button>
-          <span>{filter}</span>
+          <div class="filter-label-text">
+            <div class="filter-label-text-key">
+              {getFilterKeyText(filter)}
+            </div>
+            <div class="filter-label-text-value">
+              {getFilterValueText(filter)}
+            </div>
+          </div>
           <button
             class="close"
             on:click={() => removeFilter(index, "cf")}
@@ -585,7 +622,14 @@
             use:normalFilterIcon
             title="Convert to Compulsory Filter"
           />
-          <span>{filter}</span>
+          <div class="filter-label-text">
+            <div class="filter-label-text-key">
+              {getFilterKeyText(filter)}
+            </div>
+            <div class="filter-label-text-value">
+              {getFilterValueText(filter)}
+            </div>
+          </div>
           <button
             class="close"
             on:click={() => removeFilter(index, "nf")}
