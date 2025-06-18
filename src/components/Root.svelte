@@ -1,7 +1,7 @@
 <!-- ./src/components/Root.svelte -->
 
 <script lang="ts">
-  import { debounce, Menu, SearchComponent, setIcon } from "obsidian";
+  import { debounce, Menu, Notice, SearchComponent, setIcon } from "obsidian";
   import { afterUpdate, onMount } from "svelte";
   import { slide } from "svelte/transition";
   import MiniMasonry from "minimasonry";
