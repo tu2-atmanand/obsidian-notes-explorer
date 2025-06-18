@@ -128,12 +128,15 @@ export const DEFAULT_SETTINGS: NotesExplorerSettings = {
 
 export class NotesExplorerSettingsTab extends PluginSettingTab {
   plugin: NotesExplorerPlugin;
+  win: Window;
   tempFolderName: string;
+  allPickrs: Pickr[] = [];
 
   constructor(app: App, plugin: NotesExplorerPlugin) {
     super(app, plugin);
     this.plugin = plugin;
     this.tempFolderName = "";
+    this.win = window;
   }
 
   display(): void {
@@ -664,6 +667,8 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
                 },
               });
 
+              this.allPickrs.push(pickr);
+
               pickr
                 .on("change", (color: any) => {
                   const rgbaColor = `rgba(${color
@@ -844,6 +849,24 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     );
 
     footerSection.appendChild(donationSection);
+  }
+
+  hide(): void {
+    console.log("Cleaning up Notes Explorer settings UI...");
+    //Destroy all Pickr instances
+    this.allPickrs.forEach((pickr) => pickr.destroy());
+
+    //find all the div with calls picr-app using query-selector and remove them from the main window
+    const pickrApps = this.win.document.querySelectorAll(".pcr-app ");
+    if (pickrApps) {
+      pickrApps.forEach((pickrApp: any) => {
+        pickrApp.remove();
+      });
+    }
+    // Clear the container element
+    this.containerEl.empty();
+
+    super.hide();
   }
 }
 
