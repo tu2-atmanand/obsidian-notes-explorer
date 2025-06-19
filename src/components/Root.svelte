@@ -1,29 +1,44 @@
 <!-- ./src/components/Root.svelte -->
 
 <script lang="ts">
-  import { debounce, Menu, SearchComponent, setIcon } from "obsidian";
+  import { debounce, Menu, Notice, SearchComponent, setIcon } from "obsidian";
   import { afterUpdate, onMount } from "svelte";
+  import { slide } from "svelte/transition";
   import MiniMasonry from "minimasonry";
   import Card from "./Card.svelte";
   import store, {
-    tags,
     displayedFiles,
     searchQuery,
     skipNextTransition,
-    sort,
     viewIsVisible,
     settings,
-    refreshSignal,
     plugin,
     folderName,
-    allAllowedFiles,
     refreshOnResize,
     showActionBar,
     totalPages,
     currentPage,
     cardsPerBatch,
+    searchFilters,
+    allAllowedFiles,
+    allTags,
+    excludedFilesCount,
   } from "./store";
   import { Sort } from "src/settings";
+  import {
+    getFileSuggestions,
+    getFolderSuggestions,
+    getTagSuggestions,
+    getYAMLPropertySuggestions,
+    SearchFiltersMultiSuggestor,
+  } from "src/services/SearchFiltersMultiSuggestor";
+  import { get } from "svelte/store";
+  import {
+    addToSearchHistory,
+    initialPlaceholderSuggestionsMap,
+  } from "src/utils/SearchQueryHelpers";
+  import { refreshView } from "src/utils/GeneralHelpers";
+  import { NotesCountStatisticsModal } from "src/modals/NotesCountStatisticsModal";
 
   export let cardsContainer: HTMLElement;
   let notesGrid: MiniMasonry;
@@ -38,6 +53,15 @@
   };
   const closeIcon = (element: HTMLElement) => {
     setIcon(element, "x");
+  };
+  const cumpulsoryFilterIcon = (element: HTMLElement) => {
+    setIcon(element, "lock-keyhole");
+  };
+  const normalFilterIcon = (element: HTMLElement) => {
+    setIcon(element, "lock-open");
+  };
+  const closeCircleIcon = (element: HTMLElement) => {
+    setIcon(element, "circle-x");
   };
 
   let currentPageLocal = 1;
@@ -56,20 +80,159 @@
     if (currentPageLocal > 1) goToPage(currentPageLocal - 1);
   }
 
-  function refreshView() {
-    store.refreshSignal.set(!$refreshSignal);
-    store.files.set($allAllowedFiles);
-  }
+  let activeSuggest: SearchFiltersMultiSuggestor | null = null;
+  function searchInput(el: HTMLElement) {
+    const search = new SearchComponent(el);
+    search.addRightDecorator((rightDecoratorEl) => {
+      const sortButton = document.createElement("button");
+      sortButton.className = "clickable-icon";
+      setIcon(sortButton, "search");
+      sortButton.addEventListener(
+        "click",
+        () => ($searchQuery = search.inputEl.value),
+      );
+      rightDecoratorEl.appendChild(sortButton);
+    });
+    console.log("SearchComponent initialized:", search);
+    search.setClass("action-bar__search-input");
+    const inputEl = search.inputEl;
+    const appInstance = get(plugin)?.app;
+    const fileSuggestions = new Set(getFileSuggestions(appInstance));
+    const tagSuggestions = new Set(getTagSuggestions(appInstance));
+    const parentSuggestions = new Set(getFolderSuggestions(appInstance));
+    const yamlPropertiesSuggestions = new Set(
+      getYAMLPropertySuggestions(appInstance),
+    );
+    // console.log("Yaml Properties Suggestions:", yamlPropertiesSuggestions);
+    const finalSuggestions = new Set([
+      ...fileSuggestions,
+      ...tagSuggestions,
+      ...parentSuggestions,
+      ...yamlPropertiesSuggestions,
+    ]);
 
-  const searchInput = (element: HTMLElement) => {
-    const searchInput = new SearchComponent(element);
-    searchInput.onChange((value) => {
-      $searchQuery = value;
+    const updateSuggestions = (value: string) => {
+      console.log("User has clicked inside the inputEl:", value);
+      if (!appInstance) return;
+
+      if (!activeSuggest) {
+        activeSuggest = new SearchFiltersMultiSuggestor(
+          inputEl,
+          finalSuggestions,
+          (selected: string) => {
+            console.log(
+              "Selected:",
+              selected,
+              "\nValue inside inputEl:",
+              inputEl.value,
+              "\n Is first check true : ",
+              inputEl.value === "",
+            );
+            if (!selected) return;
+
+            const oldSearchFilters = get(searchFilters);
+            if (
+              !oldSearchFilters.cf.includes(selected) &&
+              !oldSearchFilters.nf.includes(selected)
+            ) {
+              store.searchFilters.set({
+                cf: oldSearchFilters.cf,
+                nf: [...oldSearchFilters.nf, selected],
+              });
+              // refreshView();
+            } else {
+              console.warn(
+                "The selected item is already present in the search filters.",
+              );
+              new Notice("The filter is already added to the view.");
+            }
+            addToSearchHistory(selected);
+          },
+          appInstance,
+        );
+        inputEl.blur();
+        activeSuggest.getSuggestions(inputEl.value);
+        inputEl.focus();
+      } else {
+        activeSuggest.getSuggestions(inputEl.value);
+      }
+    };
+
+    // inputEl.addEventListener("focus", () => updateSuggestions(inputEl.value));
+    inputEl.addEventListener("click", () => {
+      console.log("User has clicked inside the inputEl:", inputEl.value);
+      if (activeSuggest) {
+        activeSuggest.getSuggestions(inputEl.value);
+      } else {
+        updateSuggestions(inputEl.value);
+      }
     });
-    searchQuery.subscribe((value) => {
-      searchInput.inputEl.value = value;
+    inputEl.addEventListener("input", () => {
+      console.log("This will only be called when the input changes.");
+      // console.log("Input changed:", inputEl.value);
+      if (inputEl.value.trim() === "") {
+        $searchQuery = "";
+      } else {
+        updateSuggestions(inputEl.value);
+      }
     });
-  };
+    search.clearButtonEl.addEventListener("click", (e: Event) => {
+      $searchQuery = "";
+    });
+    inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        console.log("Enter pressed in search input:", inputEl.value);
+        const inputVal = inputEl.value.trim();
+        if (!inputVal) return;
+
+        addToSearchHistory(inputVal);
+
+        const regex = /^\[.*:.*\]$/;
+        console.log(
+          "Valid filter format detected:",
+          inputVal,
+          "If condition: ",
+          regex.test(inputVal),
+        );
+        if (
+          regex.test(inputVal) ||
+          /^file:\s*\S+$/.test(inputVal) ||
+          /^parent:\s*\S+$/.test(inputVal) ||
+          /^tag:\s*\S+$/.test(inputVal) ||
+          /^content:\s*\S+$/.test(inputVal) ||
+          /^created-before:\s*\S+$/.test(inputVal) ||
+          /^created-after:\s*\S+$/.test(inputVal) ||
+          /^modified-before:\s*\S+$/.test(inputVal) ||
+          /^modified-after:\s*\S+$/.test(inputVal)
+        ) {
+          const oldSearchFilters = get(searchFilters);
+          if (
+            !oldSearchFilters.cf.includes(inputVal) &&
+            !oldSearchFilters.nf.includes(inputVal)
+          ) {
+            store.searchFilters.set({
+              cf: oldSearchFilters.cf,
+              nf: [...oldSearchFilters.nf, inputVal],
+            });
+            inputEl.value = "";
+            // refreshView();
+          } else {
+            console.warn(
+              "The selected item is already present in the search filters.",
+            );
+            new Notice("The filter is already added to the view.");
+          }
+        } else {
+          $searchQuery = inputVal;
+        }
+      }
+    });
+
+    store.searchFilters.subscribe((filters) => {
+      console.log("Root.svelte : SearchFilters Subscriber:", filters);
+      // refreshView();
+    });
+  }
 
   function sortMenu(event: MouseEvent) {
     const sortMenu = new Menu();
@@ -81,19 +244,23 @@
     });
     sortMenu.addItem((item) => {
       item.setTitle("Filename (A-Z)");
-      item.setChecked($sort == Sort.NameAsc);
+      item.setChecked($settings.defaultSort == Sort.NameAsc);
       item.onClick(async () => {
-        $sort = Sort.NameAsc;
-        $settings.defaultSort = Sort.NameAsc;
+        store.settings.update((s) => {
+          s.defaultSort = Sort.NameAsc;
+          return s;
+        });
         await $plugin.saveSettings();
       });
     });
     sortMenu.addItem((item) => {
       item.setTitle("Filename(Z-A)");
-      item.setChecked($sort == Sort.NameDesc);
+      item.setChecked($settings.defaultSort == Sort.NameDesc);
       item.onClick(async () => {
-        $sort = Sort.NameDesc;
-        $settings.defaultSort = Sort.NameDesc;
+        store.settings.update((s) => {
+          s.defaultSort = Sort.NameDesc;
+          return s;
+        });
         await $plugin.saveSettings();
       });
     });
@@ -102,38 +269,46 @@
 
     sortMenu.addItem((item) => {
       item.setTitle("Edited (newest first)");
-      item.setChecked($sort == Sort.EditedDesc);
+      item.setChecked($settings.defaultSort == Sort.EditedDesc);
       item.onClick(async () => {
-        $sort = Sort.EditedDesc;
-        $settings.defaultSort = Sort.EditedDesc;
+        store.settings.update((s) => {
+          s.defaultSort = Sort.EditedDesc;
+          return s;
+        });
         await $plugin.saveSettings();
       });
     });
     sortMenu.addItem((item) => {
       item.setTitle("Edited (oldest first)");
-      item.setChecked($sort == Sort.EditedAsc);
+      item.setChecked($settings.defaultSort == Sort.EditedAsc);
       item.onClick(async () => {
-        $sort = Sort.EditedAsc;
-        $settings.defaultSort = Sort.EditedAsc;
+        store.settings.update((s) => {
+          s.defaultSort = Sort.EditedAsc;
+          return s;
+        });
         await $plugin.saveSettings();
       });
     });
     sortMenu.addSeparator();
     sortMenu.addItem((item) => {
       item.setTitle("Created (newest first)");
-      item.setChecked($sort == Sort.CreatedDesc);
+      item.setChecked($settings.defaultSort == Sort.CreatedDesc);
       item.onClick(async () => {
-        $sort = Sort.CreatedDesc;
-        $settings.defaultSort = Sort.CreatedDesc;
+        store.settings.update((s) => {
+          s.defaultSort = Sort.CreatedDesc;
+          return s;
+        });
         await $plugin.saveSettings();
       });
     });
     sortMenu.addItem((item) => {
       item.setTitle("Created (oldest first)");
-      item.setChecked($sort == Sort.CreatedAsc);
+      item.setChecked($settings.defaultSort == Sort.CreatedAsc);
       item.onClick(async () => {
-        $sort = Sort.CreatedAsc;
-        $settings.defaultSort = Sort.CreatedAsc;
+        store.settings.update((s) => {
+          s.defaultSort = Sort.CreatedAsc;
+          return s;
+        });
         await $plugin.saveSettings();
       });
     });
@@ -165,7 +340,7 @@
       item.setChecked($settings.showSubFolders);
       item.onClick(() => {
         $settings.showSubFolders = !$settings.showSubFolders;
-        refreshView();
+        // refreshView();
       });
     });
 
@@ -174,24 +349,87 @@
 
   function clearFolderFilter(event: MouseEvent) {
     store.folderName.set("");
-    store.files.set($allAllowedFiles);
-    notesGrid.layout();
+    // store.files.set($allAllowedFiles);
+    refreshView();
+    // notesGrid.layout();
+  }
+
+  function removeFilter(index: number, type: "cf" | "nf") {
+    store.searchFilters.update((filters) => {
+      filters[type].splice(index, 1);
+      return { ...filters };
+    });
+    // refreshView();
+  }
+
+  function moveFilter(index: number, type: "cf" | "nf") {
+    searchFilters.update((filters) => {
+      const item = filters[type].splice(index, 1)[0];
+      const otherType = type === "cf" ? "nf" : "cf";
+      filters[otherType].push(item);
+      return { ...filters };
+    });
+  }
+
+  function handleTagClick(event: MouseEvent) {
+    // $searchQuery = (event.target as HTMLButtonElement).textContent || "";
+    store.searchFilters.update((filters) => {
+      const tag = (event.target as HTMLButtonElement).textContent || "";
+      if (!filters.cf.includes(tag) && !filters.nf.includes(tag)) {
+        filters.nf.push(tag);
+      } else {
+        console.warn("The tag is already present in the search filters.");
+        new Notice("The tag is already added to the view.");
+      }
+      return { ...filters };
+    });
+  }
+
+  $: totalNotesCount =
+    $searchQuery === "" &&
+    $folderName === "" &&
+    $searchFilters.cf.length === 0 &&
+    $searchFilters.nf.length === 0
+      ? `${$allAllowedFiles.length}`
+      : `${$displayedFiles.length} / ${get(plugin).app.vault.getMarkdownFiles().length - $excludedFilesCount}`; // Display filtered count vs total count
+
+  function handleCountLabelBtn(event: MouseEvent) {
+    const statisticsModal = new NotesCountStatisticsModal(get(plugin));
+    statisticsModal.open();
+  }
+
+  function getFilterKeyText(filter: string) {
+    if (filter.startsWith(`["`)) {
+      return filter;
+    } else {
+      return `${filter.split(":")[0].trim()}: `;
+    }
+  }
+
+  function getFilterValueText(filter: string) {
+    if (filter.startsWith(`["`)) {
+      return "";
+    } else {
+      return filter.split(":")[1].trim();
+    }
   }
 
   onMount(() => {
-    $sort = $settings.defaultSort;
     columns = Math.floor(viewContent.clientWidth / $settings.minCardWidth) + 1;
     notesGrid = new MiniMasonry({
       container: cardsContainer,
       baseWidth: $settings.minCardWidth,
-      gutter: 20,
-      surroundingGutter: false,
+      gutter: $settings.gutterSize,
+      surroundingGutter: $settings.enableSurroundingGutters,
       ultimateGutter: 20,
     });
     notesGrid.layout();
 
+    window.addEventListener("resize", handleResize);
+
     return () => {
       notesGrid.destroy();
+      window.removeEventListener("resize", handleResize);
     };
   });
 
@@ -212,6 +450,16 @@
     }),
   );
 
+  let screenWidth = window.innerWidth;
+  let showFilters = false;
+
+  const handleResize = () => {
+    screenWidth = window.innerWidth;
+    if (screenWidth > 1200) {
+      showFilters = false;
+    }
+  };
+
   $: actionBarStyle = $showActionBar
     ? "action-bar-parent"
     : "action-bar-parent action-bar-parent-hide";
@@ -219,32 +467,121 @@
 
 <div class={actionBarStyle}>
   <div class="action-bar" bind:this={viewContent}>
-    <button
-      class="clickable-icon refresh-button"
-      use:refreshIcon
-      on:click={refreshView}
-    />
-    <div class="search-component">
+    <div class="action-bar-right-section">
+      <div class="action-bar_buttons">
+        <button
+          class="clickable-icon refresh-button"
+          use:refreshIcon
+          on:click={refreshView}
+        />
+        <button
+          class="clickable-icon sort-button"
+          use:sortIcon
+          on:click={sortMenu}
+        />
+      </div>
       <div class="action-bar__search" use:searchInput />
       <button
-        class="clickable-icon sort-button"
-        use:sortIcon
-        on:click={sortMenu}
-      />
+        class="clickable-icon count-label-button"
+        on:click={handleCountLabelBtn}>{totalNotesCount}</button
+      >
     </div>
-    <div class="action-bar__tags">
-      <div class="action-bar__tags__list">
-        {#each $tags as tag}
-          <button class="action-bar__tag" on:click={() => ($searchQuery = tag)}
-            >{tag}</button
-          >
-        {/each}
+    {#if screenWidth <= 1200}
+      <button
+        class="filters-toggle-button"
+        on:click={() => (showFilters = !showFilters)}
+      >
+        Filters
+      </button>
+    {:else}
+      <div class="action-bar_labelSection">
+        {#if $folderName || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
+          {#if $folderName}
+            <div class="action-bar_folder">
+              <div style="align-content: center;">{$folderName}</div>
+              <div class="action-bar_folder_closeButton">
+                <button
+                  class="clickable-icon"
+                  use:closeIcon
+                  on:click={clearFolderFilter}
+                />
+              </div>
+            </div>
+          {/if}
+          <div class="filter-labels">
+            {#each $searchFilters.cf as filter, index}
+              <div class="filter-label cf">
+                <button
+                  class="toggle"
+                  on:click={() => moveFilter(index, "cf")}
+                  use:cumpulsoryFilterIcon
+                  title="Convert to Normal Filter"
+                ></button>
+                <div class="filter-label-text">
+                  <div class="filter-label-text-key">
+                    {getFilterKeyText(filter)}
+                  </div>
+                  <div class="filter-label-text-value">
+                    {getFilterValueText(filter)}
+                  </div>
+                </div>
+                <button
+                  class="close"
+                  on:click={() => removeFilter(index, "cf")}
+                  use:closeCircleIcon
+                />
+              </div>
+            {/each}
+            {#each $searchFilters.nf as filter, index}
+              <div class="filter-label nf">
+                <button
+                  class="toggle"
+                  on:click={() => moveFilter(index, "nf")}
+                  use:normalFilterIcon
+                  title="Convert to Compulsory Filter"
+                />
+                <div class="filter-label-text">
+                  <div class="filter-label-text-key">
+                    {getFilterKeyText(filter)}
+                  </div>
+                  <div class="filter-label-text-value">
+                    {getFilterValueText(filter)}
+                  </div>
+                </div>
+                <button
+                  class="close"
+                  on:click={() => removeFilter(index, "nf")}
+                  use:closeCircleIcon
+                />
+              </div>
+            {/each}
+          </div>
+        {:else}
+          <div class="action-bar_labelSection_tags">
+            {#each $allTags as tag}
+              <button
+                class="action-bar_labelSection_tags_tag"
+                on:click={handleTagClick}
+                >{tag}
+              </button>
+            {/each}
+          </div>
+        {/if}
       </div>
-    </div>
+    {/if}
+  </div>
+</div>
+
+<div
+  class="filter-section-small-screens responsive"
+  class:visible={showFilters}
+  transition:slide
+>
+  {#if $folderName || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
     {#if $folderName}
-      <div class="action-bar_folder">
+      <div class="filter-section-small-screens-folder-label">
         <div style="align-content: center;">{$folderName}</div>
-        <div class="action-bar_folder_closeButton">
+        <div class="filter-section-small-screens-folder-label-closeButton">
           <button
             class="clickable-icon"
             use:closeIcon
@@ -253,18 +590,93 @@
         </div>
       </div>
     {/if}
-  </div>
+    <div class="filter-section-small-screens-filter-labels">
+      {#each $searchFilters.cf as filter, index}
+        <div class="filter-label cf">
+          <button
+            class="toggle"
+            on:click={() => moveFilter(index, "cf")}
+            use:cumpulsoryFilterIcon
+            title="Convert to Normal Filter"
+          ></button>
+          <div class="filter-label-text">
+            <div class="filter-label-text-key">
+              {getFilterKeyText(filter)}
+            </div>
+            <div class="filter-label-text-value">
+              {getFilterValueText(filter)}
+            </div>
+          </div>
+          <button
+            class="close"
+            on:click={() => removeFilter(index, "cf")}
+            use:closeCircleIcon
+          />
+        </div>
+      {/each}
+      {#each $searchFilters.nf as filter, index}
+        <div class="filter-label nf">
+          <button
+            class="toggle"
+            on:click={() => moveFilter(index, "nf")}
+            use:normalFilterIcon
+            title="Convert to Compulsory Filter"
+          />
+          <div class="filter-label-text">
+            <div class="filter-label-text-key">
+              {getFilterKeyText(filter)}
+            </div>
+            <div class="filter-label-text-value">
+              {getFilterValueText(filter)}
+            </div>
+          </div>
+          <button
+            class="close"
+            on:click={() => removeFilter(index, "nf")}
+            use:closeCircleIcon
+          />
+        </div>
+      {/each}
+    </div>
+  {:else}
+    No Filters Applied
+    <div class="filter-section-small-screens-tags">
+      <!-- {#each $tags as tag}
+            <span class="tag">{tag}</span>
+          {/each} -->
+    </div>
+  {/if}
 </div>
 
 <div
   bind:this={cardsContainer}
   class="cards-container"
   style="--columns: {columns};"
-  style:padding-top={$showActionBar ? "3.6em" : "0"}
+  style:padding-top={$showActionBar ? "4em" : "0"}
 >
-  {#each $displayedFiles as file (file.path)}
-    <Card {file} on:loaded={() => notesGrid.layout()} />
-  {/each}
+  {#if $displayedFiles.length === 0 && $searchQuery !== ""}
+    <div class="no-files-message">
+      No files found. <br /><br />Please check your search query again and also
+      make sure the notes you are searching are not in the Excluded folders from
+      setting.
+    </div>
+  {:else if $displayedFiles.length === 0 && $folderName !== ""}
+    <div class="no-files-message">
+      No files found in the folder "{$folderName}". <br /><br />Either the
+      folder is empty or you probably have added this folder or its parent
+      folder to excluded folder in settings.
+    </div>
+  {:else if $displayedFiles.length === 0}
+    <div class="no-files-message">
+      No files found !<br /><br />Please check if you have applied any other
+      filters and make sure the notes you are searching are not in the Excluded
+      folders from setting.
+    </div>
+  {:else}
+    {#each $displayedFiles as file (file.path)}
+      <Card {file} on:loaded={() => notesGrid.layout()} />
+    {/each}
+  {/if}
 </div>
 
 <div class="page-bar">

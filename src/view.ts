@@ -15,15 +15,23 @@ import { type NotesExplorerSettings } from "./settings";
 import Root from "./components/Root.svelte";
 import { get } from "svelte/store";
 import store, {
-  allAllowedFiles,
   cardsPerBatch,
   currentPage,
   displayedCount,
+  displayedFilesCount,
+  allAllowedFiles,
   folderName,
+  settings,
   showActionBar,
   totalPages,
 } from "./components/store";
-import { leftSideArrow, pluginIcon, rightSideArrow, topBarIcon } from "./icons";
+import {
+  leftSideArrow,
+  pageNavigationDockIcon,
+  pluginIcon,
+  rightSideArrow,
+  topBarIcon,
+} from "./icons";
 
 export const PLUGIN_VIEW_TYPE = "notes-explorer";
 
@@ -66,9 +74,25 @@ export class NotesExplorerView extends ItemView {
       target: this.viewContent,
     });
 
+    // Add action button to toggle the page navigation bar
+    if (get(settings).pagesView) {
+      this.addAction(
+        pageNavigationDockIcon,
+        "Toggle page navigation bar",
+        () => {
+          const pageBarContainer = this.viewContent.children[3];
+          if (pageBarContainer) {
+            pageBarContainer.classList.toggle("page-bar-visible");
+          }
+        }
+      );
+    }
+
+    // Add action to show/hide the top bar
     this.addAction(topBarIcon, "Show/Hide top bar", () => {
       store.showActionBar.set(!get(showActionBar));
     });
+
 
     this.renderMoreOnScroll();
   }
@@ -153,8 +177,7 @@ export class NotesExplorerView extends ItemView {
   }
 
   private renderMoreOnScroll() {
-    store.pagesView.set(this.settings.pagesView);
-    const cardsContainer = this.viewContent.children[1];
+    const cardsContainer = this.viewContent.children[2];
 
     if (!this.settings.pagesView) {
       // Add status bar showing the number of cards rendered inside the view.
@@ -179,7 +202,7 @@ export class NotesExplorerView extends ItemView {
         console.error("cardsContainer is undefined");
       }
     } else {
-      const pageBarContainer = this.viewContent.children[2];
+      const pageBarContainer = this.viewContent.children[3];
       if (pageBarContainer) {
         this.statusBarEl = this.plugin.addStatusBarItem();
 
@@ -203,7 +226,12 @@ export class NotesExplorerView extends ItemView {
           cls: "notes-explorer-statuBarSpanEl",
         });
         store.currentPage.subscribe(() => {
-          statusBarText.textContent = "Page : " + get(currentPage);
+          statusBarText.textContent =
+            "Page : " + get(currentPage) + " of " + get(totalPages);
+        });
+        store.totalPages.subscribe(() => {
+          statusBarText.textContent =
+            "Page : " + get(currentPage) + " of " + get(totalPages);
         });
         statusBarText.setAttribute("aria-label", "Open page navigation bar");
         statusBarText.setAttribute("aria-label-position", "top");
@@ -238,7 +266,7 @@ export class NotesExplorerView extends ItemView {
           cardsContainer.addEventListener("scroll", async () => {
             if (
               cardsContainer.scrollTop + cardsContainer.clientHeight >
-              cardsContainer.scrollHeight - 100
+              cardsContainer.scrollHeight - 200
             ) {
               const remainingCardsInCurrentPage =
                 this.settings.cardsPerPage - get(store.displayedFiles).length;

@@ -11,11 +11,14 @@
   import { afterUpdate, createEventDispatcher, onMount } from "svelte";
   import { skipNextTransition, app, view, settings, plugin } from "./store";
   import { ClickMode, TitleDisplayMode } from "../settings";
-  import { openDeleteConfirmationModal } from "src/utils/helpers";
+  import { openDeleteConfirmationModal } from "src/utils/ModalHelpers";
+  import { isFileEmpty } from "src/utils/GeneralHelpers";
+  import { NoteViewerModal } from "src/modals/NoteViewerModal";
   import {
     hookMarkdownLinkMouseEventHandlers,
     markdownButtonHoverPreviewEvent,
-  } from "src/utils/MarkdownHoverPreview";
+    obsidianMarkdownRenderer,
+  } from "src/services/MarkdownUIRenderer";
 
   export let file: TFile;
   let displayFilename: boolean =
@@ -174,12 +177,14 @@
   };
 
   const renderNoteCard = async (el: HTMLElement): Promise<void> => {
-    const content = await file.vault.cachedRead(file);
-    if (content.trim().length > 0) {
+    // console.log("Rendering note card for file:", file.path);
+    const fileEmptyCondition = await isFileEmpty(file);
+    if (!fileEmptyCondition) {
       const maxLiness = $settings.maxLines || 20;
+      const content = await file.vault.cachedRead(file);
       const truncatedContent = truncateContent(content, maxLiness);
 
-      await MarkdownRenderer.render(
+      await obsidianMarkdownRenderer(
         $app,
         truncatedContent,
         el,
@@ -192,13 +197,7 @@
       //   display: "Notes Explorer",
       // });
       if ($settings.contentInteractions) {
-        hookMarkdownLinkMouseEventHandlers(
-          $app,
-          $plugin,
-          el,
-          file.path,
-          file.path,
-        );
+        hookMarkdownLinkMouseEventHandlers($plugin, el, file.path, file.path);
       }
     } else {
       el.createEl("div", {
@@ -259,7 +258,11 @@
         child.type === "leaf" && child.state?.type === "notes-explorer",
     );
 
-    if ($settings.openNoteLayout === "right") {
+    if ($settings.openNoteLayout === "modal") {
+      const modal = new NoteViewerModal($plugin, file);
+      modal.open();
+      return;
+    } else if ($settings.openNoteLayout === "right") {
       if (mainEntry) {
         if ((mainEntry[1] as any)?.children?.length > 1) {
           const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
@@ -268,6 +271,7 @@
           await $app.workspace.getLeaf("split", "vertical").openFile(file);
         }
       }
+      return;
     } else if ($settings.openNoteLayout === "sameTab") {
       if (hasNotesExplorer) {
         if (mainEntry && (mainEntry[1] as any)?.children?.length > 1) {
@@ -289,8 +293,10 @@
       return;
     } else if ($settings.openNoteLayout === "tab") {
       await $app.workspace.getLeaf("tab").openFile(file);
+      return;
     } else if ($settings.openNoteLayout === "window") {
       await $app.workspace.getLeaf("window").openFile(file);
+      return;
     }
   };
 
@@ -337,7 +343,7 @@
 
       case "folderName":
         return file.parent?.path !== "/"
-          ? file.parent?.path || ""
+          ? file.parent?.path.split("/").pop() || ""
           : "Root folder";
 
       case "editedTime":
@@ -466,7 +472,13 @@
         {:else if $settings.noteMetadata === "folderName"}
           <span use:vaultIcon />
         {/if}
-        <div class="card-footer-text">{getFooterMetadata()}</div>
+        <div
+          class="card-footer-text"
+          title={file && file.parent ? file.parent.path : ""}
+          role="tooltip"
+        >
+          {getFooterMetadata()}
+        </div>
       </div>
       {#if $settings.showDeleteButton}
         <button

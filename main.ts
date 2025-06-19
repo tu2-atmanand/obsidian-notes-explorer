@@ -1,4 +1,11 @@
-import { Plugin, TFile, TFolder, WorkspaceLeaf } from "obsidian";
+import {
+  Notice,
+  Plugin,
+  TFile,
+  TFolder,
+  WorkspaceLeaf,
+  type ObsidianProtocolData,
+} from "obsidian";
 
 import {
   type NotesExplorerSettings,
@@ -6,7 +13,7 @@ import {
   DEFAULT_SETTINGS,
 } from "./src/settings";
 import { NotesExplorerView, PLUGIN_VIEW_TYPE } from "./src/view";
-import store from "./src/components/store";
+import store, { settings } from "./src/components/store";
 import "./styles.css";
 import { pluginIcon } from "src/icons";
 
@@ -35,6 +42,8 @@ export default class NotesExplorerPlugin extends Plugin {
 
       this.registerPluginRibbonIcon();
 
+      this.registerObsidianURIHandler();
+
       this.registerView(
         PLUGIN_VIEW_TYPE,
         (leaf) => new NotesExplorerView(this, this.settings, leaf)
@@ -43,6 +52,14 @@ export default class NotesExplorerPlugin extends Plugin {
       if (this.settings.launchOnStart) {
         this.activateView("main");
       }
+
+      // Registering a subscription to refresh the view when files change
+      store.allAllowedFiles.subscribe(($allAllowedFiles) => {
+        console.info(
+          "allAllowedFiles changed, refreshing the view by assigning all these files to files store..."
+        );
+        store.files.set($allAllowedFiles);
+      });
     });
   }
 
@@ -201,34 +218,115 @@ export default class NotesExplorerPlugin extends Plugin {
 
   async openAllFilesInFolder(folder: TFolder) {
     if (folder instanceof TFolder) {
-      let files: TFile[] = [];
+      // let files: TFile[] = [];
 
-      if (this.settings.showSubFolders) {
-        // Helper function to recursively fetch files
-        const collectFiles = (currentFolder: TFolder) => {
-          currentFolder.children.forEach((child) => {
-            if (child instanceof TFile && child.extension === "md") {
-              files.push(child);
-            } else if (child instanceof TFolder) {
-              collectFiles(child); // Recursively process subfolder
-            }
-          });
-        };
+      // if (this.settings.showSubFolders) {
+      //   // Helper function to recursively fetch files
+      //   const collectFiles = (currentFolder: TFolder) => {
+      //     currentFolder.children.forEach((child) => {
+      //       if (child instanceof TFile && child.extension === "md") {
+      //         files.push(child);
+      //       } else if (child instanceof TFolder) {
+      //         collectFiles(child); // Recursively process subfolder
+      //       }
+      //     });
+      //   };
 
-        collectFiles(folder);
-      } else {
-        // Only fetch files in the current folder
-        files = folder.children.filter(
-          (child): child is TFile =>
-            child instanceof TFile && child.extension === "md"
-        );
-      }
+      //   collectFiles(folder);
+      // } else {
+      //   // Only fetch files in the current folder
+      //   files = folder.children.filter(
+      //     (child): child is TFile =>
+      //       child instanceof TFile && child.extension === "md"
+      //   );
+      // }
 
-      store.files.set(files);
+      // store.files.set(files);
       store.folderName.set(folder.name);
     }
 
     await this.activateView("main");
+  }
+
+  /**
+   * Handles obsidian://fs protocol for search functionality
+   *
+   * @param layout - Where to open search:
+   *   - "tab" (default) - Opens in new tab
+   *   - "split" - Opens in split pane
+   *   - "window" - Opens in new window
+   *   - "modal" - Opens in modal popup
+   * @param args - Additional parameters for search and filtering, passed as a JSON object
+   *
+   * Examples:
+   * - obsidian://fs?query=hello&layout=modal
+   * - obsidian://fs?query=world&layout=tab
+   * - obsidian://fs?query=test (defaults to tab view)
+   */
+  private registerObsidianURIHandler() {
+    this.registerObsidianProtocolHandler(
+      "notes-explorer",
+      async (path: ObsidianProtocolData) => {
+        const args = JSON.parse(path.args) || "";
+        const layout = args.layout || "modal";
+        console.log("Path from Obsidian URI:", args);
+        store.searchFilters.set(args);
+
+        // Method 1 = Joes Approach
+        // const params = new URLSearchParams({
+        //   layout: "window",
+        //   parent: "/Research this/Notes Explorer",
+        //   tag1: "#sport/football",
+        //   tag2: "#game",
+        // });
+        // const finalURI = `obsidian://notes-explorer?${params.toString()}`;
+        // console.log("This is encoded URI : ", finalURI);
+
+        // Method 2 = Encoding and Decoding as Json Object
+        // const data = {
+        //   layout: "None",
+        //   parent: "/Research this😁/Notes Explorer",
+        //   tag1: "#sport/football",
+        //   tag2: "#game🐗",
+        //   createdBefore: "2023-10-01",
+        //   "property 1": 10,
+        // };
+        // console.log("Data to encode:", data);
+        // const encodedArgs = encodeURIComponent(JSON.stringify(data));
+        // const finalURI = `obsidian://notes-explorer?args=${encodedArgs}`;
+        // console.log("This is encoded URI : ", finalURI);
+
+        // const docodedArgs = decodeURIComponent(
+        //   finalURI.split("args=")[1] || ""
+        // );
+        // console.log("Decoded args from URI: ", JSON.stringify(docodedArgs));
+
+        if (layout === "modal") {
+          // TODO : Implement the function to open Notes Explorer view inside a modal.
+        } else {
+          const { workspace } = this.app;
+          let leaf: WorkspaceLeaf | null = null;
+
+          if (layout === "tab") {
+            leaf = workspace.getLeaf("tab");
+          } else if (layout === "split") {
+            leaf = workspace.getLeaf("split");
+          } else if (layout === "window") {
+            leaf = workspace.getLeaf("window");
+            console.log("Opening in a new window...");
+          } else {
+            new Notice(
+              "Unsupported view type passed in the Obsidian URI: " + layout
+            );
+          }
+
+          if (leaf && ["tab", "split", "window"].includes(layout)) {
+            await leaf.setViewState({ type: PLUGIN_VIEW_TYPE, active: true });
+            store.viewIsVisible.set(true);
+          }
+        }
+      }
+    );
   }
 
   // async openTagInCardsView(tagName: string) {

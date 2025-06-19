@@ -8,11 +8,17 @@ import {
   normalizePath,
   setIcon,
 } from "obsidian";
+import {
+  SimpleMultiSuggestor,
+  getSimpleFolderSuggestions,
+} from "./services/SimpleMultiSuggestor";
 import { buyMeCoffeeSVGIcon, kofiSVGIcon } from "./icons";
 
 import NotesExplorerPlugin from "../main";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
+import { get } from "svelte/store";
+import { settings } from "./components/store";
 
 export enum TitleDisplayMode {
   Both = "Both",
@@ -36,6 +42,7 @@ export enum NoteOpenLayout {
   SameTab = "sameTab",
   NewTab = "tab",
   NewWindow = "window",
+  Modal = "modal",
 }
 export enum ClickMode {
   Single = "single",
@@ -65,6 +72,8 @@ export enum Sort {
 
 export interface NotesExplorerSettings {
   minCardWidth: number;
+  gutterSize: number;
+  enableSurroundingGutters: boolean;
   fixedCardHeight: number | null;
   maxLines: number | null;
   launchOnStart: boolean;
@@ -82,16 +91,19 @@ export interface NotesExplorerSettings {
   pinnedFiles: string[];
   tagColors: TagSetting[];
   tagColorIndicatorType: TagCardColorIndicatorType;
-  defaultSort: Sort;
+  defaultSort: string;
   openViewOnFolderClick: boolean;
   excludedFolders: string[];
   pagesView: boolean;
   cardsPerPage: number;
   clickMode: string;
+  searchHistoryEntries: string[];
 }
 
 export const DEFAULT_SETTINGS: NotesExplorerSettings = {
   minCardWidth: 250,
+  gutterSize: 20,
+  enableSurroundingGutters: false,
   fixedCardHeight: null,
   maxLines: null,
   launchOnStart: false,
@@ -115,21 +127,35 @@ export const DEFAULT_SETTINGS: NotesExplorerSettings = {
   pagesView: true,
   cardsPerPage: 100,
   clickMode: "single",
+  searchHistoryEntries: [],
 };
 
 export class NotesExplorerSettingsTab extends PluginSettingTab {
   plugin: NotesExplorerPlugin;
+  win: Window;
   tempFolderName: string;
+  allPickrs: Pickr[] = [];
 
   constructor(app: App, plugin: NotesExplorerPlugin) {
     super(app, plugin);
     this.plugin = plugin;
     this.tempFolderName = "";
+    this.win = window;
   }
 
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
+
+    this.navEl = containerEl.createDiv({
+      cls: "setting-tab-header",
+    });
+    this.navEl.createEl("h2", {
+      text: "Notes Explorer Settings",
+    });
+    this.navEl.createEl("p", {
+      text: "Configure the settings for the Notes Explorer plugin.",
+    });
 
     new Setting(containerEl)
       .setName("Launch on start")
@@ -138,7 +164,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
         toggle
           .setValue(this.plugin.settings.launchOnStart)
           .onChange(async (value) => {
-            this.plugin.settings.launchOnStart = value;
+            get(settings).launchOnStart = value;
             await this.plugin.saveSettings();
           })
       );
@@ -237,6 +263,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
             [NoteOpenLayout.NewTab]: "Open note in new tab",
             [NoteOpenLayout.SameTab]: "Open note in same tab",
             [NoteOpenLayout.NewWindow]: "Open note in new window",
+            [NoteOpenLayout.Modal]: "Open note in quick modal",
           })
           .setValue(this.plugin.settings.openNoteLayout)
           .onChange(async (value) => {
@@ -290,6 +317,38 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       );
 
     new Setting(containerEl).setName("Cards ui").setHeading();
+
+    new Setting(containerEl)
+      .setName("Gutter size")
+      .setDesc("Set the size of the gutter between cards")
+      .addText((text) =>
+        text
+          .setPlaceholder("eg.: 20")
+          .setValue(this.plugin.settings.gutterSize.toString())
+          .onChange(async (value) => {
+            if (isNaN(parseInt(value))) {
+              new Notice("Invalid number");
+              return;
+            }
+
+            this.plugin.settings.gutterSize = parseInt(value);
+            await this.plugin.saveSettings();
+          })
+      );
+
+    new Setting(containerEl)
+      .setName("Surrounding gutters")
+      .setDesc(
+        "Enable this option to have gutters on the left and right side of the board, in addition to the gutters between cards."
+      )
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.enableSurroundingGutters)
+          .onChange(async (value) => {
+            this.plugin.settings.enableSurroundingGutters = value;
+            await this.plugin.saveSettings();
+          })
+      );
 
     new Setting(containerEl)
       .setName("Title display mode")
@@ -591,7 +650,6 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
                   TagCardColorIndicatorType.sidebars
                     ? `1px solid ${tag.color}`
                     : "",
-                width: "100%",
               });
             })
             .addButton((button) => {
@@ -612,6 +670,8 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
                   },
                 },
               });
+
+              this.allPickrs.push(pickr);
 
               pickr
                 .on("change", (color: any) => {
@@ -685,11 +745,34 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
       .setDesc(
         "Enter the complete folder path and click on save to exclude all notes from this folder from the board. You can also apply filters to board notes from sub-folders from the board filter menu."
       )
-      .addText((text) =>
+      .addText((text) => {
         text.setPlaceholder("Enter folder path").onChange((value) => {
           this.tempFolderName = value; // Temporary field to hold input
-        })
-      )
+        });
+
+        const inputEl = text.inputEl;
+        const suggestionContent = getSimpleFolderSuggestions(this.app);
+        const onSelectCallback = async (selectedPath: string) => {
+          const folderInput = normalizePath(selectedPath);
+          if (
+            folderInput &&
+            !this.plugin.settings.excludedFolders.includes(folderInput)
+          ) {
+            this.plugin.settings.excludedFolders.push(folderInput);
+            this.plugin.saveSettings();
+            this.display();
+          }
+          text.setValue("");
+          await this.plugin.saveSettings();
+        };
+
+        new SimpleMultiSuggestor(
+          inputEl,
+          new Set(suggestionContent),
+          onSelectCallback,
+          this.app
+        );
+      })
       .addButton((button) =>
         button
           .setButtonText("Add")
@@ -793,6 +876,24 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     );
 
     footerSection.appendChild(donationSection);
+  }
+
+  hide(): void {
+    console.log("Cleaning up Notes Explorer settings UI...");
+    //Destroy all Pickr instances
+    this.allPickrs.forEach((pickr) => pickr.destroy());
+
+    //find all the div with calls picr-app using query-selector and remove them from the main window
+    const pickrApps = this.win.document.querySelectorAll(".pcr-app ");
+    if (pickrApps) {
+      pickrApps.forEach((pickrApp: any) => {
+        pickrApp.remove();
+      });
+    }
+    // Clear the container element
+    this.containerEl.empty();
+
+    super.hide();
   }
 }
 
