@@ -13,7 +13,7 @@ import {
   DEFAULT_SETTINGS,
 } from "./src/settings";
 import { NotesExplorerView, PLUGIN_VIEW_TYPE } from "./src/view";
-import store, { settings } from "./src/components/store";
+import store, { settings } from "./src/store";
 import "./styles.css";
 import { pluginIcon } from "src/icons";
 

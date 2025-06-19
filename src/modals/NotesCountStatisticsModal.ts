@@ -5,7 +5,7 @@ import {
   allAllowedFiles,
   excludedFilesCount,
   filteredFiles,
-} from "src/components/store";
+} from "src/store";
 
 import type NotesExplorerPlugin from "main";
 import { get } from "svelte/store";

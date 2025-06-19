@@ -18,7 +18,7 @@ import NotesExplorerPlugin from "../main";
 import Pickr from "@simonwep/pickr";
 import Sortable from "sortablejs";
 import { get } from "svelte/store";
-import { settings } from "./components/store";
+import { settings } from "./store";
 
 export enum TitleDisplayMode {
   Both = "Both",
