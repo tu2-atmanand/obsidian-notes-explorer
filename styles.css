@@ -629,7 +629,7 @@
 
 .top-bar-fileName {
     width: 100%;
-    text-wrap: pretty;
+    text-wrap: wrap;
 }
 
 .card.skip-transition {
@@ -727,6 +727,7 @@
 }
 
 .card-footer {
+    max-width: 100% !important;
     width: 100%;
     flex-shrink: 0;
     flex-grow: 1;
@@ -804,6 +805,10 @@
     align-items: center;
     width: 100%;
     padding-block: 5px;
+}
+
+.notes-explorer-tag-container .setting-item-control button {
+    padding-inline: 8px !important;
 }
 
 .notes-explorer-sortable-fallback {
