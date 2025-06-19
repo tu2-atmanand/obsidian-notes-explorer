@@ -6,6 +6,7 @@ export const editIcon = "pencil";
 export const cancelIcon = "circle-x";
 export const fileOpenIcon = "file-symlink";
 export const pageNavigationDockIcon = "dock"; // or you can use 'panel-bottom'
+export const filtersIcon = "sliders-horizontal";
 
 export const pinnedIconSVG = `
 <?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
