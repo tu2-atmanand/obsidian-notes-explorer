@@ -1,4 +1,4 @@
-import store, { settings } from "src/components/store";
+import store, { settings } from "src/store";
 
 import { get } from "svelte/store";
 

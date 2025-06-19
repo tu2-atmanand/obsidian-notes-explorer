@@ -23,7 +23,7 @@
     allAllowedFiles,
     allTags,
     excludedFilesCount,
-  } from "./store";
+  } from "../store";
   import { Sort } from "src/settings";
   import {
     getFileSuggestions,

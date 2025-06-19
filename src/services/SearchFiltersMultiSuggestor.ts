@@ -10,7 +10,7 @@ import {
 
 import { get } from "svelte/store";
 import { initialPlaceholderSuggestionsMap } from "src/utils/SearchQueryHelpers";
-import { settings } from "src/components/store";
+import { settings } from "src/store";
 
 export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
   content: Set<string>;
