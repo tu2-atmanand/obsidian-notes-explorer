@@ -39,7 +39,7 @@
   } from "src/utils/SearchQueryHelpers";
   import { refreshView } from "src/utils/GeneralHelpers";
   import { NotesCountStatisticsModal } from "src/modals/NotesCountStatisticsModal";
-  import { filtersIcon } from "src/icons";
+  import { filtersIcon, viewShareIcon } from "src/icons";
 
   export let cardsContainer: HTMLElement;
   let notesGrid: MiniMasonry;
@@ -66,6 +66,9 @@
   };
   const filtersPanelIcon = (element: HTMLElement) => {
     setIcon(element, filtersIcon);
+  };
+  const viewShareButtonIcon = (element: HTMLElement) => {
+    setIcon(element, viewShareIcon);
   };
 
   let currentPageLocal = 1;
@@ -230,11 +233,6 @@
           $searchQuery = inputVal;
         }
       }
-    });
-
-    store.searchFilters.subscribe((filters) => {
-      console.log("Root.svelte : SearchFilters Subscriber:", filters);
-      // refreshView();
     });
   }
 
@@ -418,6 +416,19 @@
     }
   }
 
+  function copyViewLinkToClipboard() {
+    const viewLink = get(plugin).getViewShareLink();
+    navigator.clipboard.writeText(viewLink).then(
+      () => {
+        new Notice("Notes Explorer view link copied to clipboard!");
+      },
+      (err) => {
+        console.error("Failed to copy view link: ", err);
+        new Notice("Failed to copy view link.");
+      },
+    );
+  }
+
   onMount(() => {
     columns = Math.floor(viewContent.clientWidth / $settings.minCardWidth) + 1;
     notesGrid = new MiniMasonry({
@@ -489,10 +500,15 @@
         class="clickable-icon count-label-button"
         on:click={handleCountLabelBtn}>{totalNotesCount}</button
       >
+      <button
+        class="notes-explorer-view-share-button-desktop"
+        on:click={copyViewLinkToClipboard}
+        use:viewShareButtonIcon
+      />
     </div>
     {#if screenWidth <= 1200}
       <button
-        class="filters-toggle-button"
+        class="clickable-icon filters-toggle-button"
         on:click={() => (showFilters = !showFilters)}
         use:filtersPanelIcon
       />
@@ -594,6 +610,11 @@
       </div>
     {/if}
     <div class="filter-section-small-screens-filter-labels">
+      <button
+        class="clickable-icon notes-explorer-view-share-button"
+        on:click={copyViewLinkToClipboard}
+        use:viewShareButtonIcon
+      />
       {#each $searchFilters.cf as filter, index}
         <div class="filter-label cf">
           <button
@@ -642,11 +663,15 @@
       {/each}
     </div>
   {:else}
-    No Filters Applied
-    <div class="filter-section-small-screens-tags">
-      <!-- {#each $tags as tag}
-            <span class="tag">{tag}</span>
-          {/each} -->
+    <div class="filter-section-small-screens-no-filters">
+      <button
+        class="clickable-icon notes-explorer-view-share-button"
+        on:click={copyViewLinkToClipboard}
+        use:viewShareButtonIcon
+      />
+      <div class="filter-section-small-screens-no-filters-message">
+        No Filters Applied
+      </div>
     </div>
   {/if}
 </div>

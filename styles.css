@@ -60,7 +60,6 @@
     /* flex-wrap: wrap; */
     justify-content: space-between;
     align-items: center;
-    padding-inline: 1em;
     background-color: var(--background-primary);
     box-shadow: 0px 10px 15px -10px var(--background-modifier-success);
     backdrop-filter: blur(5px);
@@ -93,6 +92,9 @@
     gap: 0.5rem;
     min-height: 2.5rem;
     scrollbar-width: thin;
+    border: 1px solid var(--blockquote-border-color);
+    border-radius: 4px;
+    padding-inline: 0.5rem;
 }
 
 /* Force horizontal scrolling inside label section */
@@ -173,6 +175,32 @@
 
 .filter-label .close {
     margin-right: 0;
+}
+
+.filter-section-small-screens-no-filters {
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    justify-content: space-between;
+    padding: 4px;
+}
+
+.filter-section-small-screens-no-filters-message {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--text-faint);
+    flex-grow: 1;
+    text-align: center;
+    align-content: end;
+}
+
+.notes-explorer-view-share-button-desktop {
+    background-color: transparent !important;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 .action-bar_folder {
@@ -309,6 +337,10 @@
 
     /* Ensure only the responsive section is used */
     .filter-section-small-screens:not(.responsive) {
+        display: none !important;
+    }
+
+    .notes-explorer-view-share-button-desktop {
         display: none !important;
     }
 }
@@ -479,6 +511,14 @@
     font-size: 1.05em !important;
     align-self: normal !important;
     align-self: stretch !important;
+    cursor: pointer !important;
+}
+
+@media screen and (max-width: 420px) {
+    .count-label-button {
+        display: none !important;
+    }
+    
 }
 
 .search-component {
@@ -512,6 +552,14 @@
     }
 }
 
+.search-input-container input {
+    @media screen and (max-width: 450px) {
+        min-width: auto;
+        max-width: auto;
+        /* box-shadow: calc(0px - var(--size-4-5)) 0 var(--size-2-3) var(--size-2-3) var(--background-primary); */
+    }
+}
+
 .cards-container {
     position: relative;
     container-type: inline-size;
@@ -530,6 +578,7 @@
     --card-gutter: var(--size-4-5);
 }
 
+.sort-button,
 .refresh-button {
     border: none;
     border-radius: 4px;
@@ -809,6 +858,8 @@
 
 .notes-explorer-tag-container .setting-item-control button {
     padding-inline: 8px !important;
+    width: auto !important;
+    max-width: auto !important;
 }
 
 .notes-explorer-sortable-fallback {
@@ -904,6 +955,7 @@
     align-items: center;
     justify-content: center;
     max-height: 60px;
+    flex-wrap: wrap;
 }
 
 /* DeleteTaskConfirmationModal */
