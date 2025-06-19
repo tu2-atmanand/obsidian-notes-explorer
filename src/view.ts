@@ -24,7 +24,7 @@ import store, {
   settings,
   showActionBar,
   totalPages,
-} from "./components/store";
+} from "./store";
 import {
   leftSideArrow,
   pageNavigationDockIcon,

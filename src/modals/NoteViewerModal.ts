@@ -4,7 +4,7 @@ import { cancelIcon, editIcon, fileOpenIcon } from "src/icons";
 import type NotesExplorerPlugin from "main";
 import { get } from "svelte/store";
 import { renderMarkdownUI } from "src/services/MarkdownUIRenderer";
-import { view } from "src/components/store";
+import { view } from "src/store";
 
 export class NoteViewerModal extends Modal {
   private plugin: NotesExplorerPlugin;

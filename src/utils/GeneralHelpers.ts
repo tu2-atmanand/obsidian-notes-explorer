@@ -1,5 +1,5 @@
 import { TFile, getFrontMatterInfo } from "obsidian";
-import store, { allAllowedFiles } from "src/components/store";
+import store, { allAllowedFiles } from "src/store";
 
 import { get } from "svelte/store";
 

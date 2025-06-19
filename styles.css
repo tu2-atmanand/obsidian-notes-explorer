@@ -5,9 +5,10 @@
 .workspace-leaf-content[data-type="notes-explorer"] .view-content {
     overflow: unset;
     padding-block-start: 0 !important;
-    padding-right: 5px;
+    /* padding-right: 5px; */
     /* padding-block-end: 4em; */
-    padding-bottom: 0px;
+    padding-bottom: 0px !important;
+    padding-inline: 4px !important;
 }
 
 /* View.ts  */
@@ -238,8 +239,7 @@
 /* Filters toggle button on small screens */
 .filters-toggle-button {
     display: none;
-    background-color: var(--interactive-accent);
-    color: var(--text-on-accent);
+    background-color: transparent !important;
     border: none;
     padding: 0.5rem 1rem;
     border-radius: 6px;
@@ -477,6 +477,8 @@
     color: white !important;
     font-weight: 600 !important;
     font-size: 1.05em !important;
+    align-self: normal !important;
+    align-self: stretch !important;
 }
 
 .search-component {
@@ -485,10 +487,27 @@
     gap: 0.5rem;
 }
 
+.search-input-container:before {
+    display: none !important;
+}
+
+.search-input-container input {
+    padding-inline-start: 4px !important;
+    padding-inline-end: 50px !important;
+}
+
 .search-input-container input {
     @media screen and (min-width: 700px) {
         min-width: 300px;
         max-width: 300px;
+        /* box-shadow: calc(0px - var(--size-4-5)) 0 var(--size-2-3) var(--size-2-3) var(--background-primary); */
+    }
+}
+
+.search-input-container input {
+    @media screen and (max-width: 700px) {
+        min-width: 250px;
+        max-width: 250px;
         /* box-shadow: calc(0px - var(--size-4-5)) 0 var(--size-2-3) var(--size-2-3) var(--background-primary); */
     }
 }
@@ -610,7 +629,7 @@
 
 .top-bar-fileName {
     width: 100%;
-    text-wrap: pretty;
+    text-wrap: wrap;
 }
 
 .card.skip-transition {
@@ -708,6 +727,7 @@
 }
 
 .card-footer {
+    max-width: 100% !important;
     width: 100%;
     flex-shrink: 0;
     flex-grow: 1;
@@ -785,6 +805,10 @@
     align-items: center;
     width: 100%;
     padding-block: 5px;
+}
+
+.notes-explorer-tag-container .setting-item-control button {
+    padding-inline: 8px !important;
 }
 
 .notes-explorer-sortable-fallback {

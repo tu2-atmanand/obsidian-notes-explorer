@@ -4,7 +4,7 @@ import { App, Modal } from "obsidian";
 
 import { DeleteFileMode } from "src/settings";
 import { get } from "svelte/store";
-import { settings } from "src/components/store";
+import { settings } from "src/store";
 
 interface DeleteConfirmationModalProps {
   app: App; // Add this field

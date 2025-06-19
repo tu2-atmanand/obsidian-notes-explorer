@@ -12,7 +12,7 @@ import {
   TFolder,
 } from "obsidian";
 import { derived, get, readable, writable } from "svelte/store";
-import { Sort, type NotesExplorerSettings } from "../settings";
+import { Sort, type NotesExplorerSettings } from "./settings";
 import NotesExplorerPlugin from "main";
 import { isFileEmpty } from "src/utils/GeneralHelpers";
 

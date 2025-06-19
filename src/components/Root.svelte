@@ -23,7 +23,7 @@
     allAllowedFiles,
     allTags,
     excludedFilesCount,
-  } from "./store";
+  } from "../store";
   import { Sort } from "src/settings";
   import {
     getFileSuggestions,
@@ -39,6 +39,7 @@
   } from "src/utils/SearchQueryHelpers";
   import { refreshView } from "src/utils/GeneralHelpers";
   import { NotesCountStatisticsModal } from "src/modals/NotesCountStatisticsModal";
+  import { filtersIcon } from "src/icons";
 
   export let cardsContainer: HTMLElement;
   let notesGrid: MiniMasonry;
@@ -62,6 +63,9 @@
   };
   const closeCircleIcon = (element: HTMLElement) => {
     setIcon(element, "circle-x");
+  };
+  const filtersPanelIcon = (element: HTMLElement) => {
+    setIcon(element, filtersIcon);
   };
 
   let currentPageLocal = 1;
@@ -490,9 +494,8 @@
       <button
         class="filters-toggle-button"
         on:click={() => (showFilters = !showFilters)}
-      >
-        Filters
-      </button>
+        use:filtersPanelIcon
+      />
     {:else}
       <div class="action-bar_labelSection">
         {#if $folderName || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
