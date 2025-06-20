@@ -508,7 +508,11 @@
     </div>
     {#if screenWidth <= 1200}
       <button
-        class="clickable-icon filters-toggle-button"
+        class="clickable-icon filters-toggle-button {$folderName !== '' ||
+        $searchFilters.cf.length > 0 ||
+        $searchFilters.nf.length > 0
+          ? 'filters-active'
+          : ''}"
         on:click={() => (showFilters = !showFilters)}
         use:filtersPanelIcon
       />
@@ -597,6 +601,11 @@
   transition:slide
 >
   {#if $folderName || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
+    <button
+      class="clickable-icon notes-explorer-view-share-button"
+      on:click={copyViewLinkToClipboard}
+      use:viewShareButtonIcon
+    />
     {#if $folderName}
       <div class="filter-section-small-screens-folder-label">
         <div style="align-content: center;">{$folderName}</div>
@@ -610,11 +619,6 @@
       </div>
     {/if}
     <div class="filter-section-small-screens-filter-labels">
-      <button
-        class="clickable-icon notes-explorer-view-share-button"
-        on:click={copyViewLinkToClipboard}
-        use:viewShareButtonIcon
-      />
       {#each $searchFilters.cf as filter, index}
         <div class="filter-label cf">
           <button

@@ -183,6 +183,7 @@
     align-content: center;
     justify-content: space-between;
     padding: 4px;
+    min-width: 100%;
 }
 
 .filter-section-small-screens-no-filters-message {
@@ -192,6 +193,13 @@
     flex-grow: 1;
     text-align: center;
     align-content: end;
+}
+
+.notes-explorer-view-share-button {
+    border: 1px solid var(--color-accent) !important;
+    cursor: pointer !important;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
 }
 
 .notes-explorer-view-share-button-desktop {
@@ -259,26 +267,35 @@
     transform: translateY(0);
 
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     position: sticky;
     margin-top: 3em;
+    flex-wrap: wrap;
 }
 
 /* Filters toggle button on small screens */
 .filters-toggle-button {
     display: none;
-    background-color: transparent !important;
+    /* background-color: transparent !important; */
     border: none;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.5rem;
+    padding-block-end: 0.3rem;
+    margin-inline-start: 0.5rem;
     border-radius: 6px;
+    align-self: baseline;
     font-weight: bold;
     cursor: pointer;
+    /* color: var(--color-accent);*/
+}
+
+.filters-toggle-button.filters-active {
+    background-color: var(--color-accent);
+    color: black;
 }
 
 .filter-section-small-screens-folder-label {
     display: flex;
     flex: 0 0 auto;
-    gap: 0.5rem;
     background: var(--background-modifier-border);
     padding-inline-start: 0.5rem;
     border-radius: 4px;
@@ -287,6 +304,8 @@
     font-size: 1.1rem;
     font-style: italic;
     font-weight: 600;
+    max-width: max-content;
+    gap: 5px;
 }
 
 .filter-section-small-screens-folder-label-closeButton {
@@ -518,7 +537,7 @@
     .count-label-button {
         display: none !important;
     }
-    
+
 }
 
 .search-component {
@@ -785,7 +804,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--size-4-1);
-    color: var(--ascent-color);
+    color: var(--color-accent);
 }
 
 .footer-metadata {
@@ -799,9 +818,12 @@
 }
 
 .card-footer-text {
-    font-size: var(--nav-item-size);
+    font-size: 1.1em;
     font-weight: 500;
-    text-wrap: pretty;
+    text-wrap: wrap;
+    line-break: anywhere;
+    word-break: break-all;
+    word-break: break-word;
 }
 
 .card .clickable-icon.is-active {
