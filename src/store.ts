@@ -36,11 +36,104 @@ export const searchFilters = writable<{ cf: string[]; nf: string[] }>({
 
 export const excludedFilesCount = writable<number>(0);
 
+function checkFilterForFile(fstr: string, filterType: string, file: TFile) {
+  const [type, val] = fstr.split(/:\s*(.*)/).map((str) => str.trim());
+
+  switch (type) {
+    case "file":
+      if (file.basename.includes(val)) return true;
+      break;
+
+    case "parent":
+      if (file.path.startsWith(val)) return true;
+      break;
+
+    case "tag":
+      const tags = getAllTags(
+        get(appCache).getFileCache(file) as CachedMetadata
+      );
+      if (tags?.includes(val)) return true;
+      break;
+
+    case "content":
+      // Check if the file content contains the specified value
+      get(app)
+        .vault.cachedRead(file)
+        .then((content) => {
+          if (content.includes(val)) {
+            return true;
+          }
+        });
+      break;
+
+    // date filters
+    case "created-before":
+      if (file.stat.ctime < new Date(val).getTime()) return true;
+      break;
+    case "created-after":
+      if (file.stat.ctime > new Date(val).getTime()) return true;
+      break;
+    case "edited-before":
+      if (file.stat.mtime < new Date(val).getTime()) return true;
+      break;
+    case "edited-after":
+      if (file.stat.mtime > new Date(val).getTime()) return true;
+      break;
+
+    default:
+      if (fstr.startsWith("[") && fstr.endsWith("]")) {
+        // Handle frontmatter filters
+        const frontMatterKey = fstr.slice(1, -1).split(":")[0].trim();
+        const frontMatterValue = fstr.slice(1, -1).split(":")[1].trim();
+        const fileCache = get(appCache).getFileCache(file);
+        if (fileCache && fileCache.frontmatter) {
+          const fmValue =
+            fileCache.frontmatter[frontMatterKey.replace(`"`, "")];
+          const conditionFlag = fmValue.split(" ")[0].trim();
+          switch (conditionFlag) {
+            case "ABOVE":
+              if (Number(fmValue.split(" ")[1]) > Number(frontMatterValue)) {
+                return true;
+              }
+              break;
+            case "BELOW":
+              if (Number(fmValue.split(" ")[1]) < Number(frontMatterValue)) {
+                return true;
+              }
+              break;
+            case "BEFORE":
+              if (
+                new Date(fmValue.split(" ")[1]).getTime() <
+                new Date(frontMatterValue).getTime()
+              ) {
+                return true;
+              }
+              break;
+            case "AFTER":
+              if (
+                new Date(fmValue.split(" ")[1]).getTime() >
+                new Date(frontMatterValue).getTime()
+              ) {
+                return true;
+              }
+              break;
+            default:
+              if (fmValue === frontMatterValue) {
+                return true;
+              }
+              break;
+          }
+        }
+      }
+  }
+  return false;
+}
+
 export const allAllowedFiles = derived(
   [settings, folderName, searchFilters],
   ([$settings, $folderName, $searchFilters]) => {
     console.warn(
-      "allAllowedFiles : Setting or folderName or searchFilters has been updated.\nThis function should NOT run on resizing events",
+      "allAllowedFiles : Setting or folderName or searchFilters has been updated.\nThis function should NOT run on resizing events"
     );
     let allFiles: TFile[] = [];
 
@@ -69,196 +162,77 @@ export const allAllowedFiles = derived(
           // Only fetch files from the current folder
           allFiles = folder.children.filter(
             (child): child is TFile =>
-              child instanceof TFile && child.extension === "md",
+              child instanceof TFile && child.extension === "md"
           );
         }
       }
     }
 
     // Exclude files in the excluded folders
-    let filteredFiles = allFiles.filter((file) => {
+    let filesAfterRemovingExcludedFolders = allFiles.filter((file) => {
       return !$settings.excludedFolders.some((excludeFolder) =>
-        file.path.startsWith(excludeFolder),
+        file.path.startsWith(excludeFolder)
       );
     });
 
     // Exclude files based on the excluded file names
-    excludedFilesCount.set(allFiles.length - filteredFiles.length);
+    excludedFilesCount.set(
+      get(app).vault.getMarkdownFiles().length -
+        filesAfterRemovingExcludedFolders.length
+    );
 
-    if (!($searchFilters.cf.length === 0 && $searchFilters.nf.length === 0)) {
-      let cumpulsoryFilteredFilesSet = new Set<TFile>();
+    let finalFilteredFiles: TFile[] = filesAfterRemovingExcludedFolders;
+
+    let cumpulsoryFilteredFilesSet = new Set<TFile>();
+    if ($searchFilters.cf.length > 0) {
+      let tempFilteredFiles = filesAfterRemovingExcludedFolders;
 
       // Apply AND filters
+      let secondOrHigherFilter = false;
       $searchFilters.cf.forEach((fstr) => {
-        const [type, val] = fstr.split(/:\s*(.*)/).map((str) => str.trim());
-        filteredFiles.forEach((file) => {
-          switch (type) {
-            case "file":
-              if (file.basename.includes(val))
-                cumpulsoryFilteredFilesSet.add(file);
-              break;
-
-            case "parent":
-              if (file.path.startsWith(val))
-                cumpulsoryFilteredFilesSet.add(file);
-              break;
-
-            case "tag":
-              const tags = getAllTags(
-                get(appCache).getFileCache(file) as CachedMetadata,
-              );
-              if (tags?.includes(val)) cumpulsoryFilteredFilesSet.add(file);
-              break;
-
-            case "content":
-              // Check if the file content contains the specified value
-              get(app)
-                .vault.cachedRead(file)
-                .then((content) => {
-                  if (content.includes(val)) {
-                    cumpulsoryFilteredFilesSet.add(file);
-                  }
-                });
-              break;
-
-            // date filters
-            case "created-before":
-              if (file.stat.ctime < new Date(val).getTime())
-                cumpulsoryFilteredFilesSet.add(file);
-              break;
-            case "created-after":
-              if (file.stat.ctime > new Date(val).getTime())
-                cumpulsoryFilteredFilesSet.add(file);
-              break;
-            case "edited-before":
-              if (file.stat.mtime < new Date(val).getTime())
-                cumpulsoryFilteredFilesSet.add(file);
-              break;
-            case "edited-after":
-              if (file.stat.mtime > new Date(val).getTime())
-                cumpulsoryFilteredFilesSet.add(file);
-              break;
-
-            default:
-              if (fstr.startsWith("[") && fstr.endsWith("]")) {
-                // Handle frontmatter filters
-                const frontMatterKey = fstr.slice(1, -1).split(":")[0].trim();
-                const frontMatterValue = fstr.slice(1, -1).split(":")[1].trim();
-                const fileCache = get(appCache).getFileCache(file);
-                if (fileCache && fileCache.frontmatter) {
-                  const fmValue =
-                    fileCache.frontmatter[frontMatterKey.replace(`"`, "")];
-                  // console.log(
-                  //   "fmValue : ",
-                  //   fmValue,
-                  //   "\nfrontMatterValue : ",
-                  //   frontMatterValue,
-                  //   "\nfile : ",
-                  //   file.path,
-                  //   "frontmatter key : ",
-                  //   frontMatterKey.replace(`"`, ""),
-                  //   "\nFile frontmatter : ",
-                  //   fileCache.frontmatter,
-                  // );
-                  // if (fmValue === frontMatterValue) {
-                  //   cumpulsoryFilteredFilesSet.add(file);
-                  // }
-                  const conditionFlag = fmValue.split(" ")[0].trim();
-                  switch (conditionFlag) {
-                    case "ABOVE":
-                      if (
-                        Number(fmValue.split(" ")[1]) > Number(frontMatterValue)
-                      ) {
-                        cumpulsoryFilteredFilesSet.add(file);
-                      }
-                      break;
-                    case "BELOW":
-                      if (
-                        Number(fmValue.split(" ")[1]) < Number(frontMatterValue)
-                      ) {
-                        cumpulsoryFilteredFilesSet.add(file);
-                      }
-                      break;
-                    case "BEFORE":
-                      if (
-                        new Date(fmValue.split(" ")[1]).getTime() <
-                        new Date(frontMatterValue).getTime()
-                      ) {
-                        cumpulsoryFilteredFilesSet.add(file);
-                      }
-                      break;
-                    case "AFTER":
-                      if (
-                        new Date(fmValue.split(" ")[1]).getTime() >
-                        new Date(frontMatterValue).getTime()
-                      ) {
-                        cumpulsoryFilteredFilesSet.add(file);
-                      }
-                      break;
-                    default:
-                      if (fmValue === frontMatterValue) {
-                        cumpulsoryFilteredFilesSet.add(file);
-                      }
-                      break;
-                  }
-                }
-              }
+        if (secondOrHigherFilter) {
+          tempFilteredFiles = Array.from(cumpulsoryFilteredFilesSet);
+          cumpulsoryFilteredFilesSet = new Set<TFile>();
+        }
+        tempFilteredFiles.forEach((file) => {
+          if (checkFilterForFile(fstr, "cf", file)) {
+            cumpulsoryFilteredFilesSet.add(file);
+          } else {
+            // If the file does not match the filter, remove it from the set if this current filter is a second or higher filter.
+            if (secondOrHigherFilter) {
+              cumpulsoryFilteredFilesSet.delete(file);
+            }
           }
         });
+        secondOrHigherFilter = true;
       });
+      finalFilteredFiles = Array.from(cumpulsoryFilteredFilesSet);
+    }
 
+    if ($searchFilters.nf.length > 0) {
       let normalFilteredFilesSet = new Set<TFile>();
-      // If no files match the AND filters, we return empty set
-      if ($searchFilters.cf.length === 0) {
-        cumpulsoryFilteredFilesSet = new Set(filteredFiles);
-      }
+      // // If no files match the AND filters, we return empty set
+      // if ($searchFilters.cf.length === 0) {
+      //   cumpulsoryFilteredFilesSet = new Set(filesAfterRemovingExcludedFolders);
+      // }
 
       // Apply OR filters
       $searchFilters.nf.forEach((fstr) => {
-        const [type, val] = fstr.split(/:\s*(.*)/).map((str) => str.trim());
-        cumpulsoryFilteredFilesSet.forEach((file) => {
-          switch (type) {
-            case "file":
-              if (file.path.includes(val)) normalFilteredFilesSet.add(file);
-              break;
-
-            case "parent":
-              if (file.path.startsWith(val)) normalFilteredFilesSet.add(file);
-              break;
-
-            case "tag":
-              const tags = getAllTags(
-                get(appCache).getFileCache(file) as CachedMetadata,
-              );
-              if (tags?.includes(val)) normalFilteredFilesSet.add(file);
-              break;
-
-            case "created-before":
-              if (file.stat.ctime < new Date(val).getTime())
-                normalFilteredFilesSet.add(file);
-              break;
-            case "created-after":
-              if (file.stat.ctime > new Date(val).getTime())
-                normalFilteredFilesSet.add(file);
-              break;
-            case "edited-before":
-              if (file.stat.mtime < new Date(val).getTime())
-                normalFilteredFilesSet.add(file);
-              break;
-            case "edited-after":
-              if (file.stat.mtime > new Date(val).getTime())
-                normalFilteredFilesSet.add(file);
-              break;
+        finalFilteredFiles.forEach((file) => {
+          if (checkFilterForFile(fstr, "nf", file)) {
+            normalFilteredFilesSet.add(file);
           }
         });
       });
-
-      filteredFiles = Array.from(normalFilteredFilesSet);
+      finalFilteredFiles = Array.from(normalFilteredFilesSet);
     }
 
-    console.log("Filtered files based on search filters :\n", filteredFiles);
-    return filteredFiles;
-  },
+    console.log(
+      "Filtered files based on search filters :\n",
+      finalFilteredFiles
+    );
+    return finalFilteredFiles;
+  }
 );
 
 // export const tags = derived(
@@ -413,7 +387,7 @@ export const sortedFiles = derived([files], ([$files]) => {
 
 export const searchQuery = writable<string>("");
 export const preparedSearch = derived(searchQuery, ($searchQuery) =>
-  $searchQuery ? prepareFuzzySearch($searchQuery) : null,
+  $searchQuery ? prepareFuzzySearch($searchQuery) : null
 );
 export const searchResultFiles = derived(
   [preparedSearch, sortedFiles],
@@ -427,7 +401,7 @@ export const searchResultFiles = derived(
       $sortedFiles.map(async (file) => {
         const content = await file.vault.cachedRead(file);
         return [$preparedSearch(content), $preparedSearch(file.name)];
-      }),
+      })
     ).then((searchResults) => {
       set(
         $sortedFiles.filter((file, index) => {
@@ -437,11 +411,11 @@ export const searchResultFiles = derived(
             (contentMatch && contentMatch.score > -4) ||
             (nameMatch && nameMatch.score > -4)
           );
-        }),
+        })
       );
     });
   },
-  get(sortedFiles),
+  get(sortedFiles)
 );
 
 const createFilteredFiles = () =>
@@ -470,14 +444,14 @@ export const totalPages = derived(
   ([$sortedFiles, $searchQuery, $searchResultFiles, $settings]) => {
     if ($searchQuery !== "") {
       const tempData = Math.ceil(
-        $searchResultFiles.length / $settings.cardsPerPage,
+        $searchResultFiles.length / $settings.cardsPerPage
       );
       return tempData;
     } else {
       const tempData = Math.ceil($sortedFiles.length / $settings.cardsPerPage);
       return tempData;
     }
-  },
+  }
 );
 
 export const displayedFiles = derived(
@@ -501,7 +475,7 @@ export const displayedFiles = derived(
       "\nThe searchResult files are :\n",
       $searchResultFiles,
       "\nSearch query is :\n",
-      get(searchQuery),
+      get(searchQuery)
     );
     const filesToDisplay =
       get(searchQuery).trim() !== "" ? $searchResultFiles : $filteredFiles;
@@ -512,14 +486,14 @@ export const displayedFiles = derived(
     } else {
       return filesToDisplay.slice(0, $displayedCount);
     }
-  },
+  }
 );
 
 export const displayedFilesCount = derived(
   [displayedFiles],
   ([$displayedFiles]) => {
     return $displayedFiles.length;
-  },
+  }
 );
 
 export const allTags = derived([appCache], ([$appCache]) => {
@@ -527,8 +501,7 @@ export const allTags = derived([appCache], ([$appCache]) => {
   const tags = $appCache.vault
     .getMarkdownFiles()
     .map(
-      (file) =>
-        getAllTags($appCache.getFileCache(file) as CachedMetadata) || [],
+      (file) => getAllTags($appCache.getFileCache(file) as CachedMetadata) || []
     )
     .flat();
 
@@ -537,7 +510,7 @@ export const allTags = derived([appCache], ([$appCache]) => {
       acc[tag] = (acc[tag] || 0) + 1;
       return acc;
     },
-    {} as Record<string, number>,
+    {} as Record<string, number>
   );
 
   return Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]);
