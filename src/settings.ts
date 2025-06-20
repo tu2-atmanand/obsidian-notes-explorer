@@ -51,6 +51,7 @@ export enum ClickMode {
 export enum TagPostionForCardColor {
   frontmatter = "frontmatter",
   content = "content",
+  both = "both",
 }
 export enum TagCardColorIndicatorType {
   background = "background",
@@ -117,7 +118,7 @@ export const DEFAULT_SETTINGS: NotesExplorerSettings = {
   metadataVisibility: true,
   deleteFileMode: DeleteFileMode.System,
   openNoteLayout: NoteOpenLayout.Right,
-  tagPositionForCardColor: TagPostionForCardColor.content,
+  tagPositionForCardColor: TagPostionForCardColor.both,
   pinnedFiles: [],
   tagColors: [],
   tagColorIndicatorType: TagCardColorIndicatorType.background,
@@ -507,6 +508,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
           .addOptions({
             [TagPostionForCardColor.content]: "In content",
             [TagPostionForCardColor.frontmatter]: "In frontmatter",
+            [TagPostionForCardColor.both]: "Both",
           })
           .setValue(this.plugin.settings.tagPositionForCardColor)
           .onChange(async (value) => {

@@ -2,15 +2,28 @@
 
 <script lang="ts">
   import {
+    getAllTags,
     Keymap,
     MarkdownRenderer,
     setIcon,
     TFile,
+    type CachedMetadata,
     type UserEvent,
   } from "obsidian";
   import { afterUpdate, createEventDispatcher, onMount } from "svelte";
-  import { skipNextTransition, app, view, settings, plugin } from "../store";
-  import { ClickMode, TitleDisplayMode } from "../settings";
+  import {
+    skipNextTransition,
+    app,
+    view,
+    settings,
+    plugin,
+    appCache,
+  } from "../store";
+  import {
+    ClickMode,
+    TagPostionForCardColor,
+    TitleDisplayMode,
+  } from "../settings";
   import { openDeleteConfirmationModal } from "src/utils/ModalHelpers";
   import { isFileEmpty } from "src/utils/GeneralHelpers";
   import { NoteViewerModal } from "src/modals/NoteViewerModal";
@@ -301,15 +314,21 @@
   };
 
   const updateTagColorIndicator = async () => {
-    if (contentDiv && $settings.tagPositionForCardColor === "content") {
-      const content = contentDiv.textContent || contentDiv.innerText;
+    if (
+      contentDiv &&
+      $settings.tagPositionForCardColor === TagPostionForCardColor.content
+    ) {
+      const content = await file.vault.cachedRead(file);
       for (let tag of $settings.tagColors) {
-        if (content.includes("#" + tag.name)) {
+        if (content.includes("#" + tag.name.replace("#", ""))) {
           backgroundColor = tag.color;
           break;
         }
       }
-    } else {
+    } else if (
+      contentDiv &&
+      $settings.tagPositionForCardColor === TagPostionForCardColor.frontmatter
+    ) {
       const frontmatter = $app.metadataCache.getFileCache(file)?.frontmatter;
 
       if (!frontmatter || !frontmatter.tags) return;
@@ -329,6 +348,15 @@
         if (matchingTag) {
           backgroundColor = tagColor.color;
           break; // Exit once a match is found
+        }
+      }
+    } else {
+      const tags =
+        getAllTags($appCache.getFileCache(file) as CachedMetadata) || [];
+      for (let tag of $settings.tagColors) {
+        if (tags.includes(`#${tag.name.replace("#", "")}`)) {
+          backgroundColor = tag.color;
+          break;
         }
       }
     }
