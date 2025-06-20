@@ -606,6 +606,10 @@
       on:click={copyViewLinkToClipboard}
       use:viewShareButtonIcon
     />
+    <button
+      class="clickable-icon count-label-button-small-screens"
+      on:click={handleCountLabelBtn}>{totalNotesCount}</button
+    >
     {#if $folderName}
       <div class="filter-section-small-screens-folder-label">
         <div style="align-content: center;">{$folderName}</div>
@@ -673,6 +677,10 @@
         on:click={copyViewLinkToClipboard}
         use:viewShareButtonIcon
       />
+      <button
+        class="clickable-icon count-label-button-small-screens"
+        on:click={handleCountLabelBtn}>{totalNotesCount}</button
+      >
       <div class="filter-section-small-screens-no-filters-message">
         No Filters Applied
       </div>

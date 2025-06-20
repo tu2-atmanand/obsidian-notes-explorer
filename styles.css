@@ -184,6 +184,7 @@
     justify-content: space-between;
     padding: 4px;
     min-width: 100%;
+    gap: 0.5rem;
 }
 
 .filter-section-small-screens-no-filters-message {
@@ -533,9 +534,40 @@
     cursor: pointer !important;
 }
 
+.count-label-button-small-screens {
+    display: none !important;
+
+    @media screen and (max-width: 420px) {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--icon-color-active) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 1.05em !important;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer !important;
+        
+    }
+}
+
 @media screen and (max-width: 420px) {
     .count-label-button {
         display: none !important;
+    }
+
+    .count-label-button-small-screens {
+        display: block !important;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--icon-color-active) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 1.05em !important;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer !important;
     }
 
 }
