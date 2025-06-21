@@ -364,29 +364,6 @@
   };
 
   function getFooterMetadata(): string {
-    const metadataTypePossibleFilters = [
-      "created-before",
-      "created-after",
-      "edited-before",
-      "edited-after",
-    ];
-    const metadataTypeFilter =
-      $searchFilters.cf?.find((filter) =>
-        metadataTypePossibleFilters.some((f) => filter.startsWith(f)),
-      ) ||
-      $searchFilters.nf?.find((filter) =>
-        metadataTypePossibleFilters.some((f) => filter.startsWith(f)),
-      );
-    console.log("Metadata Type Filter:", metadataTypeFilter);
-
-    if (metadataTypeFilter) {
-      if (metadataTypeFilter.startsWith("created")) {
-        return new Date(file.stat.ctime).toLocaleString() || "N/A";
-      } else if (metadataTypeFilter.startsWith("edited")) {
-        return new Date(file.stat.mtime).toLocaleString() || "N/A";
-      }
-    }
-
     const metadataType = $settings.noteMetadata;
 
     switch (metadataType) {
@@ -419,8 +396,6 @@
         return "Invalid Metadata Setting";
     }
   }
-
-  $: footerMetadata = getFooterMetadata();
 
   function calculateStyle() {
     let style = "";
@@ -531,7 +506,7 @@
           title={file && file.parent ? file.parent.path : ""}
           role="tooltip"
         >
-          {footerMetadata}
+          {getFooterMetadata()}
         </div>
       </div>
       {#if $settings.showDeleteButton}
