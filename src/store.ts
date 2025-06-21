@@ -41,11 +41,11 @@ function checkFilterForFile(fstr: string, filterType: string, file: TFile) {
 
   switch (type) {
     case "file":
-      if (file.basename.includes(val)) return true;
+      if (file.path.includes(val)) return true;
       break;
 
     case "parent":
-      if (file.path.startsWith(val)) return true;
+      if (file.parent?.path === val) return true;
       break;
 
     case "tag":
@@ -68,6 +68,16 @@ function checkFilterForFile(fstr: string, filterType: string, file: TFile) {
 
     // date filters
     case "created-before":
+      console.log(
+        "For file:",
+        file.path,
+        " | Created at:",
+        file.stat.ctime,
+        " | Filter value : ",
+        val,
+        " | Filter value in unix time:",
+        new Date(val).getTime()
+      );
       if (file.stat.ctime < new Date(val).getTime()) return true;
       break;
     case "created-after":
@@ -81,44 +91,75 @@ function checkFilterForFile(fstr: string, filterType: string, file: TFile) {
       break;
 
     default:
-      if (fstr.startsWith("[") && fstr.endsWith("]")) {
+      if (fstr.startsWith(`["`) && fstr.endsWith("]")) {
         // Handle frontmatter filters
-        const frontMatterKey = fstr.slice(1, -1).split(":")[0].trim();
-        const frontMatterValue = fstr.slice(1, -1).split(":")[1].trim();
+        const frontMatterKeyFromFilter = fstr
+          .slice(1, -1)
+          .split(":")[0]
+          .trim()
+          .replaceAll(`"`, ``);
+        const frontMatterFlagAndValueFromFilter = fstr
+          .slice(1, -1)
+          .split(":")[1]
+          .trim();
         const fileCache = get(appCache).getFileCache(file);
         if (fileCache && fileCache.frontmatter) {
-          const fmValue =
-            fileCache.frontmatter[frontMatterKey.replace(`"`, "")];
-          const conditionFlag = fmValue.split(" ")[0].trim();
+          const fmValue = fileCache.frontmatter[frontMatterKeyFromFilter];
+
+          const conditionFlag = frontMatterFlagAndValueFromFilter
+            .split(" ")[0]
+            .trim();
+          console.log(
+            "frontMatterKeyFromFilter = ",
+            frontMatterKeyFromFilter,
+            "\frontMatterFlagAndValueFromFilter = ",
+            frontMatterFlagAndValueFromFilter,
+            "\nComplete frontMatter from file = ",
+            fileCache.frontmatter,
+            "\nMatching frontMatter value from file : fmValue = ",
+            fmValue,
+            "\nconditionFlag = ",
+            conditionFlag
+          );
           switch (conditionFlag) {
             case "ABOVE":
-              if (Number(fmValue.split(" ")[1]) > Number(frontMatterValue)) {
+              if (
+                Number(fmValue.trim()) >
+                Number(frontMatterFlagAndValueFromFilter.split(` `)[1].trim())
+              ) {
                 return true;
               }
               break;
             case "BELOW":
-              if (Number(fmValue.split(" ")[1]) < Number(frontMatterValue)) {
+              if (
+                Number(fmValue.trim()) <
+                Number(frontMatterFlagAndValueFromFilter.split(` `)[1].trim())
+              ) {
                 return true;
               }
               break;
             case "BEFORE":
               if (
-                new Date(fmValue.split(" ")[1]).getTime() <
-                new Date(frontMatterValue).getTime()
+                new Date(fmValue.trim()).getTime() <
+                new Date(
+                  frontMatterFlagAndValueFromFilter.split(` `)[1].trim()
+                ).getTime()
               ) {
                 return true;
               }
               break;
             case "AFTER":
               if (
-                new Date(fmValue.split(" ")[1]).getTime() >
-                new Date(frontMatterValue).getTime()
+                new Date(fmValue.trim()).getTime() >
+                new Date(
+                  frontMatterFlagAndValueFromFilter.split(` `)[1].trim()
+                ).getTime()
               ) {
                 return true;
               }
               break;
             default:
-              if (fmValue === frontMatterValue) {
+              if (fmValue.trim() === frontMatterFlagAndValueFromFilter.trim()) {
                 return true;
               }
               break;
