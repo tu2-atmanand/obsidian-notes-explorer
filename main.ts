@@ -34,7 +34,7 @@ export default class NotesExplorerPlugin extends Plugin {
     this.app.workspace.onLayoutReady(() => {
       this.registerPluginEvents();
 
-      this.createFileMenu();
+      this.registerFileMenu();
 
       this.registerCommands();
 
@@ -60,6 +60,8 @@ export default class NotesExplorerPlugin extends Plugin {
         );
         store.files.set($allAllowedFiles);
       });
+
+      this.synchronizeSearchFiltersFromShareLink();
     });
   }
 
@@ -148,7 +150,7 @@ export default class NotesExplorerPlugin extends Plugin {
     }
   }
 
-  async createFileMenu() {
+  private async registerFileMenu() {
     this.registerEvent(
       this.app.workspace.on("file-menu", (menu, file, source, leaf) => {
         if (source === "link-context-menu") return;
@@ -180,6 +182,43 @@ export default class NotesExplorerPlugin extends Plugin {
     this.addRibbonIcon(pluginIcon, "Notes explorer", () => {
       this.activateView("main");
     });
+  }
+
+  getViewShareLink(): string {
+    const viewShareLink = localStorage.getItem("notesExplorerViewShareLink");
+    if (!viewShareLink || viewShareLink === "") {
+      console.log("Error fetching the viewShareLink from localStorage.");
+      return "Error while getting the proper link";
+    } else {
+      return viewShareLink;
+    }
+  }
+
+  synchronizeSearchFiltersFromShareLink() {
+    // Firstly create a subscription to the searchFilters store so a new link is always created whenever the search filters will change.
+    store.searchFilters.subscribe(($searchFilters) => {
+      console.info(
+        "searchFilters changed, refreshing the view by assigning search filters to store..."
+      );
+
+      let newViewLink = "obsidian://notes-explorer";
+      if ($searchFilters.cf.length > 0 || $searchFilters.nf.length > 0) {
+        newViewLink = `obsidian://notes-explorer?args=${encodeURIComponent(
+          JSON.stringify($searchFilters)
+        )}`;
+      }
+      //store this newViewLink inside a localStorage
+      localStorage.setItem("notesExplorerViewShareLink", newViewLink);
+      // store.searchFilters.set($searchFilters);
+    });
+
+    //Then use the previous link from the localStorage and decode the searchFilters from the link and apply it to the store.
+    const oldShareLink = localStorage.getItem("notesExplorerViewShareLink");
+    if (oldShareLink && oldShareLink !== "obsidian://notes-explorer") {
+      const oldSearchFilters = JSON.parse(oldShareLink?.split("args=")[1]);
+      console.log("oldSearchFilters from localStorage :", oldSearchFilters);
+      store.searchFilters.set(oldSearchFilters);
+    }
   }
 
   // set by folder element
@@ -268,9 +307,15 @@ export default class NotesExplorerPlugin extends Plugin {
       "notes-explorer",
       async (path: ObsidianProtocolData) => {
         const args = JSON.parse(path.args) || "";
-        const layout = args.layout || "modal";
-        console.log("Path from Obsidian URI:", args);
-        store.searchFilters.set(args);
+        console.log("Search filters from Obsidian URI:", args);
+        if (args !== "") {
+          store.searchFilters.set(args);
+        }
+
+        const { workspace } = this.app;
+        const leaf = workspace.getLeaf("tab");
+        await leaf.setViewState({ type: PLUGIN_VIEW_TYPE, active: true });
+        store.viewIsVisible.set(true);
 
         // Method 1 = Joes Approach
         // const params = new URLSearchParams({
@@ -296,35 +341,31 @@ export default class NotesExplorerPlugin extends Plugin {
         // const finalURI = `obsidian://notes-explorer?args=${encodedArgs}`;
         // console.log("This is encoded URI : ", finalURI);
 
-        // const docodedArgs = decodeURIComponent(
-        //   finalURI.split("args=")[1] || ""
-        // );
-        // console.log("Decoded args from URI: ", JSON.stringify(docodedArgs));
+        // TODO : This feature of passing the layout in the link will be worked on some other time.
+        // if (layout === "modal") {
+        //   // TODO : Implement the function to open Notes Explorer view inside a modal.
+        // } else {
+        //   const { workspace } = this.app;
+        //   let leaf: WorkspaceLeaf | null = null;
 
-        if (layout === "modal") {
-          // TODO : Implement the function to open Notes Explorer view inside a modal.
-        } else {
-          const { workspace } = this.app;
-          let leaf: WorkspaceLeaf | null = null;
+        //   if (layout === "tab") {
+        //     leaf = workspace.getLeaf("tab");
+        //   } else if (layout === "split") {
+        //     leaf = workspace.getLeaf("split");
+        //   } else if (layout === "window") {
+        //     leaf = workspace.getLeaf("window");
+        //     console.log("Opening in a new window...");
+        //   } else {
+        //     new Notice(
+        //       "Unsupported view type passed in the Obsidian URI: " + layout
+        //     );
+        //   }
 
-          if (layout === "tab") {
-            leaf = workspace.getLeaf("tab");
-          } else if (layout === "split") {
-            leaf = workspace.getLeaf("split");
-          } else if (layout === "window") {
-            leaf = workspace.getLeaf("window");
-            console.log("Opening in a new window...");
-          } else {
-            new Notice(
-              "Unsupported view type passed in the Obsidian URI: " + layout
-            );
-          }
-
-          if (leaf && ["tab", "split", "window"].includes(layout)) {
-            await leaf.setViewState({ type: PLUGIN_VIEW_TYPE, active: true });
-            store.viewIsVisible.set(true);
-          }
-        }
+        //   if (leaf && ["tab", "split", "window"].includes(layout)) {
+        //     await leaf.setViewState({ type: PLUGIN_VIEW_TYPE, active: true });
+        //     store.viewIsVisible.set(true);
+        //   }
+        // }
       }
     );
   }

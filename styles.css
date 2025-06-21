@@ -60,7 +60,6 @@
     /* flex-wrap: wrap; */
     justify-content: space-between;
     align-items: center;
-    padding-inline: 1em;
     background-color: var(--background-primary);
     box-shadow: 0px 10px 15px -10px var(--background-modifier-success);
     backdrop-filter: blur(5px);
@@ -93,6 +92,9 @@
     gap: 0.5rem;
     min-height: 2.5rem;
     scrollbar-width: thin;
+    border: 1px solid var(--blockquote-border-color);
+    border-radius: 4px;
+    padding-inline: 0.5rem;
 }
 
 /* Force horizontal scrolling inside label section */
@@ -175,6 +177,41 @@
     margin-right: 0;
 }
 
+.filter-section-small-screens-no-filters {
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    justify-content: space-between;
+    padding: 4px;
+    min-width: 100%;
+    gap: 0.5rem;
+}
+
+.filter-section-small-screens-no-filters-message {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--text-faint);
+    flex-grow: 1;
+    text-align: center;
+    align-content: end;
+}
+
+.notes-explorer-view-share-button {
+    border: 1px solid var(--color-accent) !important;
+    cursor: pointer !important;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+}
+
+.notes-explorer-view-share-button-desktop {
+    background-color: transparent !important;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
 .action-bar_folder {
     display: flex;
     flex: 0 0 auto;
@@ -231,26 +268,35 @@
     transform: translateY(0);
 
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     position: sticky;
     margin-top: 3em;
+    flex-wrap: wrap;
 }
 
 /* Filters toggle button on small screens */
 .filters-toggle-button {
     display: none;
-    background-color: transparent !important;
+    /* background-color: transparent !important; */
     border: none;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.5rem;
+    padding-block-end: 0.3rem;
+    margin-inline-start: 0.5rem;
     border-radius: 6px;
+    align-self: baseline;
     font-weight: bold;
     cursor: pointer;
+    /* color: var(--color-accent);*/
+}
+
+.filters-toggle-button.filters-active {
+    background-color: var(--color-accent);
+    color: black;
 }
 
 .filter-section-small-screens-folder-label {
     display: flex;
     flex: 0 0 auto;
-    gap: 0.5rem;
     background: var(--background-modifier-border);
     padding-inline-start: 0.5rem;
     border-radius: 4px;
@@ -259,6 +305,8 @@
     font-size: 1.1rem;
     font-style: italic;
     font-weight: 600;
+    max-width: max-content;
+    gap: 5px;
 }
 
 .filter-section-small-screens-folder-label-closeButton {
@@ -309,6 +357,10 @@
 
     /* Ensure only the responsive section is used */
     .filter-section-small-screens:not(.responsive) {
+        display: none !important;
+    }
+
+    .notes-explorer-view-share-button-desktop {
         display: none !important;
     }
 }
@@ -479,6 +531,45 @@
     font-size: 1.05em !important;
     align-self: normal !important;
     align-self: stretch !important;
+    cursor: pointer !important;
+}
+
+.count-label-button-small-screens {
+    display: none !important;
+
+    @media screen and (max-width: 420px) {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--icon-color-active) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 1.05em !important;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer !important;
+        
+    }
+}
+
+@media screen and (max-width: 420px) {
+    .count-label-button {
+        display: none !important;
+    }
+
+    .count-label-button-small-screens {
+        display: block !important;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--icon-color-active) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 1.05em !important;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer !important;
+    }
+
 }
 
 .search-component {
@@ -512,6 +603,14 @@
     }
 }
 
+.search-input-container input {
+    @media screen and (max-width: 450px) {
+        min-width: auto;
+        max-width: auto;
+        /* box-shadow: calc(0px - var(--size-4-5)) 0 var(--size-2-3) var(--size-2-3) var(--background-primary); */
+    }
+}
+
 .cards-container {
     position: relative;
     container-type: inline-size;
@@ -530,6 +629,7 @@
     --card-gutter: var(--size-4-5);
 }
 
+.sort-button,
 .refresh-button {
     border: none;
     border-radius: 4px;
@@ -736,7 +836,7 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--size-4-1);
-    color: var(--ascent-color);
+    color: var(--color-accent);
 }
 
 .footer-metadata {
@@ -750,9 +850,12 @@
 }
 
 .card-footer-text {
-    font-size: var(--nav-item-size);
+    font-size: 1.1em;
     font-weight: 500;
-    text-wrap: pretty;
+    text-wrap: wrap;
+    line-break: anywhere;
+    word-break: break-all;
+    word-break: break-word;
 }
 
 .card .clickable-icon.is-active {
@@ -809,6 +912,8 @@
 
 .notes-explorer-tag-container .setting-item-control button {
     padding-inline: 8px !important;
+    width: auto !important;
+    max-width: auto !important;
 }
 
 .notes-explorer-sortable-fallback {
@@ -904,6 +1009,7 @@
     align-items: center;
     justify-content: center;
     max-height: 60px;
+    flex-wrap: wrap;
 }
 
 /* DeleteTaskConfirmationModal */
