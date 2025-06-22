@@ -28,10 +28,10 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
   }
 
   getSuggestions(inputStr: string): string[] {
-    console.log(
-      "User has clicked inside the inputEl. getSuggestions called with inputStr:",
-      inputStr === "" ? "empty string" : inputStr
-    );
+    // console.log(
+    //   "User has clicked inside the inputEl. getSuggestions called with inputStr:",
+    //   inputStr === "" ? "empty string" : inputStr
+    // );
     if (inputStr === "") {
       if (this.datePickerEl) {
         try {
@@ -177,14 +177,14 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
 
     const oldSearchContent = this.inputEl.value;
     let finalSearchContent = content;
-    console.log(
-      "selectSuggestion called with content:",
-      content,
-      "\nOld search content:",
-      oldSearchContent,
-      '\nfinalSearchContent.startsWith([") =',
-      finalSearchContent.startsWith(`["`)
-    );
+    // console.log(
+    //   "selectSuggestion called with content:",
+    //   content,
+    //   "\nOld search content:",
+    //   oldSearchContent,
+    //   '\nfinalSearchContent.startsWith([") =',
+    //   finalSearchContent.startsWith(`["`)
+    // );
 
     if (
       content.trim() === `file:${initialPlaceholderSuggestionsMap.get("file:")}`
@@ -234,7 +234,7 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
 
       this.getDatePickerSuggestions(finalSearchContent, this.inputEl).then(
         (datePickerValue) => {
-          console.log("Date picker value:", datePickerValue);
+          // console.log("Date picker value:", datePickerValue);
           this.inputEl.value = datePickerValue || finalSearchContent;
           // this.onSelectCb(datePickerValue || finalSearchContent);
           this.close();
@@ -250,7 +250,7 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
 
       this.getDatePickerSuggestions(finalSearchContent, this.inputEl).then(
         (datePickerValue) => {
-          console.log("Date picker value:", datePickerValue);
+          // console.log("Date picker value:", datePickerValue);
           this.inputEl.value = datePickerValue || finalSearchContent;
           // this.onSelectCb(datePickerValue || finalSearchContent);
           this.close();
@@ -265,7 +265,7 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
       this.close();
       this.getDatePickerSuggestions(finalSearchContent, this.inputEl).then(
         (datePickerValue) => {
-          console.log("Date picker value:", datePickerValue);
+          // console.log("Date picker value:", datePickerValue);
           this.inputEl.value = datePickerValue || finalSearchContent;
           // this.onSelectCb(datePickerValue || finalSearchContent);
           this.close();
@@ -280,7 +280,7 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
       this.close();
       this.getDatePickerSuggestions(finalSearchContent, this.inputEl).then(
         (datePickerValue) => {
-          console.log("Date picker value:", datePickerValue);
+          // console.log("Date picker value:", datePickerValue);
           this.inputEl.value = datePickerValue || finalSearchContent;
           // this.onSelectCb(datePickerValue || finalSearchContent);
           this.close();
@@ -326,7 +326,7 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
     content: string,
     targetEl?: HTMLElement
   ): Promise<string> {
-    console.log("Opening date picker for:", content);
+    // console.log("Opening date picker for:", content);
 
     return new Promise((resolve) => {
       this.datePickerEl = document.createElement("input");
@@ -356,7 +356,7 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
 
           if (selectedDate) {
             const finalValue = `${content.split(":")[0]}: ${selectedDate}`;
-            console.log("Selected date:", finalValue);
+            // console.log("Selected date:", finalValue);
             resolve(finalValue);
           } else {
             resolve(content); // fallback if user cancels

@@ -138,7 +138,6 @@ export default class NotesExplorerPlugin extends Plugin {
         // Event to open the Cards View on Folder click, just like Folder Notes plugin
         const elemTarget = evt.target as Element;
         const Tfolder = this.setByFolderElement(elemTarget);
-        console.log("registerDomEvent : Tfolder :", Tfolder);
 
         // open it
         if (Tfolder && Tfolder instanceof TFolder) {
@@ -217,7 +216,6 @@ export default class NotesExplorerPlugin extends Plugin {
     const oldShareLink = localStorage.getItem("notesExplorerViewShareLink");
     if (oldShareLink && oldShareLink !== "obsidian://notes-explorer") {
       const oldSearchFilters = JSON.parse(oldShareLink?.split("args=")[1]);
-      console.log("oldSearchFilters from localStorage :", oldSearchFilters);
       store.searchFilters.set(oldSearchFilters);
     }
   }
@@ -308,7 +306,6 @@ export default class NotesExplorerPlugin extends Plugin {
       "notes-explorer",
       async (path: ObsidianProtocolData) => {
         const args = JSON.parse(path.args) || "";
-        console.log("Search filters from Obsidian URI:", args);
         if (args !== "") {
           store.searchFilters.set(args);
         }

@@ -100,7 +100,6 @@
       );
       rightDecoratorEl.appendChild(sortButton);
     });
-    console.log("SearchComponent initialized:", search);
     search.setClass("action-bar__search-input");
     const inputEl = search.inputEl;
     const appInstance = get(plugin)?.app;
@@ -119,7 +118,6 @@
     ]);
 
     const updateSuggestions = (value: string) => {
-      console.log("User has clicked inside the inputEl:", value);
       if (!appInstance) return;
 
       if (!activeSuggest) {
@@ -127,14 +125,14 @@
           inputEl,
           finalSuggestions,
           (selected: string) => {
-            console.log(
-              "Selected:",
-              selected,
-              "\nValue inside inputEl:",
-              inputEl.value,
-              "\n Is first check true : ",
-              inputEl.value === "",
-            );
+            // console.log(
+            //   "Selected:",
+            //   selected,
+            //   "\nValue inside inputEl:",
+            //   inputEl.value,
+            //   "\n Is first check true : ",
+            //   inputEl.value === "",
+            // );
             if (!selected) return;
 
             const oldSearchFilters = get(searchFilters);
@@ -167,7 +165,6 @@
 
     // inputEl.addEventListener("focus", () => updateSuggestions(inputEl.value));
     inputEl.addEventListener("click", () => {
-      console.log("User has clicked inside the inputEl:", inputEl.value);
       if (activeSuggest) {
         activeSuggest.getSuggestions(inputEl.value);
       } else {
@@ -175,7 +172,7 @@
       }
     });
     inputEl.addEventListener("input", () => {
-      console.log("This will only be called when the input changes.");
+      // console.log("This will only be called when the input changes.");
       // console.log("Input changed:", inputEl.value);
       if (inputEl.value.trim() === "") {
         $searchQuery = "";
@@ -188,19 +185,19 @@
     });
     inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key === "Enter") {
-        console.log("Enter pressed in search input:", inputEl.value);
+        // console.log("Enter pressed in search input:", inputEl.value);
         const inputVal = inputEl.value.trim();
         if (!inputVal) return;
 
         addToSearchHistory(inputVal);
 
         const regex = /^\[.*:.*\]$/;
-        console.log(
-          "Valid filter format detected:",
-          inputVal,
-          "If condition: ",
-          regex.test(inputVal),
-        );
+        // console.log(
+        //   "Valid filter format detected:",
+        //   inputVal,
+        //   "If condition: ",
+        //   regex.test(inputVal),
+        // );
         if (
           regex.test(inputVal) ||
           /^file:\s*\S+$/.test(inputVal) ||

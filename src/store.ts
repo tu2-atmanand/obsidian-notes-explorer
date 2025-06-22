@@ -68,16 +68,16 @@ function checkFilterForFile(fstr: string, filterType: string, file: TFile) {
 
     // date filters
     case "created-before":
-      console.log(
-        "For file:",
-        file.path,
-        " | Created at:",
-        file.stat.ctime,
-        " | Filter value : ",
-        val,
-        " | Filter value in unix time:",
-        new Date(val).getTime()
-      );
+      // console.log(
+      //   "For file:",
+      //   file.path,
+      //   " | Created at:",
+      //   file.stat.ctime,
+      //   " | Filter value : ",
+      //   val,
+      //   " | Filter value in unix time:",
+      //   new Date(val).getTime()
+      // );
       if (file.stat.ctime < new Date(val).getTime()) return true;
       break;
     case "created-after":
@@ -109,18 +109,18 @@ function checkFilterForFile(fstr: string, filterType: string, file: TFile) {
           const conditionFlag = frontMatterFlagAndValueFromFilter
             .split(" ")[0]
             .trim();
-          console.log(
-            "frontMatterKeyFromFilter = ",
-            frontMatterKeyFromFilter,
-            "\frontMatterFlagAndValueFromFilter = ",
-            frontMatterFlagAndValueFromFilter,
-            "\nComplete frontMatter from file = ",
-            fileCache.frontmatter,
-            "\nMatching frontMatter value from file : fmValue = ",
-            fmValue,
-            "\nconditionFlag = ",
-            conditionFlag
-          );
+          // console.log(
+          //   "frontMatterKeyFromFilter = ",
+          //   frontMatterKeyFromFilter,
+          //   "\nfrontMatterFlagAndValueFromFilter = ",
+          //   frontMatterFlagAndValueFromFilter,
+          //   "\nComplete frontMatter from file = ",
+          //   fileCache.frontmatter,
+          //   "\nMatching frontMatter value from file : fmValue = ",
+          //   fmValue,
+          //   "\nconditionFlag = ",
+          //   conditionFlag
+          // );
           switch (conditionFlag) {
             case "ABOVE":
               if (
@@ -184,15 +184,14 @@ export const allAllowedFiles = derived(
     } else {
       // Fetch files from the specified folder
       const folder = get(app).vault.getAbstractFileByPath($folderName[0].path);
-      console.log(
-        "Folder name is not empty, fetching files from folder:",
-        $folderName,
-        "\nFolder object is : ",
-        folder
-      );
+      // console.log(
+      //   "Folder name is not empty, fetching files from folder:",
+      //   $folderName,
+      //   "\nFolder object is : ",
+      //   folder
+      // );
 
       if (folder instanceof TFolder) {
-        console.log("Value of showSubFolders : ", $settings.showSubFolders);
         if ($settings.showSubFolders) {
           // Helper function to recursively fetch files
           const collectFiles = (currentFolder: TFolder) => {
@@ -273,11 +272,7 @@ export const allAllowedFiles = derived(
       });
       finalFilteredFiles = Array.from(normalFilteredFilesSet);
     }
-
-    console.log(
-      "Filtered files based on search filters :\n",
-      finalFilteredFiles
-    );
+    
     return finalFilteredFiles;
   }
 );
@@ -516,14 +511,14 @@ export const displayedFiles = derived(
     $currentPage,
     $displayedFilesInBatchCount,
   ]) => {
-    console.log(
-      "Inside displayedFiles derived store...\nThe filtered files are :\n",
-      $filteredFiles,
-      "\nThe searchResult files are :\n",
-      $searchResultFiles,
-      "\nSearch query is :\n",
-      get(searchQuery)
-    );
+    // console.log(
+    //   "Inside displayedFiles derived store...\nThe filtered files are :\n",
+    //   $filteredFiles,
+    //   "\nThe searchResult files are :\n",
+    //   $searchResultFiles,
+    //   "\nSearch query is :\n",
+    //   get(searchQuery)
+    // );
     const filesToDisplay =
       get(searchQuery).trim() !== "" ? $searchResultFiles : $filteredFiles;
 
@@ -544,7 +539,6 @@ export const displayedFilesCount = derived(
 );
 
 export const allTags = derived([appCache], ([$appCache]) => {
-  console.log("AppCache changed, calculating all tags...");
   const tags = $appCache.vault
     .getMarkdownFiles()
     .map(

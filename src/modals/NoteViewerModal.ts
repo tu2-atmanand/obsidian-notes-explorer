@@ -67,14 +67,13 @@ export class NoteViewerModal extends Modal {
   }
 
   onClose() {
-    console.log("Closing Note Viewer Modal for file:", this.file.path);
     const { contentEl } = this;
     contentEl.empty();
   }
 
   private editNote() {
     // Logic to edit the note
-    console.log("Edit note:", this.file.path);
+    // console.log("Edit note:", this.file.path);
   }
 
   private async openNote(evt: UserEvent) {

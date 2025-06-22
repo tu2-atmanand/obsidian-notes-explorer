@@ -880,7 +880,6 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
   }
 
   hide(): void {
-    console.log("Cleaning up Notes Explorer settings UI...");
     //Destroy all Pickr instances
     this.allPickrs.forEach((pickr) => pickr.destroy());
 
