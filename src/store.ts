@@ -41,14 +41,14 @@ function checkFilterForFile(fstr: string, filterType: string, file: TFile) {
 
   switch (type) {
     case "file":
-      console.log(
-        "Checking filter:",
-        fstr,
-        "\nFile path:",
-        file.path,
-        "\nCondition: ",
-        file.basename.includes(val)
-      );
+      // console.log(
+      //   "Checking filter:",
+      //   fstr,
+      //   "\nFile path:",
+      //   file.path,
+      //   "\nCondition: ",
+      //   file.basename.includes(val)
+      // );
       if (file.basename.includes(val)) return true;
       break;
 
