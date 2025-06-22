@@ -146,9 +146,9 @@
               });
               // refreshView();
             } else {
-              console.warn(
-                "The selected item is already present in the search filters.",
-              );
+              // console.warn(
+              //   "The selected item is already present in the search filters.",
+              // );
               new Notice("The filter is already added to the view.");
             }
             addToSearchHistory(selected);
@@ -221,9 +221,9 @@
             inputEl.value = "";
             // refreshView();
           } else {
-            console.warn(
-              "The selected item is already present in the search filters.",
-            );
+            // console.warn(
+            //   "The selected item is already present in the search filters.",
+            // );
             new Notice("The filter is already added to the view.");
           }
         } else {
@@ -378,7 +378,7 @@
       if (!filters.cf.includes(tag) && !filters.nf.includes(tag)) {
         filters.nf.push(tag);
       } else {
-        console.warn("The tag is already present in the search filters.");
+        // console.warn("The tag is already present in the search filters.");
         new Notice("The tag is already added to the view.");
       }
       return { ...filters };

@@ -41,11 +41,19 @@ function checkFilterForFile(fstr: string, filterType: string, file: TFile) {
 
   switch (type) {
     case "file":
-      if (file.path.includes(val)) return true;
+      console.log(
+        "Checking filter:",
+        fstr,
+        "\nFile path:",
+        file.path,
+        "\nCondition: ",
+        file.basename.includes(val)
+      );
+      if (file.basename.includes(val)) return true;
       break;
 
     case "parent":
-      if (file.parent?.path === val) return true;
+      if (file.parent?.path.includes(val)) return true;
       break;
 
     case "tag":
@@ -173,9 +181,9 @@ function checkFilterForFile(fstr: string, filterType: string, file: TFile) {
 export const allAllowedFiles = derived(
   [settings, folderName, searchFilters],
   ([$settings, $folderName, $searchFilters]) => {
-    console.warn(
-      "allAllowedFiles : Setting or folderName or searchFilters has been updated.\nThis function should NOT run on resizing events"
-    );
+    // console.warn(
+    //   "allAllowedFiles : Setting or folderName or searchFilters has been updated.\nThis function should NOT run on resizing events"
+    // );
     let allFiles: TFile[] = [];
 
     if ($folderName.length === 0) {
@@ -272,7 +280,7 @@ export const allAllowedFiles = derived(
       });
       finalFilteredFiles = Array.from(normalFilteredFilesSet);
     }
-    
+
     return finalFilteredFiles;
   }
 );
