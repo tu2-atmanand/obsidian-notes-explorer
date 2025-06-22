@@ -22,7 +22,7 @@ export const view = writable<ItemView>();
 export const settings = writable<NotesExplorerSettings>();
 export const appCache = writable<MetadataCache>();
 export const files = writable<TFile[]>([]);
-export const folderName = writable<string>("");
+export const folderName = writable<TFolder[]>([]);
 export const viewIsVisible = writable(false);
 export const skipNextTransition = writable(true);
 export const refreshSignal = writable<boolean>(false);
@@ -178,12 +178,18 @@ export const allAllowedFiles = derived(
     );
     let allFiles: TFile[] = [];
 
-    if ($folderName === "") {
+    if ($folderName.length === 0) {
       // If no folder is specified, get all markdown files in the vault
       allFiles = get(app).vault.getMarkdownFiles();
     } else {
       // Fetch files from the specified folder
-      const folder = get(app).vault.getAbstractFileByPath($folderName);
+      const folder = get(app).vault.getAbstractFileByPath($folderName[0].path);
+      console.log(
+        "Folder name is not empty, fetching files from folder:",
+        $folderName,
+        "\nFolder object is : ",
+        folder
+      );
 
       if (folder instanceof TFolder) {
         console.log("Value of showSubFolders : ", $settings.showSubFolders);

@@ -1,7 +1,7 @@
 <!-- ./src/components/Root.svelte -->
 
 <script lang="ts">
-  import { debounce, Menu, Notice, SearchComponent, setIcon } from "obsidian";
+  import { debounce, Menu, Notice, SearchComponent, setIcon, TFolder } from "obsidian";
   import { afterUpdate, onMount } from "svelte";
   import { slide } from "svelte/transition";
   import MiniMasonry from "minimasonry";
@@ -350,7 +350,7 @@
   }
 
   function clearFolderFilter(event: MouseEvent) {
-    store.folderName.set("");
+    store.folderName.set([]);
     // store.files.set($allAllowedFiles);
     refreshView();
     // notesGrid.layout();
@@ -389,11 +389,11 @@
 
   $: totalNotesCount =
     $searchQuery === "" &&
-    $folderName === "" &&
+    $folderName.length > 0 &&
     $searchFilters.cf.length === 0 &&
     $searchFilters.nf.length === 0
       ? `${$allAllowedFiles.length}`
-      : `${$displayedFiles.length} / ${get(plugin).app.vault.getMarkdownFiles().length - $excludedFilesCount}`; // Display filtered count vs total count
+      : `${$displayedFiles.length} / ${get(plugin).app.vault.getMarkdownFiles().length}`; // Display filtered count vs total count
 
   function handleCountLabelBtn(event: MouseEvent) {
     const statisticsModal = new NotesCountStatisticsModal(get(plugin));
@@ -508,7 +508,7 @@
     </div>
     {#if screenWidth <= 1200}
       <button
-        class="clickable-icon filters-toggle-button {$folderName !== '' ||
+        class="clickable-icon filters-toggle-button {$folderName.length > 0 ||
         $searchFilters.cf.length > 0 ||
         $searchFilters.nf.length > 0
           ? 'filters-active'
@@ -518,10 +518,10 @@
       />
     {:else}
       <div class="action-bar_labelSection">
-        {#if $folderName || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
-          {#if $folderName}
+        {#if $folderName.length > 0 || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
+          {#if $folderName.length > 0}
             <div class="action-bar_folder">
-              <div style="align-content: center;">{$folderName}</div>
+              <div style="align-content: center;">{$folderName[0].name}</div>
               <div class="action-bar_folder_closeButton">
                 <button
                   class="clickable-icon"
@@ -600,7 +600,7 @@
   class:visible={showFilters}
   transition:slide
 >
-  {#if $folderName || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
+  {#if $folderName.length > 0 || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
     <button
       class="clickable-icon notes-explorer-view-share-button"
       on:click={copyViewLinkToClipboard}
@@ -610,9 +610,9 @@
       class="clickable-icon count-label-button-small-screens"
       on:click={handleCountLabelBtn}>{totalNotesCount}</button
     >
-    {#if $folderName}
+    {#if $folderName.length > 0}
       <div class="filter-section-small-screens-folder-label">
-        <div style="align-content: center;">{$folderName}</div>
+        <div style="align-content: center;">{$folderName[0].name}</div>
         <div class="filter-section-small-screens-folder-label-closeButton">
           <button
             class="clickable-icon"
@@ -700,9 +700,9 @@
       make sure the notes you are searching are not in the Excluded folders from
       setting.
     </div>
-  {:else if $displayedFiles.length === 0 && $folderName !== ""}
+  {:else if $displayedFiles.length === 0 && $folderName.length > 0}
     <div class="no-files-message">
-      No files found in the folder "{$folderName}". <br /><br />Either the
+      No files found in the folder "{$folderName[0].name}". <br /><br />Either the
       folder is empty or you probably have added this folder or its parent
       folder to excluded folder in settings.
     </div>

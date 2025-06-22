@@ -167,9 +167,7 @@ export class NotesExplorerView extends ItemView {
   }
 
   private getAllFiles() {
-    const onlyFolder = get(folderName);
-
-    if (onlyFolder !== "") {
+    if (get(folderName).length > 0) {
       return;
     } else {
       store.files.set(get(allAllowedFiles));

@@ -138,6 +138,7 @@ export default class NotesExplorerPlugin extends Plugin {
         // Event to open the Cards View on Folder click, just like Folder Notes plugin
         const elemTarget = evt.target as Element;
         const Tfolder = this.setByFolderElement(elemTarget);
+        console.log("registerDomEvent : Tfolder :", Tfolder);
 
         // open it
         if (Tfolder && Tfolder instanceof TFolder) {
@@ -281,7 +282,7 @@ export default class NotesExplorerPlugin extends Plugin {
       // }
 
       // store.files.set(files);
-      store.folderName.set(folder.name);
+      store.folderName.set([folder]);
     }
 
     await this.activateView("main");
