@@ -129,48 +129,57 @@ function checkFilterForFile(fstr: string, filterType: string, file: TFile) {
           //   "\nconditionFlag = ",
           //   conditionFlag
           // );
-          switch (conditionFlag) {
-            case "ABOVE":
-              if (
-                Number(fmValue.trim()) >
-                Number(frontMatterFlagAndValueFromFilter.split(` `)[1].trim())
-              ) {
-                return true;
-              }
-              break;
-            case "BELOW":
-              if (
-                Number(fmValue.trim()) <
-                Number(frontMatterFlagAndValueFromFilter.split(` `)[1].trim())
-              ) {
-                return true;
-              }
-              break;
-            case "BEFORE":
-              if (
-                new Date(fmValue.trim()).getTime() <
-                new Date(
-                  frontMatterFlagAndValueFromFilter.split(` `)[1].trim()
-                ).getTime()
-              ) {
-                return true;
-              }
-              break;
-            case "AFTER":
-              if (
-                new Date(fmValue.trim()).getTime() >
-                new Date(
-                  frontMatterFlagAndValueFromFilter.split(` `)[1].trim()
-                ).getTime()
-              ) {
-                return true;
-              }
-              break;
-            default:
-              if (fmValue.trim() === frontMatterFlagAndValueFromFilter.trim()) {
-                return true;
-              }
-              break;
+          if (
+            fmValue !== undefined &&
+            fmValue !== null &&
+            fmValue !== "" &&
+            frontMatterFlagAndValueFromFilter.includes(" ")
+          ) {
+            switch (conditionFlag) {
+              case "ABOVE":
+                if (
+                  Number(fmValue.trim()) >
+                  Number(frontMatterFlagAndValueFromFilter.split(` `)[1].trim())
+                ) {
+                  return true;
+                }
+                break;
+              case "BELOW":
+                if (
+                  Number(fmValue.trim()) <
+                  Number(frontMatterFlagAndValueFromFilter.split(` `)[1].trim())
+                ) {
+                  return true;
+                }
+                break;
+              case "BEFORE":
+                if (
+                  new Date(fmValue.trim()).getTime() <
+                  new Date(
+                    frontMatterFlagAndValueFromFilter.split(` `)[1].trim()
+                  ).getTime()
+                ) {
+                  return true;
+                }
+                break;
+              case "AFTER":
+                if (
+                  new Date(fmValue.trim()).getTime() >
+                  new Date(
+                    frontMatterFlagAndValueFromFilter.split(` `)[1].trim()
+                  ).getTime()
+                ) {
+                  return true;
+                }
+                break;
+              default:
+                if (
+                  fmValue.trim() === frontMatterFlagAndValueFromFilter.trim()
+                ) {
+                  return true;
+                }
+                break;
+            }
           }
         }
       }

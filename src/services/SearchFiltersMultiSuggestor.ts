@@ -37,7 +37,7 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
         try {
           document.body.removeChild(this.datePickerEl); // Remove the date picker if it exists as soon as user starts typing in the input.
         } catch (error) {
-          console.error("Error removing date picker:", error);
+          // console.error("Error removing date picker:", error);
         }
       }
       let initialPlaceholderSuggestions = [
@@ -171,7 +171,7 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
       try {
         document.body.removeChild(this.datePickerEl); // Remove the date picker if it exists as soon as user starts typing in the input.
       } catch (error) {
-        console.error("Error removing date picker:", error);
+        // console.error("Error removing date picker:", error);
       }
     }
 
@@ -315,7 +315,6 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
         this.inputEl.value = "";
         this.close();
       } else {
-        console.error("Is this what is running...");
         this.inputEl.value = content;
         this.close();
       }

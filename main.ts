@@ -55,9 +55,9 @@ export default class NotesExplorerPlugin extends Plugin {
 
       // Registering a subscription to refresh the view when files change
       store.allAllowedFiles.subscribe(($allAllowedFiles) => {
-        console.info(
-          "allAllowedFiles changed, refreshing the view by assigning all these files to files store..."
-        );
+        // console.info(
+        //   "allAllowedFiles changed, refreshing the view by assigning all these files to files store..."
+        // );
         store.files.set($allAllowedFiles);
       });
 
@@ -197,9 +197,9 @@ export default class NotesExplorerPlugin extends Plugin {
   synchronizeSearchFiltersFromShareLink() {
     // Firstly create a subscription to the searchFilters store so a new link is always created whenever the search filters will change.
     store.searchFilters.subscribe(($searchFilters) => {
-      console.info(
-        "searchFilters changed, refreshing the view by assigning search filters to store..."
-      );
+      // console.info(
+      //   "searchFilters changed, refreshing the view by assigning search filters to store..."
+      // );
 
       let newViewLink = "obsidian://notes-explorer";
       if ($searchFilters.cf.length > 0 || $searchFilters.nf.length > 0) {
