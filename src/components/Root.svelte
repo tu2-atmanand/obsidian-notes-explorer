@@ -232,6 +232,7 @@
         } else {
           $searchQuery = inputVal;
         }
+        inputEl.blur();
       }
     });
   }
