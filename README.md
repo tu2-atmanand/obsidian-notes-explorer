@@ -2,8 +2,20 @@
 
 This is a plugin for [Obsidian.md](https://obsidian.md) that displays all your notes as cards for better visual navigation and revision of your notes. Explore your vault using the explorer view by using various filters.
 
+
+##  Different views
+
+Using the settings to set the **fixed height** of the cards and to set the **number of lines** to read from your notes, you can achieve two kinds of views. As shown below :
+
+### 1. Masonry view
+
+Leave the field blank for the setting **"Fixed card height"**.  And if you want you can increase the number of lines to be read from your notes in the setting **"Maximum number of lines"**, and you can achieve a view like the one shown below:
+
 ![Thumbnail](./assets/Thumbnail3.png)
 <P align="center"><b>Masonry view</b> - variable card height</p>
+
+### 1. Grid view
+Set some value for the setting **"Fixed card height"**. And all the cards will be restricted to have a fixed height as per the value in pixel, giving the whole view a grid look, something like shown below :
 
 ![Thumbnail](./assets/Thumbnail4.png)
 <P align="center"><b>Gallery view</b> - fixed card height</p>
@@ -22,6 +34,14 @@ This is a plugin for [Obsidian.md](https://obsidian.md) that displays all your n
 
 ## Installation
 
+The plugin has been released in the Obsidian Community marketplace.
+
+1. Simply open the settings.
+2. Navigate to the **Community plugins** tab.
+3. Then click on the **Browse** button.
+
+
+<!--
 > This plugin is in the process of being published on the Obsidian plugin marketplace. However, until it is approved, use the following steps to install this plugin, the easiest way.
 
 **Step 1 : (Optional)** The support for **Cards View (Beta)** plugin as been ended, so unistall it, if you had installed it earlier through BRAT.
@@ -40,6 +60,9 @@ https://github.com/tu2-atmanand/obsidian-notes-explorer
 ```
 
 **Step 4 :** Thats it! Now you can open the Notes explorer board from the ribbon icon.
+
+-->
+
 
 ## Contributing
 
