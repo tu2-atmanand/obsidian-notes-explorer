@@ -1,7 +1,14 @@
 <!-- ./src/components/Root.svelte -->
 
 <script lang="ts">
-  import { debounce, Menu, Notice, SearchComponent, setIcon, TFolder } from "obsidian";
+  import {
+    debounce,
+    Menu,
+    Notice,
+    SearchComponent,
+    setIcon,
+    TFolder,
+  } from "obsidian";
   import { afterUpdate, onMount } from "svelte";
   import { slide } from "svelte/transition";
   import MiniMasonry from "minimasonry";
@@ -387,7 +394,7 @@
 
   $: totalNotesCount =
     $searchQuery === "" &&
-    $folderName.length > 0 &&
+    $folderName.length === 0 &&
     $searchFilters.cf.length === 0 &&
     $searchFilters.nf.length === 0
       ? `${$allAllowedFiles.length}`
@@ -692,17 +699,22 @@
   style="--columns: {columns};"
   style:padding-top={$showActionBar ? "4em" : "0"}
 >
-  {#if $displayedFiles.length === 0 && $searchQuery !== ""}
-    <div class="no-files-message">
-      No files found. <br /><br />Please check your search query again and also
-      make sure the notes you are searching are not in the Excluded folders from
-      setting.
+  {#if $searchFilters.cf.length === 0 && $searchFilters.nf.length === 0 && $searchQuery === "" && $folderName.length === 0 && $displayedFiles.length === 0}
+    <div class="loading-animation-and-message">
+      <div class="loading-spinner"></div>
+      <div class="loading-message">Loading your files...</div>
     </div>
-  {:else if $displayedFiles.length === 0 && $folderName.length > 0}
+  {:else if $folderName.length > 0 && $displayedFiles.length === 0}
     <div class="no-files-message">
-      No files found in the folder "{$folderName[0].name}". <br /><br />Either the
-      folder is empty or you probably have added this folder or its parent
+      No files found in the folder "{$folderName[0].name}". <br /><br />Either
+      the folder is empty or you probably have added this folder or its parent
       folder to excluded folder in settings.
+    </div>
+  {:else if ($searchFilters.cf.length > 0 || $searchFilters.nf.length > 0) && $displayedFiles.length === 0}
+    <div class="no-files-message">
+      No files found. <br /><br />Verify your filters again and check if you
+      have applied any folder tag or search query and also make sure the notes
+      you are looking for are not in the Excluded folders in setting.
     </div>
   {:else if $displayedFiles.length === 0}
     <div class="no-files-message">
