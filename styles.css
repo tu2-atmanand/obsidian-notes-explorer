@@ -1264,6 +1264,15 @@ ul>li.task-list-item>.task-list-item-checkbox {
     max-width: 100% !important;
 }
 
+.card-content span.math {
+    display: inline-block !important;
+    max-width: 100% !important;
+    /* overflow: hidden !important; */
+    text-wrap: balance !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+}
+
 /* Pickr library modifications */
 
 .pcr-app .pcr-swatches>button {
