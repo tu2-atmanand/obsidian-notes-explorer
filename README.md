@@ -40,12 +40,15 @@ Set some value for the setting **"Fixed card height"**. And all the cards will b
 
 ## Features
 
-- Display notes as cards arranged in a masonry view or Gallery view.
-- Sorts by last modified time, created time and note filename either as ascending or descending order.
-- Filters to show/hide empty notes.
-- See notes from specific folders using **Folder tag**. Also use sub-folder filter to view all notes from even the sub-folders.
-- Click on folder name from file explorer to open the explorer board to see notes within that folder only.
-- Two different types of tag based color indicators (background color and sidebars).
+- **Two view types :** Display notes as cards arranged in a masonry view or Gallery view.
+- **Various sorting criteria:** Sorts by last modified time, created time and note filename either as ascending or descending order.
+- **Folter tag :** Click on the folder name from file tree to open specific folder notes. Toggle *read-subfolders* filter, if needed.
+- **Automatic card background color :** Two different types of tag based color indicators (background color and sidebars).
+- **Search filters :** Apply various kinds of filters to the view to find your notes faster directly from the search bar.
+- **Search history** : Store your searches to easily apply them in the future.
+- **Link filtered views :** Use the Obsidian URI links to save the filtered Notes Explorer view for future quick reference.
+- **Different open note layout :** Use different setting option to open the note, the way you want.
+- **UI optimizations for mobile :** A ton of UI/UX enhancements to get a better experience even on small screens.
 
 >[!IMPORTANT]
 > **Notice :** Initially started as simple fork from the [Cards View plugin](https://github.com/jillro/obsidian-cards-view-plugin), now has become a highly functional plugin in itself with a lot of new functionalities. I started integrating all these new features for my personal use-case. But, now after hearing the suggestions from few of the users, I have decided to publish this fork plugin with all these new changes to Obsidian marketplace, as I presume, the future development plan of Cards view plugin might not align with my changes. This Beta version will be now published with a new name : **Notes Explorer**.
