@@ -1,6 +1,6 @@
 <p align="center">
 	<h1 align="center"><b>Notes Explorer</b></h1>
-	<h3 align="center"><b>"Explorer your notes as cards and advanced filters"</b></h3>
+	<h3 align="center"><b>"Explorer your notes as cards and use advanced filters"</b></h3>
 </p>
 <br/>
 <p align="center">
