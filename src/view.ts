@@ -93,8 +93,13 @@ export class NotesExplorerView extends ItemView {
       store.showActionBar.set(!get(showActionBar));
     });
 
-
     this.renderMoreOnScroll();
+  }
+
+  onResize() {
+    if (this.svelteRoot && this.svelteRoot.updateLayoutNextTick) {
+      this.svelteRoot.updateLayoutNextTick();
+    }
   }
 
   async onClose() {
@@ -152,18 +157,21 @@ export class NotesExplorerView extends ItemView {
     );
 
     this.app.workspace.on("resize", () => {
-      store.refreshOnResize.set(true);
+      // store.refreshOnResize.set(true);
+      if (this.svelteRoot && this.svelteRoot.updateLayoutNextTick) {
+        this.svelteRoot.updateLayoutNextTick();
+      }
     });
 
-    this.app.workspace.on("active-leaf-change", () => {
-      // check our leaf is visible
-      const rootLeaf = this.app.workspace.getMostRecentLeaf(
-        this.app.workspace.rootSplit
-      );
-      store.viewIsVisible.set(
-        rootLeaf?.view?.getViewType() === PLUGIN_VIEW_TYPE
-      );
-    });
+    // this.app.workspace.on("active-leaf-change", () => {
+    //   // check our leaf is visible
+    //   const rootLeaf = this.app.workspace.getMostRecentLeaf(
+    //     this.app.workspace.rootSplit
+    //   );
+    //   store.viewIsVisible.set(
+    //     rootLeaf?.view?.getViewType() === PLUGIN_VIEW_TYPE
+    //   );
+    // });
   }
 
   private getAllFiles() {

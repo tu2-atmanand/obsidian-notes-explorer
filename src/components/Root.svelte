@@ -9,7 +9,7 @@
     setIcon,
     TFolder,
   } from "obsidian";
-  import { afterUpdate, onMount } from "svelte";
+  import { afterUpdate, onMount, tick } from "svelte";
   import { slide } from "svelte/transition";
   import MiniMasonry from "minimasonry";
   import Card from "./Card.svelte";
@@ -30,6 +30,7 @@
     allAllowedFiles,
     allTags,
     excludedFilesCount,
+    files,
   } from "../store";
   import { Sort } from "src/settings";
   import {
@@ -363,7 +364,7 @@
 
   function removeFilter(index: number, type: "cf" | "nf") {
     store.searchFilters.update((filters) => {
-      filters[type].splice(index, 1);
+      filters[type]?.splice(index, 1);
       return { ...filters };
     });
     // refreshView();
@@ -371,7 +372,7 @@
 
   function moveFilter(index: number, type: "cf" | "nf") {
     searchFilters.update((filters) => {
-      const item = filters[type].splice(index, 1)[0];
+      const item = filters[type]?.splice(index, 1)[0];
       const otherType = type === "cf" ? "nf" : "cf";
       filters[otherType].push(item);
       return { ...filters };
@@ -398,7 +399,7 @@
     $searchFilters.cf.length === 0 &&
     $searchFilters.nf.length === 0
       ? `${$allAllowedFiles.length}`
-      : `${$displayedFiles.length} / ${get(plugin).app.vault.getMarkdownFiles().length}`; // Display filtered count vs total count
+      : `${$displayedFiles.length} / ${get(plugin).app.vault.getMarkdownFiles()?.length}`; // Display filtered count vs total count
 
   function handleCountLabelBtn(event: MouseEvent) {
     const statisticsModal = new NotesCountStatisticsModal(get(plugin));
@@ -409,7 +410,7 @@
     if (filter.startsWith(`["`)) {
       return filter;
     } else {
-      return `${filter.split(":")[0].trim()}: `;
+      return `${filter.split(":")[0]?.trim()}: `;
     }
   }
 
@@ -417,7 +418,7 @@
     if (filter.startsWith(`["`)) {
       return "";
     } else {
-      return filter.split(":")[1].trim();
+      return filter.split(":")[1]?.trim();
     }
   }
 
@@ -442,6 +443,7 @@
       gutter: $settings.gutterSize,
       surroundingGutter: $settings.enableSurroundingGutters,
       ultimateGutter: 20,
+      wedge: true,
     });
     notesGrid.layout();
 
@@ -453,22 +455,59 @@
     };
   });
 
-  afterUpdate(
-    debounce(async () => {
-      if (!$viewIsVisible) {
-        $skipNextTransition = true;
+  // afterUpdate(
+  //   debounce(async () => {
+  //     if (!$viewIsVisible) {
+  //       $skipNextTransition = true;
+  //       return;
+  //     }
+
+  //     notesGrid.layout();
+  //     $skipNextTransition = false;
+
+  //     if ($refreshOnResize || $settings) {
+  //       notesGrid.layout();
+  //       $refreshOnResize = false;
+  //     }
+  //   }),
+  // );
+
+  let lastLayout: Date = new Date();
+  let pendingLayout: ReturnType<typeof setTimeout> | null = null;
+  const debouncedLayout = () => {
+    // If there has been a relayout call in the last 100ms,
+    // we schedule another one 100ms later to avoid layout thrashing
+    return new Promise<void>((resolve) => {
+      if (
+        lastLayout.getTime() + 100 > new Date().getTime() &&
+        pendingLayout === null
+      ) {
+        pendingLayout = setTimeout(
+          () => {
+            notesGrid.layout();
+            $skipNextTransition = false;
+            lastLayout = new Date();
+            pendingLayout = null;
+            resolve();
+          },
+          lastLayout.getTime() + 100 - new Date().getTime(),
+        );
         return;
       }
 
+      // Otherwise, relayout immediately
       notesGrid.layout();
       $skipNextTransition = false;
+      lastLayout = new Date();
+      resolve();
+    });
+  };
 
-      if ($refreshOnResize || $settings) {
-        notesGrid.layout();
-        $refreshOnResize = false;
-      }
-    }),
-  );
+  export const updateLayoutNextTick = async () => {
+    await tick();
+    return await debouncedLayout();
+  };
+  files.subscribe(updateLayoutNextTick);
 
   let screenWidth = window.innerWidth;
   let showFilters = false;
@@ -491,25 +530,29 @@
       <div class="action-bar_buttons">
         <button
           class="clickable-icon refresh-button"
+          aria-label="Refresh View"
           use:refreshIcon
           on:click={refreshView}
-        />
+        ></button>
+        <button
+          class="notes-explorer-view-share-button-desktop"
+          aria-label="Share View Link"
+          on:click={copyViewLinkToClipboard}
+          use:viewShareButtonIcon
+        ></button>
         <button
           class="clickable-icon sort-button"
+          aria-label="Sort Notes"
           use:sortIcon
           on:click={sortMenu}
-        />
+        ></button>
       </div>
-      <div class="action-bar__search" use:searchInput />
+      <div class="action-bar__search" use:searchInput></div>
       <button
         class="clickable-icon count-label-button"
+        aria-label="Notes Count Statistics"
         on:click={handleCountLabelBtn}>{totalNotesCount}</button
       >
-      <button
-        class="notes-explorer-view-share-button-desktop"
-        on:click={copyViewLinkToClipboard}
-        use:viewShareButtonIcon
-      />
     </div>
     {#if screenWidth <= 1200}
       <button
@@ -518,9 +561,10 @@
         $searchFilters.nf.length > 0
           ? 'filters-active'
           : ''}"
+        aria-label="Toggle Filters Panel"
         on:click={() => (showFilters = !showFilters)}
         use:filtersPanelIcon
-      />
+      ></button>
     {:else}
       <div class="action-bar_labelSection">
         {#if $folderName.length > 0 || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
@@ -530,9 +574,10 @@
               <div class="action-bar_folder_closeButton">
                 <button
                   class="clickable-icon"
+                  aria-label="Clear Folder Filter"
                   use:closeIcon
                   on:click={clearFolderFilter}
-                />
+                ></button>
               </div>
             </div>
           {/if}
@@ -541,6 +586,7 @@
               <div class="filter-label cf">
                 <button
                   class="toggle"
+                  aria-label="Convert to Normal Filter"
                   on:click={() => moveFilter(index, "cf")}
                   use:cumpulsoryFilterIcon
                   title="Convert to Normal Filter"
@@ -555,19 +601,21 @@
                 </div>
                 <button
                   class="close"
+                  aria-label="Remove Filter"
                   on:click={() => removeFilter(index, "cf")}
                   use:closeCircleIcon
-                />
+                ></button>
               </div>
             {/each}
             {#each $searchFilters.nf as filter, index}
               <div class="filter-label nf">
                 <button
                   class="toggle"
+                  aria-label="Convert to Compulsory Filter"
                   on:click={() => moveFilter(index, "nf")}
                   use:normalFilterIcon
                   title="Convert to Compulsory Filter"
-                />
+                ></button>
                 <div class="filter-label-text">
                   <div class="filter-label-text-key">
                     {getFilterKeyText(filter)}
@@ -578,9 +626,10 @@
                 </div>
                 <button
                   class="close"
+                  aria-label="Remove Filter"
                   on:click={() => removeFilter(index, "nf")}
                   use:closeCircleIcon
-                />
+                ></button>
               </div>
             {/each}
           </div>
@@ -608,9 +657,10 @@
   {#if $folderName.length > 0 || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
     <button
       class="clickable-icon notes-explorer-view-share-button"
+      aria-label="Share View Link"
       on:click={copyViewLinkToClipboard}
       use:viewShareButtonIcon
-    />
+    ></button>
     <button
       class="clickable-icon count-label-button-small-screens"
       on:click={handleCountLabelBtn}>{totalNotesCount}</button
@@ -621,9 +671,10 @@
         <div class="filter-section-small-screens-folder-label-closeButton">
           <button
             class="clickable-icon"
+            aria-label="Clear Folder Filter"
             use:closeIcon
             on:click={clearFolderFilter}
-          />
+          ></button>
         </div>
       </div>
     {/if}
@@ -632,6 +683,7 @@
         <div class="filter-label cf">
           <button
             class="toggle"
+            aria-label="Convert to Normal Filter"
             on:click={() => moveFilter(index, "cf")}
             use:cumpulsoryFilterIcon
             title="Convert to Normal Filter"
@@ -646,19 +698,21 @@
           </div>
           <button
             class="close"
+            aria-label="Remove Filter"
             on:click={() => removeFilter(index, "cf")}
             use:closeCircleIcon
-          />
+          ></button>
         </div>
       {/each}
       {#each $searchFilters.nf as filter, index}
         <div class="filter-label nf">
           <button
             class="toggle"
+            aria-label="Convert to Compulsory Filter"
             on:click={() => moveFilter(index, "nf")}
             use:normalFilterIcon
             title="Convert to Compulsory Filter"
-          />
+          ></button>
           <div class="filter-label-text">
             <div class="filter-label-text-key">
               {getFilterKeyText(filter)}
@@ -669,9 +723,10 @@
           </div>
           <button
             class="close"
+            aria-label="Remove Filter"
             on:click={() => removeFilter(index, "nf")}
             use:closeCircleIcon
-          />
+          ></button>
         </div>
       {/each}
     </div>
@@ -679,9 +734,10 @@
     <div class="filter-section-small-screens-no-filters">
       <button
         class="clickable-icon notes-explorer-view-share-button"
+        aria-label="Share View Link"
         on:click={copyViewLinkToClipboard}
         use:viewShareButtonIcon
-      />
+      ></button>
       <button
         class="clickable-icon count-label-button-small-screens"
         on:click={handleCountLabelBtn}>{totalNotesCount}</button

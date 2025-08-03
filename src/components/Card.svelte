@@ -484,22 +484,24 @@
       {#if pinned}
         <button
           class="clickable-icon"
+          aria-label="Unpin file"
           use:pinnedIcon
-          on:click|stopPropagation={togglePin}
-        />
+          on:click|preventDefault={togglePin}
+        ></button>
       {:else}
         <button
           class="clickable-icon"
+          aria-label="Pin file"
           class:is-active={pinned}
           use:pinButton
-          on:click|stopPropagation={togglePin}
-        />
+          on:click|preventDefault={togglePin}
+        ></button>
       {/if}
       <div class={footerMetadataClass}>
         {#if $settings.noteMetadata === "folderName" && file.parent != null && file.parent.path !== "/"}
-          <span use:folderIcon />
+          <span use:folderIcon></span>
         {:else if $settings.noteMetadata === "folderName"}
-          <span use:vaultIcon />
+          <span use:vaultIcon></span>
         {/if}
         <div
           class="card-footer-text"
@@ -512,11 +514,13 @@
       {#if $settings.showDeleteButton}
         <button
           class="clickable-icon"
+          aria-label="Delete file"
           use:trashIcon
-          on:click|stopPropagation={trashFile}
-        />
+          on:click|preventDefault={trashFile}
+        ></button>
       {:else}
-        <button class="clickable-icon" use:blankIcon />
+        <button class="clickable-icon" aria-label="nothing" use:blankIcon
+        ></button>
       {/if}
     </div>
   </div>
