@@ -504,10 +504,15 @@
   };
 
   export const updateLayoutNextTick = async () => {
+    console.log("Updating layout next tick");
     await tick();
     return await debouncedLayout();
   };
-  files.subscribe(updateLayoutNextTick);
+  files.subscribe(() => {
+    console.log("Files store updated, updating layout next tick");
+    console.log("Files:", $files);
+    updateLayoutNextTick();
+  });
 
   let screenWidth = window.innerWidth;
   let showFilters = false;
@@ -779,8 +784,8 @@
       folders from setting.
     </div>
   {:else}
-    {#each $displayedFiles as file (file.path)}
-      <Card {file} on:loaded={() => notesGrid.layout()} />
+    {#each $displayedFiles as file (`${file.path}-${file.stat.mtime}`)}
+      <Card {file} {updateLayoutNextTick} />
     {/each}
   {/if}
 </div>

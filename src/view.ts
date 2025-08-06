@@ -18,7 +18,6 @@ import store, {
   cardsPerBatch,
   currentPage,
   displayedCount,
-  displayedFilesCount,
   allAllowedFiles,
   folderName,
   settings,

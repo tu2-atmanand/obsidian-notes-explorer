@@ -8,7 +8,6 @@ import {
   MetadataCache,
   prepareFuzzySearch,
   TFile,
-  getFrontMatterInfo,
   TFolder,
 } from "obsidian";
 import { derived, get, readable, writable } from "svelte/store";
@@ -56,12 +55,13 @@ function checkFilterForFile(fstr: string, filterType: string, file: TFile) {
       if (file.parent?.path.includes(val)) return true;
       break;
 
-    case "tag":
+    case "tag": {
       const tags = getAllTags(
         get(appCache).getFileCache(file) as CachedMetadata
       );
       if (tags?.includes(val)) return true;
       break;
+    }
 
     case "content":
       // Check if the file content contains the specified value
@@ -232,7 +232,7 @@ export const allAllowedFiles = derived(
     }
 
     // Exclude files in the excluded folders
-    let filesAfterRemovingExcludedFolders = allFiles.filter((file) => {
+    const filesAfterRemovingExcludedFolders = allFiles.filter((file) => {
       return !$settings.excludedFolders.some((excludeFolder) =>
         file.path.startsWith(excludeFolder)
       );
@@ -273,7 +273,7 @@ export const allAllowedFiles = derived(
     }
 
     if ($searchFilters.nf.length > 0) {
-      let normalFilteredFilesSet = new Set<TFile>();
+      const normalFilteredFilesSet = new Set<TFile>();
       // // If no files match the AND filters, we return empty set
       // if ($searchFilters.cf.length === 0) {
       //   cumpulsoryFilteredFilesSet = new Set(filesAfterRemovingExcludedFolders);
