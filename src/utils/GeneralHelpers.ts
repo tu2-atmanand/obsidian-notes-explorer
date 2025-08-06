@@ -18,15 +18,17 @@ export const isFileEmpty = async (file: TFile) => {
   const contentWithoutfrontmatter = content
     .replace(`---\n${frontMatter}---`, "")
     .trim();
-  if (file.path.includes("Archived")) {
-    // console.log(
-    //   "Only frontmatter :\n",
-    //   frontMatter,
-    //   "\nContent without frontmatter :\n",
-    //   contentWithoutfrontmatter,
-    //   "\nLenth : ",
-    //   contentWithoutfrontmatter.length === 0 ? true : false
-    // );
-  }
-  return contentWithoutfrontmatter.length === 0;
+
+  // if (file.path.includes("Archived")) {
+  //   console.log(
+  //     "Only frontmatter :\n",
+  //     frontMatter,
+  //     "\nContent without frontmatter :\n",
+  //     contentWithoutfrontmatter,
+  //     "\nLenth : ",
+  //     contentWithoutfrontmatter.length === 0 ? true : false
+  //   );
+  // }
+
+  return contentWithoutfrontmatter;
 };

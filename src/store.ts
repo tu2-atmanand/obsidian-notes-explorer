@@ -483,7 +483,7 @@ const createFilteredFiles = () =>
       const nonEmptyFiles = [];
       for (const file of $sortedFiles) {
         const emptiness = await isFileEmpty(file);
-        if (get(settings).showEmptyNotes || !emptiness) {
+        if (get(settings).showEmptyNotes || emptiness !== "") {
           nonEmptyFiles.push(file);
         }
       }

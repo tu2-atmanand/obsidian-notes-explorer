@@ -192,11 +192,12 @@
 
   const renderNoteCard = async (el: HTMLElement): Promise<void> => {
     // console.log("Rendering note card for file:", file.path);
-    const fileEmptyCondition = await isFileEmpty(file);
-    if (!fileEmptyCondition) {
-      const maxLiness = $settings.maxLines || 20;
-      const content = await file.vault.cachedRead(file);
-      const truncatedContent = truncateContent(content, maxLiness);
+    const sanitizedFileContent = await isFileEmpty(file);
+    if (sanitizedFileContent !== "") {
+      const maxLines = $settings.maxLines || 20;
+      // const content = await file.vault.cachedRead(file);
+      const truncatedContent =
+        truncateContent(sanitizedFileContent, maxLines) + "\n...";
 
       await obsidianMarkdownRenderer(
         $app,
