@@ -1283,7 +1283,7 @@
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card-content code {
-    display: block !important;
+    display: inline !important;
     padding: 1em !important;
     overflow: none !important;
     text-wrap: balance !important;
