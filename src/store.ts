@@ -24,6 +24,7 @@ export const files = writable<TFile[]>([]);
 export const folderName = writable<TFolder[]>([]);
 export const viewIsVisible = writable(false);
 export const skipNextTransition = writable(true);
+export const renderOnFileUpdate = writable(false);
 export const refreshSignal = writable<boolean>(false);
 export const refreshOnResize = writable<boolean>(false);
 export const showActionBar = writable<boolean>(true);
@@ -592,6 +593,7 @@ export default {
   filteredFiles,
   viewIsVisible,
   skipNextTransition,
+  renderOnFileUpdate,
   refreshSignal,
   refreshOnResize,
   allTags,

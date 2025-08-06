@@ -511,6 +511,7 @@
   files.subscribe(() => {
     console.log("Files store updated, updating layout next tick");
     console.log("Files:", $files);
+    store.renderOnFileUpdate.set(true);
     updateLayoutNextTick();
   });
 

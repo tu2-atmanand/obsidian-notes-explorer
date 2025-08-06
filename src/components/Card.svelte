@@ -20,7 +20,7 @@
     settings,
     plugin,
     appCache,
-    searchFilters,
+    renderOnFileUpdate,
   } from "../store";
   import {
     ClickMode,
@@ -487,7 +487,11 @@
       updateTagColorIndicator();
       cardStyle = calculateStyle();
       await updateLayoutNextTick();
-      store.skipNextTransition.set(false);
+      if ($renderOnFileUpdate) {
+        store.skipNextTransition.set(true);
+      } else {
+        store.skipNextTransition.set(false);
+      }
     })();
     return () => updateLayoutNextTick();
   });

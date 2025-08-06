@@ -97,6 +97,7 @@ export class NotesExplorerView extends ItemView {
 
   onResize() {
     if (this.svelteRoot && this.svelteRoot.updateLayoutNextTick) {
+      store.renderOnFileUpdate.set(false);
       this.svelteRoot.updateLayoutNextTick();
     }
   }
@@ -157,6 +158,7 @@ export class NotesExplorerView extends ItemView {
 
     this.app.workspace.on("resize", () => {
       // store.refreshOnResize.set(true);
+      store.renderOnFileUpdate.set(false);
       if (this.svelteRoot && this.svelteRoot.updateLayoutNextTick) {
         this.svelteRoot.updateLayoutNextTick();
       }
