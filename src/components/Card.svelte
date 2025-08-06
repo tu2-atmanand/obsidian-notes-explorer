@@ -4,14 +4,16 @@
   import {
     getAllTags,
     Keymap,
+    MarkdownPreviewRenderer,
     MarkdownRenderer,
     setIcon,
     TFile,
     type CachedMetadata,
+    type MarkdownPostProcessorContext,
     type UserEvent,
   } from "obsidian";
   import { afterUpdate, createEventDispatcher, onMount } from "svelte";
-  import {
+  import store, {
     skipNextTransition,
     app,
     view,
@@ -34,7 +36,10 @@
     obsidianMarkdownRenderer,
   } from "src/services/MarkdownUIRenderer";
 
+  // Svelte 4 does NOT support $props. Use `export let` for props instead:
   export let file: TFile;
+  export let updateLayoutNextTick: () => Promise<void>;
+
   let displayFilename: boolean =
     $settings.displayTitle !== TitleDisplayMode.Title;
   let contentDiv: HTMLElement;
@@ -159,8 +164,16 @@
   };
 
   // Post-process rendered content for optimizations
-  const postProcessRenderedContent = (element: HTMLElement) => {
-    // TODO : The below feature not working. Also add another option to remove both title and filename from the card header :
+  const postProcessRenderedContent = (
+    element: HTMLElement,
+    context: MarkdownPostProcessorContext,
+  ) => {
+    if (context.sourcePath !== file.path) {
+      // Very important to check if the sourcePath is the same as the file path
+      // Otherwise, the post processor will be applied to all files
+      return;
+    }
+
     if ($settings.displayTitle === TitleDisplayMode.Filename) {
       const firstChild = element.firstElementChild;
       if (firstChild?.tagName === "H1") {
@@ -191,6 +204,20 @@
   };
 
   const renderNoteCard = async (el: HTMLElement): Promise<void> => {
+    if (el == null) {
+      console.warn("Element is null, cannot render note card.");
+      return;
+    }
+
+    if (el.classList.contains("card-content")) {
+      console.warn(
+        "Element already has 'card-content' class, skipping rendering for file: ",
+        file.path,
+      );
+      // If the element is already rendered, remove it so fresh content can be rendered
+      // el.remove();
+    }
+
     // console.log("Rendering note card for file:", file.path);
     const sanitizedFileContent = await isFileEmpty(file);
     if (sanitizedFileContent !== "") {
@@ -199,6 +226,7 @@
       const truncatedContent =
         truncateContent(sanitizedFileContent, maxLines) + "\n...";
 
+      MarkdownPreviewRenderer.registerPostProcessor(postProcessRenderedContent);
       await obsidianMarkdownRenderer(
         $app,
         truncatedContent,
@@ -206,7 +234,11 @@
         file.path,
         $view,
       );
-      postProcessRenderedContent(el);
+      // postProcessRenderedContent(el);
+      MarkdownPreviewRenderer.unregisterPostProcessor(
+        postProcessRenderedContent,
+      );
+
       // $plugin.registerHoverLinkSource(PLUGIN_VIEW_TYPE, {
       //   defaultMod: true /* require ctrl key trigger */,
       //   display: "Notes Explorer",
@@ -431,18 +463,33 @@
   $: clickHandler =
     $settings.clickMode === ClickMode.Single ? "click" : "dblclick";
 
-  const dispatch = createEventDispatcher();
-  onMount(async () => {
-    await renderNoteCard(contentDiv);
-    await updateTagColorIndicator();
-    cardStyle = calculateStyle();
-    dispatch("loaded");
-  });
+  // const dispatch = createEventDispatcher();
+  // onMount(async () => {
+  //   await renderNoteCard(contentDiv);
+  //   await updateTagColorIndicator();
+  //   cardStyle = calculateStyle();
+  //   dispatch("loaded");
+  // });
 
-  afterUpdate(() => {
-    updateTagColorIndicator().then(() => {
-      cardStyle = calculateStyle(); // Recalculate style after tag color update
-    });
+  // afterUpdate(async () => {
+  //   // await renderNoteCard(contentDiv); // Re-render the card content after updates
+  //   updateTagColorIndicator().then(() => {
+  //     cardStyle = calculateStyle(); // Recalculate style after tag color update
+  //   });
+  // });
+
+  onMount(() => {
+    console.log(
+      "Trying to see if this onMount is running after the file is edited again.",
+    );
+    (async () => {
+      await renderNoteCard(contentDiv);
+      updateTagColorIndicator();
+      cardStyle = calculateStyle();
+      await updateLayoutNextTick();
+      store.skipNextTransition.set(false);
+    })();
+    return () => updateLayoutNextTick();
   });
 </script>
 
