@@ -73,7 +73,7 @@
     align-items: center;
     gap: 1rem;
     z-index: 1;
-    padding-inline-start: 7px;
+    padding-inline: 7px;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .action-bar_buttons {
@@ -584,7 +584,7 @@
 
 .workspace-leaf-content[data-type="notes-explorer"] .search-input-container input {
     padding-inline-start: 4px !important;
-    padding-inline-end: 50px !important;
+    padding-inline-end: 32px !important;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .search-input-container input {
@@ -611,6 +611,10 @@
     }
 }
 
+.workspace-leaf-content[data-type="notes-explorer"] .search-input-container input:not(:placeholder-shown)~.input-right-decorator {
+    inset-inline-end: 0px !important;
+}
+
 .workspace-leaf-content[data-type="notes-explorer"] .cards-container {
     position: relative;
     container-type: inline-size;
@@ -630,7 +634,10 @@
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .sort-button,
-.workspace-leaf-content[data-type="notes-explorer"] .refresh-button {
+.workspace-leaf-content[data-type="notes-explorer"] .refresh-button,
+/* .workspace-leaf-content[data-type="notes-explorer"] .icon-search-x,
+.workspace-leaf-content[data-type="notes-explorer"] .icon-search, */
+.workspace-leaf-content[data-type="notes-explorer"] .searchFieldToggleBtn {
     border: none;
     border-radius: 4px;
     padding: 5px;

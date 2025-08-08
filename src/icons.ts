@@ -1,13 +1,46 @@
+import { setIcon } from "obsidian";
+
 export const pluginIcon = "book-copy";
 export const leftSideArrow = "arrow-left-to-line";
 export const rightSideArrow = "arrow-right-to-line";
-export const topBarIcon = "credit-card"
+export const topBarIcon = "credit-card";
 export const editIcon = "pencil";
 export const cancelIcon = "circle-x";
 export const fileOpenIcon = "file-symlink";
 export const pageNavigationDockIcon = "dock"; // or you can use 'panel-bottom'
 export const filtersIcon = "sliders-horizontal";
 export const viewShareIcon = "share-2";
+
+export const sortIcon = (element: HTMLElement) => {
+  setIcon(element, "arrow-down-wide-narrow");
+};
+export const refreshIcon = (element: HTMLElement) => {
+  setIcon(element, "refresh-ccw");
+};
+export const closeIcon = (element: HTMLElement) => {
+  setIcon(element, "x");
+};
+export const cumpulsoryFilterIcon = (element: HTMLElement) => {
+  setIcon(element, "lock-keyhole");
+};
+export const normalFilterIcon = (element: HTMLElement) => {
+  setIcon(element, "lock-open");
+};
+export const closeCircleIcon = (element: HTMLElement) => {
+  setIcon(element, "circle-x");
+};
+export const filtersPanelIcon = (element: HTMLElement) => {
+  setIcon(element, filtersIcon);
+};
+export const viewShareButtonIcon = (element: HTMLElement) => {
+  setIcon(element, viewShareIcon);
+};
+export const findExpandIcon = (element: HTMLElement) => {
+  setIcon(element, "search");
+};
+export const findCloseIcon = (element: HTMLElement) => {
+  setIcon(element, "search-x");
+};
 
 export const pinnedIconSVG = `
 <?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->

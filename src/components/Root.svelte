@@ -47,37 +47,25 @@
   } from "src/utils/SearchQueryHelpers";
   import { refreshView } from "src/utils/GeneralHelpers";
   import { NotesCountStatisticsModal } from "src/modals/NotesCountStatisticsModal";
-  import { filtersIcon, viewShareIcon } from "src/icons";
+  import {
+    closeCircleIcon,
+    closeIcon,
+    cumpulsoryFilterIcon,
+    filtersIcon,
+    filtersPanelIcon,
+    findCloseIcon,
+    findExpandIcon,
+    normalFilterIcon,
+    refreshIcon,
+    sortIcon,
+    viewShareButtonIcon,
+    viewShareIcon,
+  } from "src/icons";
 
   export let cardsContainer: HTMLElement;
   let notesGrid: MiniMasonry;
   let viewContent: HTMLElement;
   let columns: number;
-
-  const sortIcon = (element: HTMLElement) => {
-    setIcon(element, "arrow-down-wide-narrow");
-  };
-  const refreshIcon = (element: HTMLElement) => {
-    setIcon(element, "refresh-ccw");
-  };
-  const closeIcon = (element: HTMLElement) => {
-    setIcon(element, "x");
-  };
-  const cumpulsoryFilterIcon = (element: HTMLElement) => {
-    setIcon(element, "lock-keyhole");
-  };
-  const normalFilterIcon = (element: HTMLElement) => {
-    setIcon(element, "lock-open");
-  };
-  const closeCircleIcon = (element: HTMLElement) => {
-    setIcon(element, "circle-x");
-  };
-  const filtersPanelIcon = (element: HTMLElement) => {
-    setIcon(element, filtersIcon);
-  };
-  const viewShareButtonIcon = (element: HTMLElement) => {
-    setIcon(element, viewShareIcon);
-  };
 
   let currentPageLocal = 1;
   $: currentPageLocal = $currentPage;
@@ -98,6 +86,7 @@
   let activeSuggest: SearchFiltersMultiSuggestor | null = null;
   function searchInput(el: HTMLElement) {
     const search = new SearchComponent(el);
+    search.clearButtonEl.style.display = "none"; // Hide the clear button
     search.addRightDecorator((rightDecoratorEl) => {
       const sortButton = document.createElement("button");
       sortButton.className = "clickable-icon";
@@ -517,6 +506,14 @@
 
   let screenWidth = window.innerWidth;
   let showFilters = false;
+  let showSearchInput = false;
+
+  function toggleSearchInput() {
+    showSearchInput = !showSearchInput;
+    if (!showSearchInput) {
+      $searchQuery = "";
+    }
+  }
 
   const handleResize = () => {
     screenWidth = window.innerWidth;
@@ -553,7 +550,24 @@
           on:click={sortMenu}
         ></button>
       </div>
-      <div class="action-bar__search" use:searchInput></div>
+      <button
+        class="clickable-icon searchFieldToggleBtn"
+        on:click={toggleSearchInput}
+        aria-label={showSearchInput ? "Clear Search Query" : "Search Tasks"}
+      >
+        {#if showSearchInput}
+          <div class="icon-search-x" use:findCloseIcon></div>
+        {:else}
+          <div class="icon-search" use:findExpandIcon></div>
+        {/if}
+      </button>
+      {#if showSearchInput}
+        <div
+          class="action-bar__search"
+          use:searchInput
+          transition:slide|local={{ duration: 250 }}
+        ></div>
+      {/if}
       <button
         class="clickable-icon count-label-button"
         aria-label="Notes Count Statistics"
