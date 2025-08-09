@@ -6,6 +6,7 @@
     Keymap,
     MarkdownPreviewRenderer,
     MarkdownRenderer,
+    Notice,
     setIcon,
     TFile,
     type CachedMetadata,
@@ -28,7 +29,7 @@
     TitleDisplayMode,
   } from "../settings";
   import { openDeleteConfirmationModal } from "src/utils/ModalHelpers";
-  import { isFileEmpty } from "src/utils/GeneralHelpers";
+  import { pullContentWithoutFrontmatter } from "src/utils/GeneralHelpers";
   import { NoteViewerModal } from "src/modals/NoteViewerModal";
   import {
     hookMarkdownLinkMouseEventHandlers,
@@ -219,7 +220,7 @@
     }
 
     // console.log("Rendering note card for file:", file.path);
-    const sanitizedFileContent = await isFileEmpty(file);
+    const sanitizedFileContent = await pullContentWithoutFrontmatter(file);
     if (sanitizedFileContent !== "") {
       const maxLines = $settings.maxLines || 20;
       // const content = await file.vault.cachedRead(file);
@@ -291,6 +292,9 @@
         );
       } catch (error) {
         console.error("trashFile : Error deleting the file:", error);
+        new Notice(
+          `Error deleting the file: An error occurred while trying to delete the file: ${file.path}. Please check the console for more details.`,
+        );
       }
     }
   };

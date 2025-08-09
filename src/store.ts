@@ -13,7 +13,7 @@ import {
 import { derived, get, readable, writable } from "svelte/store";
 import { Sort, type NotesExplorerSettings } from "./settings";
 import NotesExplorerPlugin from "main";
-import { isFileEmpty } from "src/utils/GeneralHelpers";
+import { pullContentWithoutFrontmatter } from "src/utils/GeneralHelpers";
 
 export const app = writable<App>();
 export const plugin = writable<NotesExplorerPlugin>();
@@ -89,15 +89,24 @@ function checkFilterForFile(fstr: string, filterType: string, file: TFile) {
       // );
       if (file.stat.ctime < new Date(val).getTime()) return true;
       break;
+
     case "created-after":
       if (file.stat.ctime > new Date(val).getTime()) return true;
       break;
+
     case "edited-before":
       if (file.stat.mtime < new Date(val).getTime()) return true;
       break;
+
     case "edited-after":
       if (file.stat.mtime > new Date(val).getTime()) return true;
       break;
+
+    case "regex": {
+      const regex = new RegExp(val);
+      if (regex.test(file.path)) return true;
+      break;
+    }
 
     default:
       if (fstr.startsWith(`["`) && fstr.endsWith("]")) {
@@ -483,7 +492,7 @@ const createFilteredFiles = () =>
     const unsubscribe = sortedFiles.subscribe(async ($sortedFiles) => {
       const nonEmptyFiles = [];
       for (const file of $sortedFiles) {
-        const emptiness = await isFileEmpty(file);
+        const emptiness = await pullContentWithoutFrontmatter(file);
         if (get(settings).showEmptyNotes || emptiness !== "") {
           nonEmptyFiles.push(file);
         }

@@ -8,8 +8,12 @@ export function refreshView() {
   store.files.set(get(allAllowedFiles));
 }
 
-// Helper function to determine if a file is empty
-export const isFileEmpty = async (file: TFile) => {
+/**
+ * Pulls the content without frontmatter from a file.
+ * @param file - The file object.
+ * @returns The content without frontmatter.
+ */
+export const pullContentWithoutFrontmatter = async (file: TFile) => {
   const content = await file.vault.cachedRead(file);
   // console.log("Content with frontmatter :\n", content);
   const frontMatter = getFrontMatterInfo(content).exists
@@ -32,3 +36,18 @@ export const isFileEmpty = async (file: TFile) => {
 
   return contentWithoutfrontmatter;
 };
+
+/**
+ * Checks if a string is a valid regular expression.
+ *
+ * @param str - The string to check.
+ * @returns `true` if the string is a valid regular expression, `false` otherwise.
+ */
+export function isValidRegExp(str: string): boolean {
+  try {
+    new RegExp(str);
+    return true;
+  } catch {
+    return false;
+  }
+}

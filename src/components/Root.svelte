@@ -45,7 +45,7 @@
     addToSearchHistory,
     initialPlaceholderSuggestionsMap,
   } from "src/utils/SearchQueryHelpers";
-  import { refreshView } from "src/utils/GeneralHelpers";
+  import { isValidRegExp, refreshView } from "src/utils/GeneralHelpers";
   import { NotesCountStatisticsModal } from "src/modals/NotesCountStatisticsModal";
   import {
     closeCircleIcon,
@@ -84,7 +84,9 @@
   }
 
   let activeSuggest: SearchFiltersMultiSuggestor | null = null;
+  let searchInputEl: HTMLInputElement | null = null;
   function searchInput(el: HTMLElement) {
+    console.log("Initializing search input component with element:", el);
     const search = new SearchComponent(el);
     search.clearButtonEl.style.display = "none"; // Hide the clear button
     search.addRightDecorator((rightDecoratorEl) => {
@@ -98,7 +100,7 @@
       rightDecoratorEl.appendChild(sortButton);
     });
     search.setClass("action-bar__search-input");
-    const inputEl = search.inputEl;
+    searchInputEl = search.inputEl;
     const appInstance = get(plugin)?.app;
     const fileSuggestions = new Set(getFileSuggestions(appInstance));
     const tagSuggestions = new Set(getTagSuggestions(appInstance));
@@ -114,12 +116,12 @@
       ...yamlPropertiesSuggestions,
     ]);
 
-    const updateSuggestions = (value: string) => {
+    const updateSuggestions = (value?: string) => {
       if (!appInstance) return;
 
-      if (!activeSuggest) {
+      if (!activeSuggest && searchInputEl != null) {
         activeSuggest = new SearchFiltersMultiSuggestor(
-          inputEl,
+          searchInputEl,
           finalSuggestions,
           (selected: string) => {
             // console.log(
@@ -152,51 +154,51 @@
           },
           appInstance,
         );
-        inputEl.blur();
-        activeSuggest.getSuggestions(inputEl.value);
-        inputEl.focus();
-      } else {
-        activeSuggest.getSuggestions(inputEl.value);
+        if (searchInputEl) searchInputEl.blur();
+        activeSuggest.getSuggestions(searchInputEl.value);
+        searchInputEl.focus();
+      } else if (activeSuggest && searchInputEl != null) {
+        activeSuggest.getSuggestions(searchInputEl.value);
       }
     };
 
-    // inputEl.addEventListener("focus", () => updateSuggestions(inputEl.value));
-    inputEl.addEventListener("click", () => {
-      if (activeSuggest) {
-        activeSuggest.getSuggestions(inputEl.value);
+    // searchInputEl.addEventListener("focus", () => updateSuggestions(searchInputEl.value));
+    searchInputEl.addEventListener("click", () => {
+      if (activeSuggest && searchInputEl != null) {
+        activeSuggest.getSuggestions(searchInputEl.value);
       } else {
-        updateSuggestions(inputEl.value);
+        updateSuggestions();
       }
     });
-    inputEl.addEventListener("input", () => {
+    searchInputEl.addEventListener("input", () => {
       // console.log("This will only be called when the input changes.");
       // console.log("Input changed:", inputEl.value);
-      if (inputEl.value.trim() === "") {
+      if (searchInputEl && searchInputEl.value.trim() === "") {
         $searchQuery = "";
       } else {
-        updateSuggestions(inputEl.value);
+        // updateSuggestions();
       }
     });
-    search.clearButtonEl.addEventListener("click", (e: Event) => {
-      $searchQuery = "";
-    });
-    inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
+    // search.clearButtonEl.addEventListener("click", (e: Event) => {
+    //   $searchQuery = "";
+    // });
+    searchInputEl.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key === "Enter") {
         // console.log("Enter pressed in search input:", inputEl.value);
-        const inputVal = inputEl.value.trim();
+        const inputVal = searchInputEl ? searchInputEl.value.trim() : "";
         if (!inputVal) return;
 
         addToSearchHistory(inputVal);
 
-        const regex = /^\[.*:.*\]$/;
+        const yamlPropertyRegexPattern = /^\[.*:.*\]$/;
         // console.log(
         //   "Valid filter format detected:",
         //   inputVal,
         //   "If condition: ",
-        //   regex.test(inputVal),
+        //   yamlPropertyRegexPattern.test(inputVal),
         // );
         if (
-          regex.test(inputVal) ||
+          yamlPropertyRegexPattern.test(inputVal) ||
           /^file:\s*\S+$/.test(inputVal) ||
           /^parent:\s*\S+$/.test(inputVal) ||
           /^tag:\s*\S+$/.test(inputVal) ||
@@ -204,19 +206,31 @@
           /^created-before:\s*\S+$/.test(inputVal) ||
           /^created-after:\s*\S+$/.test(inputVal) ||
           /^modified-before:\s*\S+$/.test(inputVal) ||
-          /^modified-after:\s*\S+$/.test(inputVal)
+          /^modified-after:\s*\S+$/.test(inputVal) ||
+          /^regex:\s*\S+$/.test(inputVal)
         ) {
           const oldSearchFilters = get(searchFilters);
+
           if (
             !oldSearchFilters.cf.includes(inputVal) &&
             !oldSearchFilters.nf.includes(inputVal)
           ) {
-            store.searchFilters.set({
-              cf: oldSearchFilters.cf,
-              nf: [...oldSearchFilters.nf, inputVal],
-            });
-            inputEl.value = "";
-            // refreshView();
+            if (
+              /^regex:\s*\S+:\s*\S+$/.test(inputVal) &&
+              !isValidRegExp(inputVal.split(":")[1].trim())
+            ) {
+              new Notice("Invalid regular expression in filter.");
+              return;
+            } else {
+              store.searchFilters.set({
+                cf: oldSearchFilters.cf,
+                nf: [...oldSearchFilters.nf, inputVal],
+              });
+              if (searchInputEl) {
+                searchInputEl.value = "";
+              }
+              // refreshView();
+            }
           } else {
             // console.warn(
             //   "The selected item is already present in the search filters.",
@@ -226,7 +240,7 @@
         } else {
           $searchQuery = inputVal;
         }
-        inputEl.blur();
+        if (searchInputEl) searchInputEl.blur();
       }
     });
   }
@@ -372,8 +386,9 @@
     // $searchQuery = (event.target as HTMLButtonElement).textContent || "";
     store.searchFilters.update((filters) => {
       const tag = (event.target as HTMLButtonElement).textContent || "";
-      if (!filters.cf.includes(tag) && !filters.nf.includes(tag)) {
-        filters.nf.push(tag);
+      const tagFilter = `tag: ${tag}`;
+      if (!filters.cf.includes(tagFilter) && !filters.nf.includes(tagFilter)) {
+        filters.cf.push(tagFilter);
       } else {
         // console.warn("The tag is already present in the search filters.");
         new Notice("The tag is already added to the view.");
@@ -493,13 +508,10 @@
   };
 
   export const updateLayoutNextTick = async () => {
-    console.log("Updating layout next tick");
     await tick();
     return await debouncedLayout();
   };
   files.subscribe(() => {
-    console.log("Files store updated, updating layout next tick");
-    console.log("Files:", $files);
     store.renderOnFileUpdate.set(true);
     updateLayoutNextTick();
   });
@@ -512,6 +524,10 @@
     showSearchInput = !showSearchInput;
     if (!showSearchInput) {
       $searchQuery = "";
+      activeSuggest = null;
+      searchInputEl?.blur();
+    } else {
+      searchInputEl?.focus();
     }
   }
 
