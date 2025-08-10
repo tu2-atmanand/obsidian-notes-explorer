@@ -35,7 +35,7 @@
     <div class="folder-icon" bind:this={folderIconDiv}></div>
   </div>
   <div class="folder-children">
-    <div class="folder-children-title">Children:</div>
+    <div class="folder-children-title">Children</div>
     <ul>
       {#each childrenNames as name}
         <li>{name}</li>

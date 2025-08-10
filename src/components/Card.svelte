@@ -30,7 +30,10 @@
     TitleDisplayMode,
   } from "../settings";
   import { openDeleteConfirmationModal } from "src/utils/ModalHelpers";
-  import { pullContentWithoutFrontmatter } from "src/utils/GeneralHelpers";
+  import {
+    pullContentWithoutFrontmatter,
+    refreshView,
+  } from "src/utils/GeneralHelpers";
   import { NoteViewerModal } from "src/modals/NoteViewerModal";
   import {
     hookMarkdownLinkMouseEventHandlers,
@@ -300,6 +303,7 @@
     $settings.pinnedFiles = pinned
       ? $settings.pinnedFiles.filter((f) => f !== file.path)
       : [...$settings.pinnedFiles, file.path];
+    refreshView();
   };
 
   const trashFile = async () => {

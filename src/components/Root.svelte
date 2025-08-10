@@ -594,7 +594,7 @@
           on:click={refreshView}
         ></button>
         <button
-          class="notes-explorer-view-share-button-desktop"
+          class="clickable-icon notes-explorer-view-share-button-desktop"
           aria-label="Share View Link"
           on:click={copyViewLinkToClipboard}
           use:viewShareButtonIcon
