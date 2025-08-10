@@ -92,9 +92,30 @@
     gap: 0.5rem;
     min-height: 2.5rem;
     scrollbar-width: thin;
-    border: 1px solid var(--blockquote-border-color);
+    /* border: 1px solid var(--blockquote-border-color); */
     border-radius: 4px;
     padding-inline: 0.5rem;
+}
+
+.workspace-leaf-content[data-type="notes-explorer"] .action-bar_labelSection>.folder-label,
+.workspace-leaf-content[data-type="notes-explorer"] .filter-section-small-screens>.folder-label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    /* background-color: var(--background-modifier-border); */
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 1em;
+    font-weight: 600;
+    font-style: italic;
+    gap: 0.2rem;
+}
+
+.workspace-leaf-content[data-type="notes-explorer"] .action-bar_labelSection>.folder-label>.folder-path-segment,
+.workspace-leaf-content[data-type="notes-explorer"] .filter-section-small-screens>.folder-label>.folder-path-segment {
+    background-color: transparent !important;
+    cursor: pointer !important;
+    padding: 5px !important;
 }
 
 /* Force horizontal scrolling inside label section */
@@ -309,11 +330,9 @@
     gap: 5px;
 }
 
-.workspace-leaf-content[data-type="notes-explorer"] .filter-section-small-screens-folder-label-closeButton {
+.workspace-leaf-content[data-type="notes-explorer"] .action-bar_labelSection>.folder-label>.folder-label-close-button,
+.workspace-leaf-content[data-type="notes-explorer"] .filter-section-small-screens>.folder-label>.folder-label-close-button {
     color: white;
-    background: var(--canvas-background);
-    border: 0 !important;
-    border-radius: 4px !important;
     cursor: pointer;
 }
 
@@ -525,8 +544,10 @@
 } */
 
 .workspace-leaf-content[data-type="notes-explorer"] .count-label-button {
-    background-color: var(--icon-color-active) !important;
+    /* background-color: var(--icon-color-active) !important; */
     color: white !important;
+    border: 2px solid var(--icon-color-active) !important;
+    border-radius: 7px !important;
     font-weight: 600 !important;
     font-size: 1.05em !important;
     align-self: normal !important;
@@ -682,6 +703,8 @@
 .workspace-leaf-content[data-type="notes-explorer"] .no-files-message {
     font-size: 1.5em;
     text-align: center;
+    align-self: center;
+    width: 80% !important;
 }
 
 /* .refresh-button:hover {

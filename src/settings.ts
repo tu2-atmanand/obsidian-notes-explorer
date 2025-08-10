@@ -5,6 +5,7 @@ import {
   Notice,
   PluginSettingTab,
   Setting,
+  TextComponent,
   normalizePath,
   setIcon,
 } from "obsidian";
@@ -99,6 +100,7 @@ export interface NotesExplorerSettings {
   cardsPerPage: number;
   clickMode: string;
   searchHistoryEntries: string[];
+  showFolderCards: boolean;
 }
 
 export const DEFAULT_SETTINGS: NotesExplorerSettings = {
@@ -129,6 +131,7 @@ export const DEFAULT_SETTINGS: NotesExplorerSettings = {
   cardsPerPage: 100,
   clickMode: "single",
   searchHistoryEntries: [],
+  showFolderCards: false,
 };
 
 export class NotesExplorerSettingsTab extends PluginSettingTab {
@@ -583,7 +586,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
           });
           // row.style.backgroundColor = tag.color;
 
-          let rgbaInput: any;
+          let rgbaInput: TextComponent;
           new Setting(row)
             .setClass("notes-explorer-tag-container-tag-row-element")
             .addButton((drag) =>
@@ -675,10 +678,10 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
               this.allPickrs.push(pickr);
 
               pickr
-                .on("change", (color: any) => {
+                .on("change", (color: Pickr.HSVaColor) => {
                   const rgbaColor = `rgba(${color
                     .toRGBA()
-                    .map((value: any, index: number) =>
+                    .map((value: number, index: number) =>
                       index < 3 ? Math.round(value) : value
                     )
                     .join(", ")})`; // Construct valid rgba format
@@ -886,7 +889,7 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     //find all the div with calls picr-app using query-selector and remove them from the main window
     const pickrApps = this.win.document.querySelectorAll(".pcr-app ");
     if (pickrApps) {
-      pickrApps.forEach((pickrApp: any) => {
+      pickrApps.forEach((pickrApp: Element) => {
         pickrApp.remove();
       });
     }

@@ -20,7 +20,7 @@ export const plugin = writable<NotesExplorerPlugin>();
 export const view = writable<ItemView>();
 export const settings = writable<NotesExplorerSettings>();
 export const appCache = writable<MetadataCache>();
-export const files = writable<TFile[]>([]);
+export const files = writable<(TFile | TFolder)[]>([]);
 export const folderName = writable<TFolder[]>([]);
 export const viewIsVisible = writable(false);
 export const skipNextTransition = writable(true);
@@ -36,8 +36,16 @@ export const searchFilters = writable<{ cf: string[]; nf: string[] }>({
 
 export const excludedFilesCount = writable<number>(0);
 
-function checkFilterForFile(fstr: string, filterType: string, file: TFile) {
+function checkFilterForFile(
+  fstr: string,
+  filterType: string,
+  file: TFile | TFolder
+): boolean {
   const [type, val] = fstr.split(/:\s*(.*)/).map((str) => str.trim());
+
+  if (file instanceof TFolder) {
+    return true; // If the file is a folder, we can skip the checks for now.
+  }
 
   switch (type) {
     case "file":
@@ -203,12 +211,12 @@ export const allAllowedFiles = derived(
     // console.warn(
     //   "allAllowedFiles : Setting or folderName or searchFilters has been updated.\nThis function should NOT run on resizing events"
     // );
-    let allFiles: TFile[] = [];
+    let allFiles: (TFile | TFolder)[] = [];
 
-    if ($folderName.length === 0) {
+    if ($folderName.length === 0 && !$settings.showFolderCards) {
       // If no folder is specified, get all markdown files in the vault
       allFiles = get(app).vault.getMarkdownFiles();
-    } else {
+    } else if ($folderName.length > 0) {
       // Fetch files from the specified folder
       const folder = get(app).vault.getAbstractFileByPath($folderName[0].path);
       // console.log(
@@ -231,14 +239,30 @@ export const allAllowedFiles = derived(
             });
           };
           collectFiles(folder);
+        } else if ($settings.showFolderCards) {
+          // Fetch the files from the current folder as well as the subfolders.
+          allFiles = folder.children.filter(
+            (child): child is TFile =>
+              child instanceof TFolder ||
+              (child instanceof TFile && child.extension === "md")
+          );
         } else {
-          // Only fetch files from the current folder
+          // If folder cards are enabled, only fetch files from the current folder
           allFiles = folder.children.filter(
             (child): child is TFile =>
               child instanceof TFile && child.extension === "md"
           );
         }
       }
+    } else {
+      // If folderName is empty, but in this case showFolderCards is true, hence we will need to show only the files from the root folder and the subfolders as cards, hence the folders from the root folder should be included.
+      const rootFolder = get(app).vault.getRoot();
+      console.log("Root folder:", rootFolder);
+      allFiles = rootFolder.children.filter(
+        (child): child is TFile | TFolder =>
+          child instanceof TFolder ||
+          (child instanceof TFile && child.extension === "md")
+      );
     }
 
     // Exclude files in the excluded folders
@@ -254,9 +278,10 @@ export const allAllowedFiles = derived(
         filesAfterRemovingExcludedFolders.length
     );
 
-    let finalFilteredFiles: TFile[] = filesAfterRemovingExcludedFolders;
+    let finalFilteredFiles: (TFile | TFolder)[] =
+      filesAfterRemovingExcludedFolders;
 
-    let cumpulsoryFilteredFilesSet = new Set<TFile>();
+    let cumpulsoryFilteredFilesSet = new Set<TFile | TFolder>();
     if ($searchFilters.cf.length > 0) {
       let tempFilteredFiles = filesAfterRemovingExcludedFolders;
 
@@ -283,7 +308,7 @@ export const allAllowedFiles = derived(
     }
 
     if ($searchFilters.nf.length > 0) {
-      const normalFilteredFilesSet = new Set<TFile>();
+      const normalFilteredFilesSet = new Set<TFile | TFolder>();
       // // If no files match the AND filters, we return empty set
       // if ($searchFilters.cf.length === 0) {
       //   cumpulsoryFilteredFilesSet = new Set(filesAfterRemovingExcludedFolders);
@@ -449,9 +474,20 @@ export const sortedFiles = derived([files], ([$files]) => {
 
   const sortFunction = sortMethods[get(settings)?.defaultSort] || (() => 0);
 
-  return [...$files]
+  // Separate folders and files
+  const folders = $files.filter((file): file is TFolder => file instanceof TFolder);
+  const filesOnly = $files.filter((file): file is TFile => file instanceof TFile);
+
+  // Sort folders by name ascending
+  const sortedFolders = [...folders].sort((a, b) => a.name.localeCompare(b.name));
+
+  // Sort files as before, excluding excalidraw files
+  const sortedFilesOnly = [...filesOnly]
     .filter((file) => !file.path.endsWith(".excalidraw.md"))
     .sort((a, b) => comparePinned(a, b) || sortFunction(a, b));
+
+  // Concatenate folders first, then files
+  return [...sortedFolders, ...sortedFilesOnly];
 });
 
 export const searchQuery = writable<string>("");
@@ -466,16 +502,22 @@ export const searchResultFiles = derived(
       return;
     }
 
+    // Only process TFile instances for content search
+    const filesOnly = $sortedFiles.filter((file): file is TFile => file instanceof TFile);
+
     Promise.all(
-      $sortedFiles.map(async (file) => {
+      filesOnly.map(async (file) => {
         const content = await file.vault.cachedRead(file);
         return [$preparedSearch(content), $preparedSearch(file.name)];
       })
     ).then((searchResults) => {
+      // Map back to the original $sortedFiles array, keeping folders and filtering files by search results
       set(
         $sortedFiles.filter((file, index) => {
-          const [contentMatch, nameMatch] = searchResults[index];
-
+          if (file instanceof TFolder) return true; // Always include folders
+          const fileIndex = filesOnly.indexOf(file);
+          if (fileIndex === -1) return false;
+          const [contentMatch, nameMatch] = searchResults[fileIndex];
           return (
             (contentMatch && contentMatch.score > -4) ||
             (nameMatch && nameMatch.score > -4)
@@ -488,16 +530,20 @@ export const searchResultFiles = derived(
 );
 
 const createFilteredFiles = () =>
-  readable<TFile[]>([], (set) => {
+  readable<(TFile | TFolder)[]>([], (set) => {
     const unsubscribe = sortedFiles.subscribe(async ($sortedFiles) => {
-      const nonEmptyFiles = [];
-      for (const file of $sortedFiles) {
+      const folders = $sortedFiles.filter((file): file is TFolder => file instanceof TFolder);
+      const filesOnly = $sortedFiles.filter((file): file is TFile => file instanceof TFile);
+
+      const nonEmptyFiles: TFile[] = [];
+      for (const file of filesOnly) {
         const emptiness = await pullContentWithoutFrontmatter(file);
         if (get(settings).showEmptyNotes || emptiness !== "") {
           nonEmptyFiles.push(file);
         }
       }
-      set(nonEmptyFiles);
+
+      set([...folders, ...nonEmptyFiles]);
     });
     return unsubscribe;
   });

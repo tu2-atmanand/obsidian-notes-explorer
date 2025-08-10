@@ -4,6 +4,7 @@
   import {
     debounce,
     Menu,
+    normalizePath,
     Notice,
     SearchComponent,
     setIcon,
@@ -58,6 +59,7 @@
     normalFilterIcon,
     refreshIcon,
     sortIcon,
+    vaultRootIcon,
     viewShareButtonIcon,
     viewShareIcon,
   } from "src/icons";
@@ -347,12 +349,23 @@
     });
 
     sortMenu.addItem((item) => {
+      item.setTitle("Enable folder view");
+      item.setChecked($settings.showFolderCards);
+      item.onClick(() => {
+        $settings.showFolderCards = !$settings.showFolderCards;
+        $settings.showSubFolders = false; // Disable sub-folder view when folder cards are enabled
+        // refreshView();
+      });
+    });
+
+    sortMenu.addItem((item) => {
       item.setTitle("Read sub-folders");
-      item.setChecked($settings.showSubFolders);
+      item.setChecked($settings.showSubFolders && !$settings.showFolderCards);
       item.onClick(() => {
         $settings.showSubFolders = !$settings.showSubFolders;
         // refreshView();
       });
+      item.setDisabled($settings.showFolderCards || $folderName.length === 0);
     });
 
     sortMenu.showAtMouseEvent(event);
@@ -437,6 +450,33 @@
         new Notice("Failed to copy view link.");
       },
     );
+  }
+
+  function handleFolderPathSegmentClick(idx: number) {
+    console.log(
+      "Clicked on folder path segment at index:",
+      idx,
+      "Current folder path segments length:",
+      $folderName[0].path.split("/").length,
+    );
+    if (idx === $folderName[0].path.split("/").length - 1) {
+      console.warn("Clicked on the last segment of the folder path.");
+      return;
+    }
+
+    // Navigate to the folder at the clicked segment index
+    const folderSegments = $folderName[0].path.split("/");
+    const newPath = folderSegments.slice(0, idx + 1).join("/");
+    // Find the folder object by path and set it as the current folder filter
+    const appInstance = get(plugin)?.app;
+    const normalizedNewFolderPath = normalizePath(newPath);
+    const folder = appInstance?.vault.getAbstractFileByPath(
+      normalizedNewFolderPath,
+    );
+    if (folder && folder instanceof TFolder) {
+      store.folderName.set([folder]);
+      refreshView();
+    }
   }
 
   onMount(() => {
@@ -605,16 +645,30 @@
       <div class="action-bar_labelSection">
         {#if $folderName.length > 0 || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
           {#if $folderName.length > 0}
-            <div class="action-bar_folder">
-              <div style="align-content: center;">{$folderName[0].name}</div>
-              <div class="action-bar_folder_closeButton">
+            <div class="folder-label">
+              {#if $folderName[0].path !== "/"}
                 <button
-                  class="clickable-icon"
-                  aria-label="Clear Folder Filter"
-                  use:closeIcon
+                  class="clickable-icon folder-label-close-button"
+                  aria-label="Clear Folder Filter and go to vault root"
+                  use:vaultRootIcon
                   on:click={clearFolderFilter}
                 ></button>
-              </div>
+                <span class="folder-path-separator">></span>
+              {/if}
+              {#each $folderName[0].path.split("/") as segment, idx (segment)}
+                <button
+                  class="folder-path-segment"
+                  on:click={() => handleFolderPathSegmentClick(idx)}
+                  aria-label={$folderName[0].path.split("/").length - 1 === idx
+                    ? `You are in this folder`
+                    : `Go to ${segment} subfolder`}
+                >
+                  {segment}
+                </button>
+                {#if idx < $folderName[0].path.split("/").length - 1}
+                  <span class="folder-path-separator">></span>
+                {/if}
+              {/each}
             </div>
           {/if}
           <div class="filter-labels">
@@ -702,16 +756,30 @@
       on:click={handleCountLabelBtn}>{totalNotesCount}</button
     >
     {#if $folderName.length > 0}
-      <div class="filter-section-small-screens-folder-label">
-        <div style="align-content: center;">{$folderName[0].name}</div>
-        <div class="filter-section-small-screens-folder-label-closeButton">
+      <div class="folder-label">
+        {#if $folderName[0].path !== "/"}
           <button
-            class="clickable-icon"
-            aria-label="Clear Folder Filter"
-            use:closeIcon
+            class="clickable-icon folder-label-close-button"
+            aria-label="Clear Folder Filter and go to vault root"
+            use:vaultRootIcon
             on:click={clearFolderFilter}
           ></button>
-        </div>
+          <span class="folder-path-separator">></span>
+        {/if}
+        {#each $folderName[0].path.split("/") as segment, idx (segment)}
+          <button
+            class="folder-path-segment"
+            on:click={() => handleFolderPathSegmentClick(idx)}
+            aria-label={$folderName[0].path.split("/").length - 1 === idx
+              ? `You are in this folder`
+              : `Go to ${segment} subfolder`}
+          >
+            {segment}
+          </button>
+          {#if idx < $folderName[0].path.split("/").length - 1}
+            <span class="folder-path-separator">></span>
+          {/if}
+        {/each}
       </div>
     {/if}
     <div class="filter-section-small-screens-filter-labels">
@@ -798,9 +866,13 @@
     </div>
   {:else if $folderName.length > 0 && $displayedFiles.length === 0}
     <div class="no-files-message">
-      No files found in the folder "{$folderName[0].name}". <br /><br />Either
-      the folder is empty or you probably have added this folder or its parent
+      No files found at the root of the folder : "{$folderName[0].name}".
+      <br /><br />
+      Either the folder is empty or you probably have added this folder or its parent
       folder to excluded folder in settings.
+      <br /><br />
+      If you want to see its children folder files, you can enable the "Read sub-folders"
+      from the top right menu.
     </div>
   {:else if ($searchFilters.cf.length > 0 || $searchFilters.nf.length > 0) && $displayedFiles.length === 0}
     <div class="no-files-message">
@@ -815,7 +887,7 @@
       folders from setting.
     </div>
   {:else}
-    {#each $displayedFiles as file (`${file.path}-${file.stat.mtime}`)}
+    {#each $displayedFiles as file (file.path + "-" + ("stat" in file ? (file.stat?.mtime ?? file.name) : file.name))}
       <Card {file} {updateLayoutNextTick} />
     {/each}
   {/if}
