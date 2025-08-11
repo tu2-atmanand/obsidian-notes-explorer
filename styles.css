@@ -634,7 +634,7 @@
 .workspace-leaf-content[data-type="notes-explorer"] .cards-container {
     position: relative;
     container-type: inline-size;
-    max-height: 100%;
+    max-height: 96%;
     overflow-y: auto;
     overflow-x: hidden;
     display: flex;
@@ -868,7 +868,7 @@
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card-footer-parent {
-    background-color: transparent;
+    /* background-color: transparent; */
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -876,7 +876,7 @@
 
 .workspace-leaf-content[data-type="notes-explorer"] .card-footer-parent-active {
     background-color: var(--background-primary);
-    box-shadow: 0 8px 32px 0 var(--caret-color);
+    box-shadow: 0px 14px 32px 0 var(--caret-color);
     position: absolute;
     bottom: 0;
     width: 100%;

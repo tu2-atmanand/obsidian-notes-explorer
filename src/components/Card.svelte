@@ -222,7 +222,9 @@
         const maxLines = $settings.maxLines || 20;
         // const content = await file.vault.cachedRead(file);
         const truncatedContent =
-          truncateContent(sanitizedFileContent, maxLines) + "\n...";
+          sanitizedFileContent.split("\n").length > ($settings.maxLines || 20)
+            ? truncateContent(sanitizedFileContent, maxLines) + "\n\n..."
+            : sanitizedFileContent + "\n\n";
 
         MarkdownPreviewRenderer.registerPostProcessor(
           postProcessRenderedContent,
