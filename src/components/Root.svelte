@@ -88,7 +88,6 @@
   let activeSuggest: SearchFiltersMultiSuggestor | null = null;
   let searchInputEl: HTMLInputElement | null = null;
   function searchInput(el: HTMLElement) {
-    console.log("Initializing search input component with element:", el);
     const search = new SearchComponent(el);
     search.clearButtonEl.style.display = "none"; // Hide the clear button
     search.addRightDecorator((rightDecoratorEl) => {
@@ -453,14 +452,7 @@
   }
 
   function handleFolderPathSegmentClick(idx: number) {
-    console.log(
-      "Clicked on folder path segment at index:",
-      idx,
-      "Current folder path segments length:",
-      $folderName[0].path.split("/").length,
-    );
     if (idx === $folderName[0].path.split("/").length - 1) {
-      console.warn("Clicked on the last segment of the folder path.");
       return;
     }
 

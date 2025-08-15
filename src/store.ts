@@ -257,7 +257,6 @@ export const allAllowedFiles = derived(
     } else {
       // If folderName is empty, but in this case showFolderCards is true, hence we will need to show only the files from the root folder and the subfolders as cards, hence the folders from the root folder should be included.
       const rootFolder = get(app).vault.getRoot();
-      console.log("Root folder:", rootFolder);
       allFiles = rootFolder.children.filter(
         (child): child is TFile | TFolder =>
           child instanceof TFolder ||

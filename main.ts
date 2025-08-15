@@ -374,8 +374,6 @@ export default class NotesExplorerPlugin extends Plugin {
   }
 
   setupMenu(menu: Menu, tagName: string, isHierarchy: boolean = false) {
-    console.log("Setting up context menu for tag:", tagName);
-
     if (tagName) {
       menu.addItem(
         item("open-notes-explorer", pluginIcon, "Open notes explorer", (e) => {

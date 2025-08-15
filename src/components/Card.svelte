@@ -522,9 +522,6 @@
   // });
 
   onMount(() => {
-    console.log(
-      "Trying to see if this onMount is running after the file is edited again.",
-    );
     (async () => {
       await renderNoteCard(contentDiv);
       updateTagColorIndicator();
