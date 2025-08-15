@@ -1,7 +1,9 @@
+import { setIcon } from "obsidian";
+
 export const pluginIcon = "book-copy";
 export const leftSideArrow = "arrow-left-to-line";
 export const rightSideArrow = "arrow-right-to-line";
-export const topBarIcon = "credit-card"
+export const topBarIcon = "credit-card";
 export const editIcon = "pencil";
 export const cancelIcon = "circle-x";
 export const fileOpenIcon = "file-symlink";
@@ -9,12 +11,41 @@ export const pageNavigationDockIcon = "dock"; // or you can use 'panel-bottom'
 export const filtersIcon = "sliders-horizontal";
 export const viewShareIcon = "share-2";
 
-export const pinnedIconSVG = `
-<?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
-<svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path opacity="0.5" fill-rule="evenodd" clip-rule="evenodd" d="M16.2188 4.83755L19.1835 7.80516C21.1954 9.81905 22.2014 10.826 21.9667 11.9115C21.7319 12.9969 20.4 13.4973 17.7362 14.4981L15.8922 15.191C15.1788 15.459 14.8221 15.593 14.5468 15.8314C14.4262 15.9358 14.3184 16.054 14.2254 16.1835C14.013 16.4795 13.9119 16.8472 13.7095 17.5825C13.2493 19.2551 13.0192 20.0914 12.4713 20.4041C12.2404 20.5358 11.9792 20.6049 11.7134 20.6045C11.0827 20.6036 10.4699 19.9902 9.24441 18.7635L7.77841 17.2961L6.69935 16.2163L5.28476 14.8C4.06698 13.581 3.45809 12.9715 3.45413 12.3446C3.45242 12.0735 3.5228 11.8069 3.65804 11.5721C3.97088 11.0289 4.80107 10.8 6.46145 10.3423C7.19811 10.1392 7.56644 10.0377 7.86251 9.82451C7.99536 9.72887 8.11619 9.61754 8.22239 9.49292C8.45908 9.2152 8.59063 8.85617 8.85373 8.1381L9.5217 6.31506C10.5086 3.62155 11.0021 2.2748 12.0904 2.03468C13.1788 1.79457 14.1921 2.8089 16.2188 4.83755Z" fill="#1C274C"/>
-<path d="M3.30236 21.7764L7.77841 17.2961L6.69935 16.2163L2.22345 20.6965C1.92552 20.9947 1.92552 21.4782 2.22345 21.7764C2.52138 22.0747 3.00443 22.0747 3.30236 21.7764Z" fill="#1C274C"/>
-</svg>`;
+export const sortIcon = (element: HTMLElement) => {
+  setIcon(element, "arrow-down-wide-narrow");
+};
+export const refreshIcon = (element: HTMLElement) => {
+  setIcon(element, "refresh-ccw");
+};
+export const closeIcon = (element: HTMLElement) => {
+  setIcon(element, "x");
+};
+export const cumpulsoryFilterIcon = (element: HTMLElement) => {
+  setIcon(element, "lock-keyhole");
+};
+export const normalFilterIcon = (element: HTMLElement) => {
+  setIcon(element, "lock-open");
+};
+export const closeCircleIcon = (element: HTMLElement) => {
+  setIcon(element, "circle-x");
+};
+export const filtersPanelIcon = (element: HTMLElement) => {
+  setIcon(element, filtersIcon);
+};
+export const viewShareButtonIcon = (element: HTMLElement) => {
+  setIcon(element, viewShareIcon);
+};
+export const findExpandIcon = (element: HTMLElement) => {
+  setIcon(element, "search");
+};
+export const findCloseIcon = (element: HTMLElement) => {
+  setIcon(element, "search-x");
+};
+export const vaultRootIcon = (element: HTMLElement) => {
+  setIcon(element, "house");
+};
+
+export const folderIconSVG = `<svg fill="#228BE6" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 48 48" width="100%" height="100%"><path d="M 8.5 8 C 6.0324991 8 4 10.032499 4 12.5 L 4 36.40625 L 4.015625 36.40625 C 3.9865145 38.276932 5.5083888 40 7.5019531 40 L 36.546875 40 C 38.416875 40 40.10278 38.832994 40.759766 37.082031 L 45.767578 23.75 L 45.767578 23.746094 C 46.62354 21.501657 44.900814 19 42.498047 19 L 42 19 L 42 17.5 C 42 15.032499 39.967501 13 37.5 13 L 24.042969 13 L 19.574219 9.2753906 A 1.50015 1.50015 0 0 0 19.572266 9.2753906 C 18.584102 8.4521105 17.339162 8 16.052734 8 L 8.5 8 z M 8.5 11 L 16.052734 11 C 16.638307 11 17.202555 11.205358 17.652344 11.580078 L 22.539062 15.652344 A 1.50015 1.50015 0 0 0 23.5 16 L 37.5 16 C 38.346499 16 39 16.653501 39 17.5 L 39 19 L 13.453125 19 C 11.583125 19 9.8972196 20.167006 9.2402344 21.917969 L 7 27.882812 L 7 12.5 C 7 11.653501 7.6535009 11 8.5 11 z M 13.453125 22 L 42.498047 22 C 42.897907 22 43.107444 22.305152 42.964844 22.677734 A 1.50015 1.50015 0 0 0 42.960938 22.6875 L 37.951172 36.027344 C 37.730157 36.616381 37.176875 37 36.546875 37 L 7.5019531 37 C 7.1042373 37 6.8935735 36.697099 7.0332031 36.326172 A 1.50015 1.50015 0 0 0 7.0351562 36.324219 L 12.048828 22.972656 C 12.269843 22.383619 12.823125 22 13.453125 22 z"/></svg>`;
 
 export const buyMeCoffeeSVGIcon = `
 <svg width="180" height="80" viewBox="0 0 545 153" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -4,12 +4,13 @@
   import {
     debounce,
     Menu,
+    normalizePath,
     Notice,
     SearchComponent,
     setIcon,
     TFolder,
   } from "obsidian";
-  import { afterUpdate, onMount } from "svelte";
+  import { afterUpdate, onMount, tick } from "svelte";
   import { slide } from "svelte/transition";
   import MiniMasonry from "minimasonry";
   import Card from "./Card.svelte";
@@ -30,6 +31,7 @@
     allAllowedFiles,
     allTags,
     excludedFilesCount,
+    files,
   } from "../store";
   import { Sort } from "src/settings";
   import {
@@ -44,39 +46,28 @@
     addToSearchHistory,
     initialPlaceholderSuggestionsMap,
   } from "src/utils/SearchQueryHelpers";
-  import { refreshView } from "src/utils/GeneralHelpers";
+  import { isValidRegExp, refreshView } from "src/utils/GeneralHelpers";
   import { NotesCountStatisticsModal } from "src/modals/NotesCountStatisticsModal";
-  import { filtersIcon, viewShareIcon } from "src/icons";
+  import {
+    closeCircleIcon,
+    closeIcon,
+    cumpulsoryFilterIcon,
+    filtersIcon,
+    filtersPanelIcon,
+    findCloseIcon,
+    findExpandIcon,
+    normalFilterIcon,
+    refreshIcon,
+    sortIcon,
+    vaultRootIcon,
+    viewShareButtonIcon,
+    viewShareIcon,
+  } from "src/icons";
 
   export let cardsContainer: HTMLElement;
   let notesGrid: MiniMasonry;
   let viewContent: HTMLElement;
   let columns: number;
-
-  const sortIcon = (element: HTMLElement) => {
-    setIcon(element, "arrow-down-wide-narrow");
-  };
-  const refreshIcon = (element: HTMLElement) => {
-    setIcon(element, "refresh-ccw");
-  };
-  const closeIcon = (element: HTMLElement) => {
-    setIcon(element, "x");
-  };
-  const cumpulsoryFilterIcon = (element: HTMLElement) => {
-    setIcon(element, "lock-keyhole");
-  };
-  const normalFilterIcon = (element: HTMLElement) => {
-    setIcon(element, "lock-open");
-  };
-  const closeCircleIcon = (element: HTMLElement) => {
-    setIcon(element, "circle-x");
-  };
-  const filtersPanelIcon = (element: HTMLElement) => {
-    setIcon(element, filtersIcon);
-  };
-  const viewShareButtonIcon = (element: HTMLElement) => {
-    setIcon(element, viewShareIcon);
-  };
 
   let currentPageLocal = 1;
   $: currentPageLocal = $currentPage;
@@ -95,8 +86,11 @@
   }
 
   let activeSuggest: SearchFiltersMultiSuggestor | null = null;
+  let searchInputEl: HTMLInputElement | null = null;
   function searchInput(el: HTMLElement) {
+    console.log("Initializing search input component with element:", el);
     const search = new SearchComponent(el);
+    search.clearButtonEl.style.display = "none"; // Hide the clear button
     search.addRightDecorator((rightDecoratorEl) => {
       const sortButton = document.createElement("button");
       sortButton.className = "clickable-icon";
@@ -108,7 +102,7 @@
       rightDecoratorEl.appendChild(sortButton);
     });
     search.setClass("action-bar__search-input");
-    const inputEl = search.inputEl;
+    searchInputEl = search.inputEl;
     const appInstance = get(plugin)?.app;
     const fileSuggestions = new Set(getFileSuggestions(appInstance));
     const tagSuggestions = new Set(getTagSuggestions(appInstance));
@@ -124,12 +118,12 @@
       ...yamlPropertiesSuggestions,
     ]);
 
-    const updateSuggestions = (value: string) => {
+    const updateSuggestions = (value?: string) => {
       if (!appInstance) return;
 
-      if (!activeSuggest) {
+      if (!activeSuggest && searchInputEl != null) {
         activeSuggest = new SearchFiltersMultiSuggestor(
-          inputEl,
+          searchInputEl,
           finalSuggestions,
           (selected: string) => {
             // console.log(
@@ -162,51 +156,51 @@
           },
           appInstance,
         );
-        inputEl.blur();
-        activeSuggest.getSuggestions(inputEl.value);
-        inputEl.focus();
-      } else {
-        activeSuggest.getSuggestions(inputEl.value);
+        if (searchInputEl) searchInputEl.blur();
+        activeSuggest.getSuggestions(searchInputEl.value);
+        searchInputEl.focus();
+      } else if (activeSuggest && searchInputEl != null) {
+        activeSuggest.getSuggestions(searchInputEl.value);
       }
     };
 
-    // inputEl.addEventListener("focus", () => updateSuggestions(inputEl.value));
-    inputEl.addEventListener("click", () => {
-      if (activeSuggest) {
-        activeSuggest.getSuggestions(inputEl.value);
+    // searchInputEl.addEventListener("focus", () => updateSuggestions(searchInputEl.value));
+    searchInputEl.addEventListener("click", () => {
+      if (activeSuggest && searchInputEl != null) {
+        activeSuggest.getSuggestions(searchInputEl.value);
       } else {
-        updateSuggestions(inputEl.value);
+        updateSuggestions();
       }
     });
-    inputEl.addEventListener("input", () => {
+    searchInputEl.addEventListener("input", () => {
       // console.log("This will only be called when the input changes.");
       // console.log("Input changed:", inputEl.value);
-      if (inputEl.value.trim() === "") {
+      if (searchInputEl && searchInputEl.value.trim() === "") {
         $searchQuery = "";
       } else {
-        updateSuggestions(inputEl.value);
+        // updateSuggestions();
       }
     });
-    search.clearButtonEl.addEventListener("click", (e: Event) => {
-      $searchQuery = "";
-    });
-    inputEl.addEventListener("keydown", (e: KeyboardEvent) => {
+    // search.clearButtonEl.addEventListener("click", (e: Event) => {
+    //   $searchQuery = "";
+    // });
+    searchInputEl.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key === "Enter") {
         // console.log("Enter pressed in search input:", inputEl.value);
-        const inputVal = inputEl.value.trim();
+        const inputVal = searchInputEl ? searchInputEl.value.trim() : "";
         if (!inputVal) return;
 
         addToSearchHistory(inputVal);
 
-        const regex = /^\[.*:.*\]$/;
+        const yamlPropertyRegexPattern = /^\[.*:.*\]$/;
         // console.log(
         //   "Valid filter format detected:",
         //   inputVal,
         //   "If condition: ",
-        //   regex.test(inputVal),
+        //   yamlPropertyRegexPattern.test(inputVal),
         // );
         if (
-          regex.test(inputVal) ||
+          yamlPropertyRegexPattern.test(inputVal) ||
           /^file:\s*\S+$/.test(inputVal) ||
           /^parent:\s*\S+$/.test(inputVal) ||
           /^tag:\s*\S+$/.test(inputVal) ||
@@ -214,19 +208,31 @@
           /^created-before:\s*\S+$/.test(inputVal) ||
           /^created-after:\s*\S+$/.test(inputVal) ||
           /^modified-before:\s*\S+$/.test(inputVal) ||
-          /^modified-after:\s*\S+$/.test(inputVal)
+          /^modified-after:\s*\S+$/.test(inputVal) ||
+          /^regex:\s*\S+$/.test(inputVal)
         ) {
           const oldSearchFilters = get(searchFilters);
+
           if (
             !oldSearchFilters.cf.includes(inputVal) &&
             !oldSearchFilters.nf.includes(inputVal)
           ) {
-            store.searchFilters.set({
-              cf: oldSearchFilters.cf,
-              nf: [...oldSearchFilters.nf, inputVal],
-            });
-            inputEl.value = "";
-            // refreshView();
+            if (
+              /^regex:\s*\S+:\s*\S+$/.test(inputVal) &&
+              !isValidRegExp(inputVal.split(":")[1].trim())
+            ) {
+              new Notice("Invalid regular expression in filter.");
+              return;
+            } else {
+              store.searchFilters.set({
+                cf: oldSearchFilters.cf,
+                nf: [...oldSearchFilters.nf, inputVal],
+              });
+              if (searchInputEl) {
+                searchInputEl.value = "";
+              }
+              // refreshView();
+            }
           } else {
             // console.warn(
             //   "The selected item is already present in the search filters.",
@@ -236,7 +242,7 @@
         } else {
           $searchQuery = inputVal;
         }
-        inputEl.blur();
+        if (searchInputEl) searchInputEl.blur();
       }
     });
   }
@@ -343,12 +349,23 @@
     });
 
     sortMenu.addItem((item) => {
+      item.setTitle("Enable folder view");
+      item.setChecked($settings.showFolderCards);
+      item.onClick(() => {
+        $settings.showFolderCards = !$settings.showFolderCards;
+        $settings.showSubFolders = false; // Disable sub-folder view when folder cards are enabled
+        // refreshView();
+      });
+    });
+
+    sortMenu.addItem((item) => {
       item.setTitle("Read sub-folders");
-      item.setChecked($settings.showSubFolders);
+      item.setChecked($settings.showSubFolders && !$settings.showFolderCards);
       item.onClick(() => {
         $settings.showSubFolders = !$settings.showSubFolders;
         // refreshView();
       });
+      item.setDisabled($settings.showFolderCards || $folderName.length === 0);
     });
 
     sortMenu.showAtMouseEvent(event);
@@ -363,7 +380,7 @@
 
   function removeFilter(index: number, type: "cf" | "nf") {
     store.searchFilters.update((filters) => {
-      filters[type].splice(index, 1);
+      filters[type]?.splice(index, 1);
       return { ...filters };
     });
     // refreshView();
@@ -371,7 +388,7 @@
 
   function moveFilter(index: number, type: "cf" | "nf") {
     searchFilters.update((filters) => {
-      const item = filters[type].splice(index, 1)[0];
+      const item = filters[type]?.splice(index, 1)[0];
       const otherType = type === "cf" ? "nf" : "cf";
       filters[otherType].push(item);
       return { ...filters };
@@ -382,8 +399,9 @@
     // $searchQuery = (event.target as HTMLButtonElement).textContent || "";
     store.searchFilters.update((filters) => {
       const tag = (event.target as HTMLButtonElement).textContent || "";
-      if (!filters.cf.includes(tag) && !filters.nf.includes(tag)) {
-        filters.nf.push(tag);
+      const tagFilter = `tag: ${tag}`;
+      if (!filters.cf.includes(tagFilter) && !filters.nf.includes(tagFilter)) {
+        filters.cf.push(tagFilter);
       } else {
         // console.warn("The tag is already present in the search filters.");
         new Notice("The tag is already added to the view.");
@@ -398,7 +416,7 @@
     $searchFilters.cf.length === 0 &&
     $searchFilters.nf.length === 0
       ? `${$allAllowedFiles.length}`
-      : `${$displayedFiles.length} / ${get(plugin).app.vault.getMarkdownFiles().length}`; // Display filtered count vs total count
+      : `${$displayedFiles.length} / ${get(plugin).app.vault.getMarkdownFiles()?.length}`; // Display filtered count vs total count
 
   function handleCountLabelBtn(event: MouseEvent) {
     const statisticsModal = new NotesCountStatisticsModal(get(plugin));
@@ -409,7 +427,7 @@
     if (filter.startsWith(`["`)) {
       return filter;
     } else {
-      return `${filter.split(":")[0].trim()}: `;
+      return `${filter.split(":")[0]?.trim()}: `;
     }
   }
 
@@ -417,7 +435,7 @@
     if (filter.startsWith(`["`)) {
       return "";
     } else {
-      return filter.split(":")[1].trim();
+      return filter.split(":")[1]?.trim();
     }
   }
 
@@ -434,6 +452,33 @@
     );
   }
 
+  function handleFolderPathSegmentClick(idx: number) {
+    console.log(
+      "Clicked on folder path segment at index:",
+      idx,
+      "Current folder path segments length:",
+      $folderName[0].path.split("/").length,
+    );
+    if (idx === $folderName[0].path.split("/").length - 1) {
+      console.warn("Clicked on the last segment of the folder path.");
+      return;
+    }
+
+    // Navigate to the folder at the clicked segment index
+    const folderSegments = $folderName[0].path.split("/");
+    const newPath = folderSegments.slice(0, idx + 1).join("/");
+    // Find the folder object by path and set it as the current folder filter
+    const appInstance = get(plugin)?.app;
+    const normalizedNewFolderPath = normalizePath(newPath);
+    const folder = appInstance?.vault.getAbstractFileByPath(
+      normalizedNewFolderPath,
+    );
+    if (folder && folder instanceof TFolder) {
+      store.folderName.set([folder]);
+      refreshView();
+    }
+  }
+
   onMount(() => {
     columns = Math.floor(viewContent.clientWidth / $settings.minCardWidth) + 1;
     notesGrid = new MiniMasonry({
@@ -442,6 +487,7 @@
       gutter: $settings.gutterSize,
       surroundingGutter: $settings.enableSurroundingGutters,
       ultimateGutter: 20,
+      wedge: true,
     });
     notesGrid.layout();
 
@@ -453,25 +499,77 @@
     };
   });
 
-  afterUpdate(
-    debounce(async () => {
-      if (!$viewIsVisible) {
-        $skipNextTransition = true;
+  // afterUpdate(
+  //   debounce(async () => {
+  //     if (!$viewIsVisible) {
+  //       $skipNextTransition = true;
+  //       return;
+  //     }
+
+  //     notesGrid.layout();
+  //     $skipNextTransition = false;
+
+  //     if ($refreshOnResize || $settings) {
+  //       notesGrid.layout();
+  //       $refreshOnResize = false;
+  //     }
+  //   }),
+  // );
+
+  let lastLayout: Date = new Date();
+  let pendingLayout: ReturnType<typeof setTimeout> | null = null;
+  const debouncedLayout = () => {
+    // If there has been a relayout call in the last 100ms,
+    // we schedule another one 100ms later to avoid layout thrashing
+    return new Promise<void>((resolve) => {
+      if (
+        lastLayout.getTime() + 100 > new Date().getTime() &&
+        pendingLayout === null
+      ) {
+        pendingLayout = setTimeout(
+          () => {
+            notesGrid.layout();
+            $skipNextTransition = false;
+            lastLayout = new Date();
+            pendingLayout = null;
+            resolve();
+          },
+          lastLayout.getTime() + 100 - new Date().getTime(),
+        );
         return;
       }
 
+      // Otherwise, relayout immediately
       notesGrid.layout();
       $skipNextTransition = false;
+      lastLayout = new Date();
+      resolve();
+    });
+  };
 
-      if ($refreshOnResize || $settings) {
-        notesGrid.layout();
-        $refreshOnResize = false;
-      }
-    }),
-  );
+  export const updateLayoutNextTick = async () => {
+    await tick();
+    return await debouncedLayout();
+  };
+  files.subscribe(() => {
+    store.renderOnFileUpdate.set(true);
+    updateLayoutNextTick();
+  });
 
   let screenWidth = window.innerWidth;
   let showFilters = false;
+  let showSearchInput = false;
+
+  function toggleSearchInput() {
+    showSearchInput = !showSearchInput;
+    if (!showSearchInput) {
+      $searchQuery = "";
+      activeSuggest = null;
+      searchInputEl?.blur();
+    } else {
+      searchInputEl?.focus();
+    }
+  }
 
   const handleResize = () => {
     screenWidth = window.innerWidth;
@@ -491,25 +589,46 @@
       <div class="action-bar_buttons">
         <button
           class="clickable-icon refresh-button"
+          aria-label="Refresh View"
           use:refreshIcon
           on:click={refreshView}
-        />
+        ></button>
+        <button
+          class="clickable-icon notes-explorer-view-share-button-desktop"
+          aria-label="Share View Link"
+          on:click={copyViewLinkToClipboard}
+          use:viewShareButtonIcon
+        ></button>
         <button
           class="clickable-icon sort-button"
+          aria-label="Sort Notes"
           use:sortIcon
           on:click={sortMenu}
-        />
+        ></button>
       </div>
-      <div class="action-bar__search" use:searchInput />
+      <button
+        class="clickable-icon searchFieldToggleBtn"
+        on:click={toggleSearchInput}
+        aria-label={showSearchInput ? "Clear Search Query" : "Search Tasks"}
+      >
+        {#if showSearchInput}
+          <div class="icon-search-x" use:findCloseIcon></div>
+        {:else}
+          <div class="icon-search" use:findExpandIcon></div>
+        {/if}
+      </button>
+      {#if showSearchInput}
+        <div
+          class="action-bar__search"
+          use:searchInput
+          transition:slide|local={{ duration: 250 }}
+        ></div>
+      {/if}
       <button
         class="clickable-icon count-label-button"
+        aria-label="Notes Count Statistics"
         on:click={handleCountLabelBtn}>{totalNotesCount}</button
       >
-      <button
-        class="notes-explorer-view-share-button-desktop"
-        on:click={copyViewLinkToClipboard}
-        use:viewShareButtonIcon
-      />
     </div>
     {#if screenWidth <= 1200}
       <button
@@ -518,22 +637,38 @@
         $searchFilters.nf.length > 0
           ? 'filters-active'
           : ''}"
+        aria-label="Toggle Filters Panel"
         on:click={() => (showFilters = !showFilters)}
         use:filtersPanelIcon
-      />
+      ></button>
     {:else}
       <div class="action-bar_labelSection">
         {#if $folderName.length > 0 || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
           {#if $folderName.length > 0}
-            <div class="action-bar_folder">
-              <div style="align-content: center;">{$folderName[0].name}</div>
-              <div class="action-bar_folder_closeButton">
+            <div class="folder-label">
+              {#if $folderName[0].path !== "/"}
                 <button
-                  class="clickable-icon"
-                  use:closeIcon
+                  class="clickable-icon folder-label-close-button"
+                  aria-label="Clear Folder Filter and go to vault root"
+                  use:vaultRootIcon
                   on:click={clearFolderFilter}
-                />
-              </div>
+                ></button>
+                <span class="folder-path-separator">></span>
+              {/if}
+              {#each $folderName[0].path.split("/") as segment, idx (segment)}
+                <button
+                  class="folder-path-segment"
+                  on:click={() => handleFolderPathSegmentClick(idx)}
+                  aria-label={$folderName[0].path.split("/").length - 1 === idx
+                    ? `You are in this folder`
+                    : `Go to ${segment} subfolder`}
+                >
+                  {segment}
+                </button>
+                {#if idx < $folderName[0].path.split("/").length - 1}
+                  <span class="folder-path-separator">></span>
+                {/if}
+              {/each}
             </div>
           {/if}
           <div class="filter-labels">
@@ -541,6 +676,7 @@
               <div class="filter-label cf">
                 <button
                   class="toggle"
+                  aria-label="Convert to Normal Filter"
                   on:click={() => moveFilter(index, "cf")}
                   use:cumpulsoryFilterIcon
                   title="Convert to Normal Filter"
@@ -555,19 +691,21 @@
                 </div>
                 <button
                   class="close"
+                  aria-label="Remove Filter"
                   on:click={() => removeFilter(index, "cf")}
                   use:closeCircleIcon
-                />
+                ></button>
               </div>
             {/each}
             {#each $searchFilters.nf as filter, index}
               <div class="filter-label nf">
                 <button
                   class="toggle"
+                  aria-label="Convert to Compulsory Filter"
                   on:click={() => moveFilter(index, "nf")}
                   use:normalFilterIcon
                   title="Convert to Compulsory Filter"
-                />
+                ></button>
                 <div class="filter-label-text">
                   <div class="filter-label-text-key">
                     {getFilterKeyText(filter)}
@@ -578,9 +716,10 @@
                 </div>
                 <button
                   class="close"
+                  aria-label="Remove Filter"
                   on:click={() => removeFilter(index, "nf")}
                   use:closeCircleIcon
-                />
+                ></button>
               </div>
             {/each}
           </div>
@@ -608,23 +747,39 @@
   {#if $folderName.length > 0 || $searchFilters.cf.length > 0 || $searchFilters.nf.length > 0}
     <button
       class="clickable-icon notes-explorer-view-share-button"
+      aria-label="Share View Link"
       on:click={copyViewLinkToClipboard}
       use:viewShareButtonIcon
-    />
+    ></button>
     <button
       class="clickable-icon count-label-button-small-screens"
       on:click={handleCountLabelBtn}>{totalNotesCount}</button
     >
     {#if $folderName.length > 0}
-      <div class="filter-section-small-screens-folder-label">
-        <div style="align-content: center;">{$folderName[0].name}</div>
-        <div class="filter-section-small-screens-folder-label-closeButton">
+      <div class="folder-label">
+        {#if $folderName[0].path !== "/"}
           <button
-            class="clickable-icon"
-            use:closeIcon
+            class="clickable-icon folder-label-close-button"
+            aria-label="Clear Folder Filter and go to vault root"
+            use:vaultRootIcon
             on:click={clearFolderFilter}
-          />
-        </div>
+          ></button>
+          <span class="folder-path-separator">></span>
+        {/if}
+        {#each $folderName[0].path.split("/") as segment, idx (segment)}
+          <button
+            class="folder-path-segment"
+            on:click={() => handleFolderPathSegmentClick(idx)}
+            aria-label={$folderName[0].path.split("/").length - 1 === idx
+              ? `You are in this folder`
+              : `Go to ${segment} subfolder`}
+          >
+            {segment}
+          </button>
+          {#if idx < $folderName[0].path.split("/").length - 1}
+            <span class="folder-path-separator">></span>
+          {/if}
+        {/each}
       </div>
     {/if}
     <div class="filter-section-small-screens-filter-labels">
@@ -632,6 +787,7 @@
         <div class="filter-label cf">
           <button
             class="toggle"
+            aria-label="Convert to Normal Filter"
             on:click={() => moveFilter(index, "cf")}
             use:cumpulsoryFilterIcon
             title="Convert to Normal Filter"
@@ -646,19 +802,21 @@
           </div>
           <button
             class="close"
+            aria-label="Remove Filter"
             on:click={() => removeFilter(index, "cf")}
             use:closeCircleIcon
-          />
+          ></button>
         </div>
       {/each}
       {#each $searchFilters.nf as filter, index}
         <div class="filter-label nf">
           <button
             class="toggle"
+            aria-label="Convert to Compulsory Filter"
             on:click={() => moveFilter(index, "nf")}
             use:normalFilterIcon
             title="Convert to Compulsory Filter"
-          />
+          ></button>
           <div class="filter-label-text">
             <div class="filter-label-text-key">
               {getFilterKeyText(filter)}
@@ -669,9 +827,10 @@
           </div>
           <button
             class="close"
+            aria-label="Remove Filter"
             on:click={() => removeFilter(index, "nf")}
             use:closeCircleIcon
-          />
+          ></button>
         </div>
       {/each}
     </div>
@@ -679,9 +838,10 @@
     <div class="filter-section-small-screens-no-filters">
       <button
         class="clickable-icon notes-explorer-view-share-button"
+        aria-label="Share View Link"
         on:click={copyViewLinkToClipboard}
         use:viewShareButtonIcon
-      />
+      ></button>
       <button
         class="clickable-icon count-label-button-small-screens"
         on:click={handleCountLabelBtn}>{totalNotesCount}</button
@@ -706,9 +866,13 @@
     </div>
   {:else if $folderName.length > 0 && $displayedFiles.length === 0}
     <div class="no-files-message">
-      No files found in the folder "{$folderName[0].name}". <br /><br />Either
-      the folder is empty or you probably have added this folder or its parent
+      No files found at the root of the folder : "{$folderName[0].name}".
+      <br /><br />
+      Either the folder is empty or you probably have added this folder or its parent
       folder to excluded folder in settings.
+      <br /><br />
+      If you want to see its children folder files, you can enable the "Read sub-folders"
+      from the top right menu.
     </div>
   {:else if ($searchFilters.cf.length > 0 || $searchFilters.nf.length > 0) && $displayedFiles.length === 0}
     <div class="no-files-message">
@@ -723,8 +887,8 @@
       folders from setting.
     </div>
   {:else}
-    {#each $displayedFiles as file (file.path)}
-      <Card {file} on:loaded={() => notesGrid.layout()} />
+    {#each $displayedFiles as file (file.path + "-" + ("stat" in file ? (file.stat?.mtime ?? file.name) : file.name))}
+      <Card {file} {updateLayoutNextTick} />
     {/each}
   {/if}
 </div>

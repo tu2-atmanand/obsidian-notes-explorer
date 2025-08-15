@@ -1,7 +1,7 @@
 import {
-  Notice,
+  Menu,
+  MenuItem,
   Plugin,
-  TFile,
   TFolder,
   WorkspaceLeaf,
   type ObsidianProtocolData,
@@ -13,7 +13,7 @@ import {
   DEFAULT_SETTINGS,
 } from "./src/settings";
 import { NotesExplorerView, PLUGIN_VIEW_TYPE } from "./src/view";
-import store, { settings } from "./src/store";
+import store from "./src/store";
 import "./styles.css";
 import { pluginIcon } from "src/icons";
 
@@ -73,7 +73,7 @@ export default class NotesExplorerPlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
-  async activateView(layout: string) {
+  async activateView(layout?: string) {
     const { workspace } = this.app;
 
     let leaf: WorkspaceLeaf;
@@ -166,6 +166,11 @@ export default class NotesExplorerPlugin extends Plugin {
         }
       })
     );
+
+    this.app.workspace.on("editor-menu", (menu, editor) => {
+      const token = editor.getClickableTokenAt(editor.getCursor());
+      if (token?.type === "tag") this.setupMenu(menu, token.text);
+    });
   }
 
   private async registerCommands() {
@@ -368,6 +373,34 @@ export default class NotesExplorerPlugin extends Plugin {
     );
   }
 
+  setupMenu(menu: Menu, tagName: string, isHierarchy: boolean = false) {
+    console.log("Setting up context menu for tag:", tagName);
+
+    if (tagName) {
+      menu.addItem(
+        item("open-notes-explorer", pluginIcon, "Open notes explorer", (e) => {
+          this.openNotesExplorerWithTag(tagName);
+          e.preventDefault();
+        })
+      );
+    }
+
+    this.app.workspace.trigger("notes-explorer:contextmenu", menu, tagName);
+  }
+
+  openNotesExplorerWithTag(tagName: string) {
+    // const encodedArgs = encodeURIComponent(JSON.stringify({ tag: tagName }));
+    // const finalURI = `obsidian://notes-explorer?args=${encodedArgs}`;
+    // console.log("This is encoded URI : ", finalURI);
+
+    store.searchFilters.update((filters) => {
+      filters.cf.push(`tag: ${tagName}`);
+      return filters;
+    });
+
+    this.activateView("main");
+  }
+
   // async openTagInCardsView(tagName: string) {
   //   try {
   //     const files = await this.getFilesWithTag(tagName);
@@ -408,4 +441,16 @@ export default class NotesExplorerPlugin extends Plugin {
   //   }
   //   return String(error);
   // }
+}
+
+function item(
+  section: string | undefined,
+  icon: string,
+  title: string,
+  click: (e: MouseEvent | KeyboardEvent) => void
+): (i: MenuItem) => void {
+  return (i: MenuItem) => {
+    i.setIcon(icon).setTitle(title).onClick(click);
+    if (section) i.setSection(section);
+  };
 }

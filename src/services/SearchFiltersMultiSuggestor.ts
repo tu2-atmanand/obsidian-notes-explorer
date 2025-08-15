@@ -1,12 +1,6 @@
 // /src/services/SearchFiltersSearchFiltersMultiSuggestoror.ts
 
-import {
-  AbstractInputSuggest,
-  App,
-  TFile,
-  TFolder,
-  sanitizeHTMLToDom,
-} from "obsidian";
+import { AbstractInputSuggest, App, TFile, TFolder } from "obsidian";
 
 import { get } from "svelte/store";
 import { initialPlaceholderSuggestionsMap } from "src/utils/SearchQueryHelpers";
@@ -51,6 +45,7 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
         `modified-before:${initialPlaceholderSuggestionsMap.get("modified-before:")}`,
         `modified-after:${initialPlaceholderSuggestionsMap.get("modified-after:")}`,
         `["property": value]${initialPlaceholderSuggestionsMap.get(`["property": value]`)}`,
+        `regex:${initialPlaceholderSuggestionsMap.get("regex:")}`,
         "divider:History",
       ];
       initialPlaceholderSuggestions = [
@@ -82,6 +77,14 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
             .toLocaleLowerCase()
             .includes(inputStr.toLocaleLowerCase().replace(/^tag: /, "")) &&
           tag.startsWith("tag:")
+      );
+    } else if (inputStr.trim().startsWith("regex:")) {
+      return [...this.content].filter(
+        (regex) =>
+          regex
+            .toLocaleLowerCase()
+            .includes(inputStr.toLocaleLowerCase().replace(/^regex:/, "")) &&
+          regex.startsWith("regex:")
       );
     } else if (inputStr.trim() === "[]" || inputStr.trim().startsWith('["')) {
       return [...this.content].filter(
@@ -128,7 +131,8 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
       content.startsWith("file:") ||
       content.startsWith("tag:") ||
       content.startsWith("parent:") ||
-      content.startsWith("content:")
+      content.startsWith("content:") ||
+      content.startsWith("regex:")
     ) {
       const label = content.split(":")[0];
       const span = el.createSpan({ text: label });
@@ -175,7 +179,7 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
       }
     }
 
-    const oldSearchContent = this.inputEl.value;
+    // const oldSearchContent = this.inputEl.value;
     let finalSearchContent = content;
     // console.log(
     //   "selectSuggestion called with content:",
@@ -219,6 +223,16 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
       `content:${initialPlaceholderSuggestionsMap.get("content:")}`
     ) {
       finalSearchContent = `content: `;
+      this.inputEl.value = finalSearchContent;
+      this.close();
+      this.inputEl.blur();
+      // this.getSuggestions(finalSearchContent);
+      this.inputEl.focus();
+    } else if (
+      content.trim() ===
+      `regex:${initialPlaceholderSuggestionsMap.get("regex:")}`
+    ) {
+      finalSearchContent = `regex: //`;
       this.inputEl.value = finalSearchContent;
       this.close();
       this.inputEl.blur();
@@ -308,7 +322,8 @@ export class SearchFiltersMultiSuggestor extends AbstractInputSuggest<string> {
         content.startsWith("created-before:") ||
         content.startsWith("created-after:") ||
         content.startsWith("modified-before:") ||
-        content.startsWith("modified-after:")
+        content.startsWith("modified-after:") ||
+        content.startsWith("regex:")
       ) {
         this.inputEl.blur();
         this.onSelectCb(content);

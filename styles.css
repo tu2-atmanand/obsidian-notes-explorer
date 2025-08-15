@@ -61,7 +61,7 @@
     justify-content: space-between;
     align-items: center;
     background-color: var(--background-primary);
-    box-shadow: 0px 10px 15px -10px var(--background-modifier-success);
+    border-bottom: 1px solid var(--color-accent);
     backdrop-filter: blur(5px);
     overflow: visible;
     flex-direction: row-reverse;
@@ -71,9 +71,10 @@
     display: flex;
     flex-direction: row-reverse;
     align-items: center;
+    align-self: flex-start;
     gap: 1rem;
     z-index: 1;
-    padding-inline-start: 7px;
+    padding-inline: 7px;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .action-bar_buttons {
@@ -92,9 +93,30 @@
     gap: 0.5rem;
     min-height: 2.5rem;
     scrollbar-width: thin;
-    border: 1px solid var(--blockquote-border-color);
+    /* border: 1px solid var(--blockquote-border-color); */
     border-radius: 4px;
     padding-inline: 0.5rem;
+}
+
+.workspace-leaf-content[data-type="notes-explorer"] .action-bar_labelSection>.folder-label,
+.workspace-leaf-content[data-type="notes-explorer"] .filter-section-small-screens>.folder-label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    /* background-color: var(--background-modifier-border); */
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 1em;
+    font-weight: 600;
+    font-style: italic;
+    gap: 0.2rem;
+}
+
+.workspace-leaf-content[data-type="notes-explorer"] .action-bar_labelSection>.folder-label>.folder-path-segment,
+.workspace-leaf-content[data-type="notes-explorer"] .filter-section-small-screens>.folder-label>.folder-path-segment {
+    background-color: transparent !important;
+    cursor: pointer !important;
+    padding: 5px !important;
 }
 
 /* Force horizontal scrolling inside label section */
@@ -203,15 +225,6 @@
     border-radius: 6px;
 }
 
-.notes-explorer-view-share-button-desktop {
-    background-color: transparent !important;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
 .workspace-leaf-content[data-type="notes-explorer"] .action-bar_folder {
     display: flex;
     flex: 0 0 auto;
@@ -309,12 +322,17 @@
     gap: 5px;
 }
 
-.workspace-leaf-content[data-type="notes-explorer"] .filter-section-small-screens-folder-label-closeButton {
-    color: white;
-    background: var(--canvas-background);
-    border: 0 !important;
-    border-radius: 4px !important;
+.workspace-leaf-content[data-type="notes-explorer"] .action-bar_labelSection>.folder-label>.folder-label-close-button,
+.workspace-leaf-content[data-type="notes-explorer"] .filter-section-small-screens>.folder-label>.folder-label-close-button {
     cursor: pointer;
+}
+
+.workspace-leaf-content[data-type="notes-explorer"] .action-bar_labelSection>.folder-label>.folder-path-separator,
+.workspace-leaf-content[data-type="notes-explorer"] .filter-section-small-screens>.folder-label>.folder-path-separator {
+    font-size: 1.7rem;
+    font-weight: 700;
+    padding: 0 !important;
+    color: var(--blockquote-border-color);
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .filter-section-small-screens-filter-labels {
@@ -326,14 +344,11 @@
 
 /* Responsive adjustment for narrow screens */
 @media screen and (max-width: 1200px) {
-    .workspace-leaf-content[data-type="notes-explorer"] .action-bar {
-        /* flex-direction: column;
-        align-items: stretch; */
-    }
 
     .workspace-leaf-content[data-type="notes-explorer"] .action-bar-right-section {
         /* width: 100%; */
         justify-content: flex-start;
+        align-self: flex-start;
         margin-bottom: 0.5rem;
     }
 
@@ -525,8 +540,9 @@
 } */
 
 .workspace-leaf-content[data-type="notes-explorer"] .count-label-button {
-    background-color: var(--icon-color-active) !important;
-    color: white !important;
+    /* background-color: var(--icon-color-active) !important; */
+    border: 2px solid var(--icon-color-active) !important;
+    border-radius: 7px !important;
     font-weight: 600 !important;
     font-size: 1.05em !important;
     align-self: normal !important;
@@ -584,7 +600,7 @@
 
 .workspace-leaf-content[data-type="notes-explorer"] .search-input-container input {
     padding-inline-start: 4px !important;
-    padding-inline-end: 50px !important;
+    padding-inline-end: 32px !important;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .search-input-container input {
@@ -611,10 +627,14 @@
     }
 }
 
+.workspace-leaf-content[data-type="notes-explorer"] .search-input-container input:not(:placeholder-shown)~.input-right-decorator {
+    inset-inline-end: 0px !important;
+}
+
 .workspace-leaf-content[data-type="notes-explorer"] .cards-container {
     position: relative;
     container-type: inline-size;
-    max-height: 100%;
+    max-height: 96%;
     overflow-y: auto;
     overflow-x: hidden;
     display: flex;
@@ -630,7 +650,11 @@
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .sort-button,
-.workspace-leaf-content[data-type="notes-explorer"] .refresh-button {
+.workspace-leaf-content[data-type="notes-explorer"] .refresh-button,
+/* .workspace-leaf-content[data-type="notes-explorer"] .icon-search-x,
+.workspace-leaf-content[data-type="notes-explorer"] .icon-search, */
+.workspace-leaf-content[data-type="notes-explorer"] .searchFieldToggleBtn,
+.workspace-leaf-content[data-type="notes-explorer"] .notes-explorer-view-share-button-desktop {
     border: none;
     border-radius: 4px;
     padding: 5px;
@@ -641,6 +665,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    align-self: center;
     justify-content: center;
     height: 100%;
     gap: 1rem;
@@ -675,6 +700,8 @@
 .workspace-leaf-content[data-type="notes-explorer"] .no-files-message {
     font-size: 1.5em;
     text-align: center;
+    align-self: center;
+    width: 80% !important;
 }
 
 /* .refresh-button:hover {
@@ -838,10 +865,11 @@
     height: 100%;
     overflow-x: clip;
     min-height: 7em;
+    padding-block-end: 7px;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card-footer-parent {
-    background-color: transparent;
+    /* background-color: transparent; */
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -849,7 +877,7 @@
 
 .workspace-leaf-content[data-type="notes-explorer"] .card-footer-parent-active {
     background-color: var(--background-primary);
-    box-shadow: 0 8px 32px 0 var(--caret-color);
+    box-shadow: 0px 14px 32px 0 var(--caret-color);
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -1283,7 +1311,7 @@
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card-content code {
-    display: block !important;
+    display: inline !important;
     padding: 1em !important;
     overflow: none !important;
     text-wrap: balance !important;

@@ -15,6 +15,7 @@ export const initialPlaceholderSuggestionsMap = new Map<string, string>([
     `["property": value]`,
     ` - Filter notes with YAML frontmatter. Eg. ["author": John Doe], ["date": BEFORE 2023-01-01], ["amount": > 100`,
   ],
+  ["regex:", " - Filter notes by regex pattern. Eg. regex: /pattern/"],
 ]);
 
 export function addToSearchHistory(entry: string) {

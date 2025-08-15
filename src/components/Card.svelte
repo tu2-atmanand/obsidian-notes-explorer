@@ -4,21 +4,25 @@
   import {
     getAllTags,
     Keymap,
+    MarkdownPreviewRenderer,
     MarkdownRenderer,
+    Notice,
     setIcon,
     TFile,
+    TFolder,
     type CachedMetadata,
+    type MarkdownPostProcessorContext,
     type UserEvent,
   } from "obsidian";
   import { afterUpdate, createEventDispatcher, onMount } from "svelte";
-  import {
+  import store, {
     skipNextTransition,
     app,
     view,
     settings,
     plugin,
     appCache,
-    searchFilters,
+    renderOnFileUpdate,
   } from "../store";
   import {
     ClickMode,
@@ -26,15 +30,22 @@
     TitleDisplayMode,
   } from "../settings";
   import { openDeleteConfirmationModal } from "src/utils/ModalHelpers";
-  import { isFileEmpty } from "src/utils/GeneralHelpers";
+  import {
+    pullContentWithoutFrontmatter,
+    refreshView,
+  } from "src/utils/GeneralHelpers";
   import { NoteViewerModal } from "src/modals/NoteViewerModal";
   import {
     hookMarkdownLinkMouseEventHandlers,
     markdownButtonHoverPreviewEvent,
     obsidianMarkdownRenderer,
   } from "src/services/MarkdownUIRenderer";
+  import FolderCardContent from "./FolderCardContent.svelte";
 
-  export let file: TFile;
+  // Svelte 4 does NOT support $props. Use `export let` for props instead:
+  export let file: TFile | TFolder;
+  export let updateLayoutNextTick: () => Promise<void>;
+
   let displayFilename: boolean =
     $settings.displayTitle !== TitleDisplayMode.Title;
   let contentDiv: HTMLElement;
@@ -159,8 +170,16 @@
   };
 
   // Post-process rendered content for optimizations
-  const postProcessRenderedContent = (element: HTMLElement) => {
-    // TODO : The below feature not working. Also add another option to remove both title and filename from the card header :
+  const postProcessRenderedContent = (
+    element: HTMLElement,
+    context: MarkdownPostProcessorContext,
+  ) => {
+    if (context.sourcePath !== file.path) {
+      // Very important to check if the sourcePath is the same as the file path
+      // Otherwise, the post processor will be applied to all files
+      return;
+    }
+
     if ($settings.displayTitle === TitleDisplayMode.Filename) {
       const firstChild = element.firstElementChild;
       if (firstChild?.tagName === "H1") {
@@ -191,32 +210,72 @@
   };
 
   const renderNoteCard = async (el: HTMLElement): Promise<void> => {
-    // console.log("Rendering note card for file:", file.path);
-    const fileEmptyCondition = await isFileEmpty(file);
-    if (!fileEmptyCondition) {
-      const maxLiness = $settings.maxLines || 20;
-      const content = await file.vault.cachedRead(file);
-      const truncatedContent = truncateContent(content, maxLiness);
+    if (el == null) {
+      console.warn("Element is null, cannot render note card.");
+      return;
+    }
 
-      await obsidianMarkdownRenderer(
-        $app,
-        truncatedContent,
-        el,
-        file.path,
-        $view,
-      );
-      postProcessRenderedContent(el);
-      // $plugin.registerHoverLinkSource(PLUGIN_VIEW_TYPE, {
-      //   defaultMod: true /* require ctrl key trigger */,
-      //   display: "Notes Explorer",
-      // });
-      if ($settings.contentInteractions) {
-        hookMarkdownLinkMouseEventHandlers($plugin, el, file.path, file.path);
+    if (file instanceof TFile) {
+      // console.log("Rendering note card for file:", file.path);
+      const sanitizedFileContent = await pullContentWithoutFrontmatter(file);
+      if (sanitizedFileContent !== "") {
+        const maxLines = $settings.maxLines || 20;
+        // const content = await file.vault.cachedRead(file);
+        const truncatedContent =
+          sanitizedFileContent.split("\n").length > ($settings.maxLines || 20)
+            ? truncateContent(sanitizedFileContent, maxLines) + "\n\n..."
+            : sanitizedFileContent + "\n\n";
+
+        MarkdownPreviewRenderer.registerPostProcessor(
+          postProcessRenderedContent,
+        );
+        await obsidianMarkdownRenderer(
+          $app,
+          truncatedContent,
+          el,
+          file.path,
+          $view,
+        );
+        // postProcessRenderedContent(el);
+        MarkdownPreviewRenderer.unregisterPostProcessor(
+          postProcessRenderedContent,
+        );
+
+        // $plugin.registerHoverLinkSource(PLUGIN_VIEW_TYPE, {
+        //   defaultMod: true /* require ctrl key trigger */,
+        //   display: "Notes Explorer",
+        // });
+        if ($settings.contentInteractions) {
+          hookMarkdownLinkMouseEventHandlers($plugin, el, file.path, file.path);
+        }
+      } else {
+        el.createEl("div", {
+          text: "File is empty",
+          cls: "card-content-empty",
+        });
       }
+    } else if (file instanceof TFolder) {
+      // console.log("Rendering folder card for folder:", file.path);
+      // el.createEl("div", {
+      //   text: "Folder: " + file.name,
+      //   cls: "card-content-folder",
+      // });
+
+      // Render FolderCardContent component
+      const folderContent = document.createElement("div");
+      folderContent.className = "card-content-folder";
+      el.appendChild(folderContent);
+
+      // Mount Svelte component
+      new FolderCardContent({
+        target: folderContent,
+        props: { folder: file },
+      });
     } else {
+      console.warn("Unsupported file type for rendering:", file);
       el.createEl("div", {
-        text: "File is empty",
-        cls: "card-content-empty",
+        text: "Unsupported file type",
+        cls: "card-content-unsupported",
       });
     }
   };
@@ -246,6 +305,7 @@
     $settings.pinnedFiles = pinned
       ? $settings.pinnedFiles.filter((f) => f !== file.path)
       : [...$settings.pinnedFiles, file.path];
+    refreshView();
   };
 
   const trashFile = async () => {
@@ -258,63 +318,75 @@
         );
       } catch (error) {
         console.error("trashFile : Error deleting the file:", error);
+        new Notice(
+          `Error deleting the file: An error occurred while trying to delete the file: ${file.path}. Please check the console for more details.`,
+        );
       }
     }
   };
 
   const openFile = async (evt: UserEvent) => {
-    const layoutEntries = Object.entries($app.workspace.getLayout());
-    const mainEntry = layoutEntries.find(([key]) => key === "main");
-    const children =
-      (mainEntry && (mainEntry[1] as any)?.children[0]?.children) || [];
-    const hasNotesExplorer = children.some(
-      (child: any) =>
-        child.type === "leaf" && child.state?.type === "notes-explorer",
-    );
+    if (file instanceof TFolder) {
+      store.folderName.set([file]);
+    } else if (file instanceof TFile) {
+      const layoutEntries = Object.entries($app.workspace.getLayout());
+      const mainEntry = layoutEntries.find(([key]) => key === "main");
+      const children =
+        (mainEntry && (mainEntry[1] as any)?.children[0]?.children) || [];
+      const hasNotesExplorer = children.some(
+        (child: any) =>
+          child.type === "leaf" && child.state?.type === "notes-explorer",
+      );
 
-    if ($settings.openNoteLayout === "modal") {
-      const modal = new NoteViewerModal($plugin, file);
-      modal.open();
-      return;
-    } else if ($settings.openNoteLayout === "right") {
-      if (mainEntry) {
-        if ((mainEntry[1] as any)?.children?.length > 1) {
-          const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
-          await newLeaf.openFile(file);
-        } else {
-          await $app.workspace.getLeaf("split", "vertical").openFile(file);
-        }
-      }
-      return;
-    } else if ($settings.openNoteLayout === "sameTab") {
-      if (hasNotesExplorer) {
-        if (mainEntry && (mainEntry[1] as any)?.children?.length > 1) {
-          const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
-          await newLeaf.openFile(file);
-        } else {
-          await $app.workspace.getLeaf("split", "vertical").openFile(file);
-        }
-
-        // NOTE : The below method will simply be not worked on because its very expensive to render the cards again and again and also remembering the scroll position and going back to the same. Unless I found out some method in future to cache the view.
-        // const activeView =
-        //   $app.workspace.getActiveViewOfType(NotesExplorerView);
-        // await activeView?.leaf.openFile(file);
+      if ($settings.openNoteLayout === "modal") {
+        const modal = new NoteViewerModal($plugin, file);
+        modal.open();
         return;
-      } else {
-        const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
-        await newLeaf.openFile(file);
+      } else if ($settings.openNoteLayout === "right") {
+        if (mainEntry) {
+          if ((mainEntry[1] as any)?.children?.length > 1) {
+            const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
+            await newLeaf.openFile(file);
+          } else {
+            await $app.workspace.getLeaf("split", "vertical").openFile(file);
+          }
+        }
+        return;
+      } else if ($settings.openNoteLayout === "sameTab") {
+        if (hasNotesExplorer) {
+          if (mainEntry && (mainEntry[1] as any)?.children?.length > 1) {
+            const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
+            await newLeaf.openFile(file);
+          } else {
+            await $app.workspace.getLeaf("split", "vertical").openFile(file);
+          }
+
+          // NOTE : The below method will simply be not worked on because its very expensive to render the cards again and again and also remembering the scroll position and going back to the same. Unless I found out some method in future to cache the view.
+          // const activeView =
+          //   $app.workspace.getActiveViewOfType(NotesExplorerView);
+          // await activeView?.leaf.openFile(file);
+          return;
+        } else {
+          const newLeaf = $app.workspace.getLeaf(Keymap.isModEvent(evt));
+          await newLeaf.openFile(file);
+        }
+        return;
+      } else if ($settings.openNoteLayout === "tab") {
+        await $app.workspace.getLeaf("tab").openFile(file);
+        return;
+      } else if ($settings.openNoteLayout === "window") {
+        await $app.workspace.getLeaf("window").openFile(file);
+        return;
       }
-      return;
-    } else if ($settings.openNoteLayout === "tab") {
-      await $app.workspace.getLeaf("tab").openFile(file);
-      return;
-    } else if ($settings.openNoteLayout === "window") {
-      await $app.workspace.getLeaf("window").openFile(file);
-      return;
     }
   };
 
   const updateTagColorIndicator = async () => {
+    if (file instanceof TFolder) {
+      backgroundColor = ""; // Reset for folders
+      return;
+    }
+
     if (
       contentDiv &&
       $settings.tagPositionForCardColor === TagPostionForCardColor.content
@@ -364,6 +436,10 @@
   };
 
   function getFooterMetadata(): string {
+    if (!(file instanceof TFile)) {
+      return "Not a file";
+    }
+
     const metadataType = $settings.noteMetadata;
 
     switch (metadataType) {
@@ -430,18 +506,37 @@
   $: clickHandler =
     $settings.clickMode === ClickMode.Single ? "click" : "dblclick";
 
-  const dispatch = createEventDispatcher();
-  onMount(async () => {
-    await renderNoteCard(contentDiv);
-    await updateTagColorIndicator();
-    cardStyle = calculateStyle();
-    dispatch("loaded");
-  });
+  // const dispatch = createEventDispatcher();
+  // onMount(async () => {
+  //   await renderNoteCard(contentDiv);
+  //   await updateTagColorIndicator();
+  //   cardStyle = calculateStyle();
+  //   dispatch("loaded");
+  // });
 
-  afterUpdate(() => {
-    updateTagColorIndicator().then(() => {
-      cardStyle = calculateStyle(); // Recalculate style after tag color update
-    });
+  // afterUpdate(async () => {
+  //   // await renderNoteCard(contentDiv); // Re-render the card content after updates
+  //   updateTagColorIndicator().then(() => {
+  //     cardStyle = calculateStyle(); // Recalculate style after tag color update
+  //   });
+  // });
+
+  onMount(() => {
+    console.log(
+      "Trying to see if this onMount is running after the file is edited again.",
+    );
+    (async () => {
+      await renderNoteCard(contentDiv);
+      updateTagColorIndicator();
+      cardStyle = calculateStyle();
+      await updateLayoutNextTick();
+      if ($renderOnFileUpdate) {
+        store.skipNextTransition.set(true);
+      } else {
+        store.skipNextTransition.set(false);
+      }
+    })();
+    return () => updateLayoutNextTick();
   });
 </script>
 
@@ -452,7 +547,7 @@
   role="link"
   tabindex="0"
 >
-  {#if displayFilename}
+  {#if displayFilename && file instanceof TFile}
     <div class="top-bar">
       <div class="top-bar-fileName">{file.basename}</div>
     </div>
@@ -472,52 +567,58 @@
     role="presentation"
   ></div>
 
-  <div
-    class={$settings.metadataVisibility
-      ? "card-footer-parent-active"
-      : "card-footer-parent"}
-    bind:this={footerDiv}
-    on:mouseenter={(event) => parentNoteHoverPreview(event, footerDiv)}
-    role="presentation"
-  >
-    <div class="card-footer">
-      {#if pinned}
-        <button
-          class="clickable-icon"
-          use:pinnedIcon
-          on:click|stopPropagation={togglePin}
-        />
-      {:else}
-        <button
-          class="clickable-icon"
-          class:is-active={pinned}
-          use:pinButton
-          on:click|stopPropagation={togglePin}
-        />
-      {/if}
-      <div class={footerMetadataClass}>
-        {#if $settings.noteMetadata === "folderName" && file.parent != null && file.parent.path !== "/"}
-          <span use:folderIcon />
-        {:else if $settings.noteMetadata === "folderName"}
-          <span use:vaultIcon />
+  {#if file instanceof TFile}
+    <div
+      class={$settings.metadataVisibility
+        ? "card-footer-parent-active"
+        : "card-footer-parent"}
+      bind:this={footerDiv}
+      on:mouseenter={(event) => parentNoteHoverPreview(event, footerDiv)}
+      role="presentation"
+    >
+      <div class="card-footer">
+        {#if pinned}
+          <button
+            class="clickable-icon"
+            aria-label="Unpin file"
+            use:pinnedIcon
+            on:click|preventDefault={togglePin}
+          ></button>
+        {:else}
+          <button
+            class="clickable-icon"
+            aria-label="Pin file"
+            class:is-active={pinned}
+            use:pinButton
+            on:click|preventDefault={togglePin}
+          ></button>
         {/if}
-        <div
-          class="card-footer-text"
-          title={file && file.parent ? file.parent.path : ""}
-          role="tooltip"
-        >
-          {getFooterMetadata()}
+        <div class={footerMetadataClass}>
+          {#if $settings.noteMetadata === "folderName" && file.parent != null && file.parent.path !== "/"}
+            <span use:folderIcon></span>
+          {:else if $settings.noteMetadata === "folderName"}
+            <span use:vaultIcon></span>
+          {/if}
+          <div
+            class="card-footer-text"
+            title={file && file.parent ? file.parent.path : ""}
+            role="tooltip"
+          >
+            {getFooterMetadata()}
+          </div>
         </div>
+        {#if $settings.showDeleteButton}
+          <button
+            class="clickable-icon"
+            aria-label="Delete file"
+            use:trashIcon
+            on:click|preventDefault={trashFile}
+          ></button>
+        {:else}
+          <button class="clickable-icon" aria-label="nothing" use:blankIcon
+          ></button>
+        {/if}
       </div>
-      {#if $settings.showDeleteButton}
-        <button
-          class="clickable-icon"
-          use:trashIcon
-          on:click|stopPropagation={trashFile}
-        />
-      {:else}
-        <button class="clickable-icon" use:blankIcon />
-      {/if}
     </div>
-  </div>
+  {/if}
 </div>
