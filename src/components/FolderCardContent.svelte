@@ -2,8 +2,17 @@
   import { TFolder, setIcon } from "obsidian";
   export let folder: TFolder;
   import { onMount } from "svelte";
+  import { folderIconSVG } from "../icons";
+  import { settings } from "src/store";
 
   let folderIconDiv: HTMLElement;
+
+  export const fileIcon = (element: HTMLElement) => {
+    setIcon(element, "file");
+  };
+  export const folderIcon = (element: HTMLElement) => {
+    setIcon(element, "folder");
+  };
 
   // Get children names (files and folders)
   $: childrenNames = folder.children
@@ -16,9 +25,6 @@
         ? child.name.slice(0, maxLen) + "..."
         : child.name;
     });
-
-  import { folderIconSVG } from "../icons";
-  import { settings } from "src/store";
 
   onMount(() => {
     if (folderIconDiv) {
@@ -37,8 +43,20 @@
   <div class="folder-children">
     <div class="folder-children-title">Children</div>
     <ul>
-      {#each childrenNames as name}
-        <li>{name}</li>
+      {#each folder.children.slice(0, $settings.maxLines ?? folder.children.length) as child}
+        <li class="folder-child">
+          <span class="child-icon">
+            {#if child instanceof TFolder}
+              <div class="child-folder-icon" use:folderIcon></div>
+            {:else}
+              <div class="child-file-icon" use:fileIcon></div>
+            {/if}
+          </span>
+          {child.name.length > Math.floor($settings.minCardWidth / 8)
+            ? child.name.slice(0, Math.floor($settings.minCardWidth / 8)) +
+              "..."
+            : child.name}
+        </li>
       {/each}
     </ul>
   </div>
@@ -83,6 +101,13 @@
   .folder-children-title {
     font-weight: bold;
     margin-bottom: 0.25em;
+  }
+  .folder-child {
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    align-items: center;
+    gap: 0.5rem;
   }
   .folder-icon {
     flex: 1;
