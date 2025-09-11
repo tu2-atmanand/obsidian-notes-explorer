@@ -219,10 +219,10 @@
       // console.log("Rendering note card for file:", file.path);
       const sanitizedFileContent = await pullContentWithoutFrontmatter(file);
       if (sanitizedFileContent !== "") {
-        const maxLines = $settings.maxLines || 20;
+        const maxLines = $settings.maxLines || 3;
         // const content = await file.vault.cachedRead(file);
         const truncatedContent =
-          sanitizedFileContent.split("\n").length > ($settings.maxLines || 20)
+          sanitizedFileContent.split("\n").length > ($settings.maxLines || 3)
             ? truncateContent(sanitizedFileContent, maxLines) + "\n\n..."
             : sanitizedFileContent + "\n\n";
 
@@ -546,7 +546,7 @@
 >
   {#if displayFilename && file instanceof TFile}
     <div class="top-bar">
-      <div class="top-bar-fileName">{file.basename}</div>
+      <h1 class="top-bar-fileName">{file.basename}</h1>
     </div>
   {/if}
 
@@ -554,7 +554,7 @@
     class="card-content"
     style="
     padding-inline: {$settings.tagColorIndicatorType === 'background'
-      ? '8px'
+      ? '0px'
       : '4px'};
     {$settings.fixedCardHeight ? 'overflow-y: clip;' : ''}
   "

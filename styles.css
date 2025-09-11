@@ -763,12 +763,9 @@
     transform: translate(0, 100vh);
     display: flex;
     flex-direction: column;
-    /* Set max height for cards */
-    box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0.2),
-        -1px 4px 10px 0 rgba(0, 0, 0, 0.19);
     margin: calc(-1 * var(--card-padding));
     margin-top: 1px;
-    padding: 0;
+    padding: 20px;
     align-items: center;
     justify-content: space-between;
     gap: var(--size-4-1);
@@ -777,21 +774,20 @@
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .top-bar {
-    font-size: 1.2em;
-    font-weight: 600;
-    color: var(--color-base-70);
-    padding: 0.2rem;
-    border-bottom: 1px solid var(--background-modifier-border);
-    text-align: center;
+    text-align: left;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-height: 1.8em;
+    height: fit-content;
+    width: 100%;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .top-bar-fileName {
     width: 100%;
     text-wrap: wrap;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0 !important;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card.skip-transition {
@@ -820,6 +816,7 @@
 .workspace-leaf-content[data-type="notes-explorer"] .card :global(span.image-embed) {
     margin: 0 calc(-1 * var(--card-padding));
     width: calc(100% + 2 * var(--card-padding));
+    border-radius: 20px !important;
 }
 
 /* Images embeds alone in a paragraph */
@@ -833,7 +830,7 @@
 
 /* Image embeds followed by line break in same paragraph */
 .workspace-leaf-content[data-type="notes-explorer"] .card :global(p:has(> span.image-embed):has(br) span.image-embed) {
-    display: inline-block;
+    display: block;
 }
 
 /** Embed notes */
@@ -865,11 +862,10 @@
     height: 100%;
     overflow-x: clip;
     min-height: 7em;
-    padding-block-end: 7px;
+    padding-block-end: 2rem;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card-footer-parent {
-    /* background-color: transparent; */
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -877,7 +873,6 @@
 
 .workspace-leaf-content[data-type="notes-explorer"] .card-footer-parent-active {
     background-color: var(--background-primary);
-    box-shadow: 0px 14px 32px 0 var(--caret-color);
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -886,7 +881,6 @@
 .workspace-leaf-content[data-type="notes-explorer"] .card:hover .card-footer-parent {
     background-color: var(--background-primary);
     box-shadow: 0 8px 32px 0 var(--caret-color);
-    /* backdrop-filter: blur(5px); */
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card-footer {
@@ -900,6 +894,11 @@
     justify-content: space-between;
     gap: var(--size-4-1);
     color: var(--color-accent);
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    border-top: 1px solid var(--background-modifier-border);
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .footer-metadata {
@@ -910,6 +909,11 @@
     text-wrap: wrap;
     word-wrap: break-word;
     max-width: 75%;
+}
+
+.workspace-leaf-content[data-type="notes-explorer"] .footer-metadata > span {
+    display: flex;
+    align-items: center;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card-footer-text {
@@ -1236,7 +1240,7 @@
     margin-inline-start: 1em;
 }
 
-.workspace-leaf-content[data-type="notes-explorer"] .card-content span {
+.workspace-leaf-content[data-type="notes-explorer"] .card-content span:not(.image-embed) {
     display: flex;
     justify-content: center;
     margin-inline-start: 4px;
@@ -1321,6 +1325,11 @@
 
 .workspace-leaf-content[data-type="notes-explorer"] .card-content code>span {
     display: inline !important;
+}
+
+.workspace-leaf-content[data-type="notes-explorer"] .card .card-content p span.image-embed img {
+    border-radius: 5px !important;
+    overflow: hidden !important;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card-content img {
