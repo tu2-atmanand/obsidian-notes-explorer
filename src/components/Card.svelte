@@ -552,12 +552,7 @@
 
   <div
     class="card-content"
-    style="
-    padding-inline: {$settings.tagColorIndicatorType === 'background'
-      ? '0px'
-      : '4px'};
-    {$settings.fixedCardHeight ? 'overflow-y: clip;' : ''}
-  "
+    style="{$settings.fixedCardHeight ? 'overflow-y: clip;' : ($settings.metadataVisibility ? 'padding-bottom: 28px;' : '')}"
     on:click|preventDefault={clickHandler === "click" ? openFile : null}
     on:dblclick|preventDefault={clickHandler === "dblclick" ? openFile : null}
     bind:this={contentDiv}
