@@ -545,8 +545,8 @@
   tabindex="0"
 >
   {#if displayFilename && file instanceof TFile}
-    <div class="top-bar">
-      <h1 class="top-bar-fileName">{file.basename}</h1>
+    <div class="card-header">
+      <h1 class="card-label">{file.basename}</h1>
     </div>
   {/if}
 
@@ -561,14 +561,13 @@
 
   {#if file instanceof TFile}
     <div
-      class={$settings.metadataVisibility
-        ? "card-footer-parent-active"
-        : "card-footer-parent"}
+      class="card-footer"
+      class:is-active={$settings.metadataVisibility}
       bind:this={footerDiv}
       on:mouseenter={(event) => parentNoteHoverPreview(event, footerDiv)}
       role="presentation"
     >
-      <div class="card-footer">
+      <div class="card-footer-content">
         {#if pinned}
           <button
             class="clickable-icon"
@@ -592,7 +591,7 @@
             <span use:vaultIcon></span>
           {/if}
           <div
-            class="card-footer-text"
+            class="card-footer-content-text"
             title={file && file.parent ? file.parent.path : ""}
             role="tooltip"
           >

@@ -631,24 +631,6 @@
     inset-inline-end: 0px !important;
 }
 
-.workspace-leaf-content[data-type="notes-explorer"] .cards-container {
-    position: relative;
-    container-type: inline-size;
-    max-height: 96%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-    /* margin-top: 3em; */
-    margin-bottom: 2em;
-    height: inherit !important;
-}
-
-.workspace-leaf-content[data-type="notes-explorer"] .cards-container :global(*) {
-    --card-padding: var(--size-4-3);
-    --card-gutter: var(--size-4-5);
-}
-
 .workspace-leaf-content[data-type="notes-explorer"] .sort-button,
 .workspace-leaf-content[data-type="notes-explorer"] .refresh-button,
 /* .workspace-leaf-content[data-type="notes-explorer"] .icon-search-x,
@@ -750,261 +732,208 @@
     background-color: var(--color-accent);
 }
 
-/* Card.svelte */
-
-.workspace-leaf-content[data-type="notes-explorer"] .card {
-    position: absolute;
-    background-color: var(--background-primary-alt);
-    border: 1px solid var(--background-modifier-border);
-    word-wrap: break-word;
-    overflow-y: hidden;
-    transition-property: transform;
-    transition-duration: 0.4s;
-    transform: translate(0, 100vh);
+.workspace-leaf-content[data-type="notes-explorer"] .cards-container {
+    position: relative;
+    container-type: inline-size;
+    max-height: 96%;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
-    margin: calc(-1 * var(--card-padding));
-    padding: 20px;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--size-4-1);
-    border-radius: 7px;
-    font-size: 0.8rem;
+    margin-bottom: 2em;
+    height: inherit !important;
 }
 
-.workspace-leaf-content[data-type="notes-explorer"] .top-bar {
-    text-align: left;
-    height: fit-content;
-    width: 100%;
+.workspace-leaf-content[data-type="notes-explorer"] .cards-container :global(*) {
+    --card-padding: var(--size-4-3);
+    --card-gutter: var(--size-4-5);
 }
 
-.workspace-leaf-content[data-type="notes-explorer"] .top-bar-fileName {
-    width: 100%;
-    font-size: 24px;
-    font-weight: bold;
-    margin: 0 !important;
+/*Card.svelte*/
+
+.workspace-leaf-content[data-type="notes-explorer"] .card {
+	position: absolute;
+	background-color: var(--background-primary-alt);
+	border: 1px solid var(--background-modifier-border);
+	word-wrap: break-word;
+	overflow-y: hidden;
+	transition-property: transform;
+	transition-duration: 0.4s;
+	transform: translate(0, 100vh);
+	display: flex;
+	flex-direction: column;
+	margin: calc(-1 * var(--card-padding));
+	padding: 20px;
+    align-items: start;
+	justify-content: space-between;
+	gap: var(--size-4-1);
+	border-radius: 7px;
+	font-size: 0.8rem;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card.skip-transition {
-    transition: none;
+	transition: none;
+}
+
+.workspace-leaf-content[data-type="notes-explorer"] .card:hover {
+	border-color: var(--background-modifier-border-hover);
+}
+
+.workspace-leaf-content[data-type="notes-explorer"] .card-header {
+	height: fit-content;
+	width: 100%;
+}
+
+.workspace-leaf-content[data-type="notes-explorer"] .card-label {
+	text-align: left;
+	width: 100%;
+	font-size: 24px;
+	font-weight: bold;
+	margin: 0 !important;
+}
+
+/*Card Content*/
+
+.workspace-leaf-content[data-type="notes-explorer"] .card-content {
+	flex-grow: 1;
+	max-width: 100%;
+	width: 100%;
+	height: 100%;
+	overflow-x: clip;
+	min-height: 7em;
+}
+
+.workspace-leaf-content[data-type="notes-explorer"] .card-content-empty {
+	padding-block: 2rem;
+	text-align: center;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card :global(p),
-.workspace-leaf-content[data-type="notes-explorer"] .card :global(ul) {
+.workspace-leaf-content[data-type="notes-explorer"] .card :global(ul),
+.workspace-leaf-content[data-type="notes-explorer"] .card :global(h1),
+.workspace-leaf-content[data-type="notes-explorer"] .card :global(h2),
+.workspace-leaf-content[data-type="notes-explorer"] .card :global(h3),
+.workspace-leaf-content[data-type="notes-explorer"] .card :global(h4),
+.workspace-leaf-content[data-type="notes-explorer"] .card :global(h5),
+.workspace-leaf-content[data-type="notes-explorer"] .card :global(h6) {
     margin: 0.3rem 0;
 }
 
-.workspace-leaf-content[data-type="notes-explorer"] .card :global(h1),
-.workspace-leaf-content[data-type="notes-explorer"] .card :global(h2),
-.workspace-leaf-content[data-type="notes-explorer"] .card :global(h3) {
-    margin: 0 0 0.3rem;
+.workspace-leaf-content[data-type="notes-explorer"] .card :global(ul) {
+	padding-left: var(--size-4-5);
 }
 
-.workspace-leaf-content[data-type="notes-explorer"] .card :global(ul) {
-    padding-left: var(--size-4-5);
-}
+/* Image Embeds */
 
 .workspace-leaf-content[data-type="notes-explorer"] .card :global(p:has(> span.image-embed):not(:has(br))) {
-    margin: 0;
+	margin: 0;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card :global(span.image-embed) {
-    margin: 0 calc(-1 * var(--card-padding));
-    width: calc(100% + 2 * var(--card-padding));
-    border-radius: 20px !important;
+	margin: 0 calc(-1 * var(--card-padding));
+	width: calc(100% + 2 * var(--card-padding));
+	border-radius: 20px !important;
 }
 
-/* Images embeds alone in a paragraph */
 .workspace-leaf-content[data-type="notes-explorer"] .card :global(p:has(> span.image-embed):not(:has(br)) span.image-embed) {
-    display: block;
-
-    & img {
-        display: block;
-    }
+	display: block;
 }
 
-/* Image embeds followed by line break in same paragraph */
+.workspace-leaf-content[data-type="notes-explorer"] .card :global(p:has(> span.image-embed):not(:has(br)) span.image-embed) img {
+	display: block;
+}
+
 .workspace-leaf-content[data-type="notes-explorer"] .card :global(p:has(> span.image-embed):has(br) span.image-embed) {
-    display: block;
+	display: block;
 }
 
-/** Embed notes */
+/* Note Embeds */
+
 .workspace-leaf-content[data-type="notes-explorer"] .card :global(p:has(> span.markdown-embed)),
 .workspace-leaf-content[data-type="notes-explorer"] .card :global(.block-language-dataview) {
-    overflow: hidden;
-    max-height: 5rem;
-    position: relative;
+	overflow: hidden;
+	max-height: 5rem;
+	position: relative;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card :global(p:has(> span.markdown-embed) > .embed-shadow),
 .workspace-leaf-content[data-type="notes-explorer"] .card :global(.block-language-dataview > .embed-shadow) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    box-shadow: inset 0 -2rem 1rem -1rem var(--background-primary-alt);
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	box-shadow: inset 0 -2rem 1rem -1rem var(--background-primary-alt);
 }
 
-.workspace-leaf-content[data-type="notes-explorer"] .card:hover {
-    border-color: var(--background-modifier-border-hover);
-}
-
-.workspace-leaf-content[data-type="notes-explorer"] .card-content {
-    flex-grow: 1;
-    max-width: 100%;
-    width: 100%;
-    height: 100%;
-    overflow-x: clip;
-    min-height: 7em;
-}
-
-.workspace-leaf-content[data-type="notes-explorer"] .card-footer-parent {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    z-index: 10;
-    background-color: var(--background-primary);
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-.workspace-leaf-content[data-type="notes-explorer"] .card:hover .card-footer-parent {
-    border-top: 1px solid var(--background-modifier-border);
-}
-
-.workspace-leaf-content[data-type="notes-explorer"] .card-footer-parent-active {
-    background-color: var(--background-primary);
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    z-index: 10;
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    width: 100%;
-}
-
-.workspace-leaf-content[data-type="notes-explorer"] .card:hover .card-footer-parent:not(.card-footer-parent-active) {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-}
+/*Card Footer*/
 
 .workspace-leaf-content[data-type="notes-explorer"] .card-footer {
-    max-width: 100% !important;
-    width: 100%;
-    flex-shrink: 0;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--size-4-1);
-    color: var(--color-accent);
-    padding-top: 6px;
-    padding-bottom: 6px;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	z-index: 10;
+	background-color: var(--background-primary);
+	border-top: 1px solid var(--background-modifier-border);
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.workspace-leaf-content[data-type="notes-explorer"] .card-footer-parent-active,
-.workspace-leaf-content[data-type="notes-explorer"] .card:hover {
-    border-top: 1px solid var(--background-modifier-border);
+.workspace-leaf-content[data-type="notes-explorer"] .card:hover .card-footer,
+.workspace-leaf-content[data-type="notes-explorer"] .card-footer.is-active {
+	opacity: 1;
+	visibility: visible;
+	pointer-events: auto;
 }
 
-.workspace-leaf-content[data-type="notes-explorer"] .card-footer-parent {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    z-index: 10;
-    background-color: var(--background-primary);
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-.workspace-leaf-content[data-type="notes-explorer"] .card-footer-parent-active {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-}
-
-.workspace-leaf-content[data-type="notes-explorer"] .card:hover .card-footer-parent:not(.card-footer-parent-active) {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-}
-
-.workspace-leaf-content[data-type="notes-explorer"] .card-footer {
-    max-width: 100% !important;
-    width: 100%;
-    flex-shrink: 0;
-    flex-grow: 1;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--size-4-1);
-    color: var(--color-accent);
-    padding-left: 12px;
-    padding-right: 12px;
-    padding-top: 6px;
-    padding-bottom: 6px;
+.workspace-leaf-content[data-type="notes-explorer"] .card-footer-content {
+	max-width: 100% !important;
+	width: 100%;
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--size-4-1);
+	color: var(--color-accent);
+	padding: 6px 12px;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .footer-metadata {
-    display: flex;
-    flex-direction: row;
-    gap: 0.4rem;
-    align-items: center;
-    text-wrap: wrap;
-    word-wrap: break-word;
-    max-width: 75%;
+	display: flex;
+	flex-direction: row;
+	gap: 0.4rem;
+	align-items: center;
+	overflow-wrap: break-word;
+	max-width: 75%;
+	color: var(--color-accent);
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .footer-metadata > span {
-    display: flex;
-    align-items: center;
+	display: flex;
+	align-items: center;
 }
 
-.workspace-leaf-content[data-type="notes-explorer"] .card-footer-text {
-    font-size: 1.1em;
-    font-weight: 500;
-    text-wrap: wrap;
-    line-break: anywhere;
-    word-break: break-all;
-    word-break: break-word;
+.workspace-leaf-content[data-type="notes-explorer"] .card-footer-content-text {
+	font-size: 1.1em;
+	font-weight: 500;
+	overflow-wrap: break-word;
+	word-break: break-word;
+	white-space: normal;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card .clickable-icon.is-active {
-    color: var(--tab-text-color-focused-active);
-    background-color: var(--background-modifier-hover);
-    cursor: pointer;
-}
-
-.workspace-leaf-content[data-type="notes-explorer"] .card-footer .clickable-icon {
-    opacity: 0;
-    transform: scale(0.9);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+	color: var(--tab-text-color-focused-active);
+	background-color: var(--background-modifier-hover);
+	cursor: pointer;
 }
 
 .workspace-leaf-content[data-type="notes-explorer"] .card:hover .clickable-icon {
-    opacity: 1;
-    transform: scale(1);
-    color: var(--text-color);
+	color: var(--text-color);
 }
-
-.workspace-leaf-content[data-type="notes-explorer"] .card-footer button.clickable-icon {
-    cursor: pointer;
-}
-
-.workspace-leaf-content[data-type="notes-explorer"] .card-content-empty {
-    padding-block: 2rem;
-    text-align: center;
-}
-
 
 /* /src/settings.ts */
 
