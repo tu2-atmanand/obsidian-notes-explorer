@@ -951,6 +951,18 @@
 
 /* /src/settings.ts */
 
+.notes-explorer-setting-tab-header .setting-item-name {
+    --font-weight: var(--h3-weight);
+    font-variant: var(--h3-variant);
+    letter-spacing: -0.015em;
+    line-height: var(--h3-line-height);
+    font-size: var(--h3-size);
+    color: var(--h3-color);
+    font-weight: var(--font-weight);
+    font-style: var(--h3-style);
+    font-family: var(--h3-font);
+}
+
 .notes-explorer-tag-container .notes-explorer-tag-container-tag-row {
     display: flex;
     align-items: center;
@@ -975,7 +987,6 @@
 
 .notes-explorer-tag-container .setting-item-control button {
     padding-inline: 8px !important;
-    width: auto !important;
     max-width: auto !important;
 }
 

@@ -151,15 +151,23 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    this.navEl = containerEl.createDiv({
-      cls: "setting-tab-header",
-    });
-    this.navEl.createEl("h2", {
-      text: "Notes Explorer Settings",
-    });
-    this.navEl.createEl("p", {
-      text: "Configure the settings for the Notes Explorer plugin.",
-    });
+    console.log("containerEl : ", containerEl);
+
+    // this.navEl = containerEl.createDiv({
+    //   cls: "notes-explorer-setting-tab-header",
+    // });
+    // console.log("navEl : ", this.navEl);
+    // this.navEl.createEl("h2", {
+    //   text: "Notes Explorer Settings",
+    // });
+    // this.navEl.createEl("p", {
+    //   text: "Configure the settings for the Notes Explorer plugin.",
+    // });
+
+    new Setting(containerEl)
+      .setName("Notes explorer settings")
+      .setHeading()
+      .setClass("notes-explorer-setting-tab-header");
 
     new Setting(containerEl)
       .setName("Launch on start")
@@ -319,7 +327,10 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
           })
       );
 
-    new Setting(containerEl).setName("Cards ui").setHeading();
+    new Setting(containerEl)
+      .setName("Cards ui")
+      .setHeading()
+      .setDesc("Configure the look of your notes explorer view.");
 
     new Setting(containerEl)
       .setName("Gutter size")
@@ -498,7 +509,12 @@ export class NotesExplorerSettingsTab extends PluginSettingTab {
           })
       );
 
-    new Setting(containerEl).setName("Tag color indicator").setHeading();
+    new Setting(containerEl)
+      .setName("Tag color indicator")
+      .setHeading()
+      .setDesc(
+        "Set automatic colors to cards based on the tags present in them, either in frontmatter or in the content of the note. Also the color can be set to the background of the card or as inline side bars."
+      );
 
     new Setting(containerEl)
       .setName("Which tags to read")
