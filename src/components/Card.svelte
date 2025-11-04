@@ -215,7 +215,7 @@
       return;
     }
 
-    if (file instanceof TFile) {
+    if (file instanceof TFile && file.extension === "md") {
       // console.log("Rendering note card for file:", file.path);
       const sanitizedFileContent = await pullContentWithoutFrontmatter(file);
       if (sanitizedFileContent !== "") {
@@ -254,6 +254,9 @@
           cls: "card-content-empty",
         });
       }
+    } else if (file instanceof TFile && file.extension == "canvas") {
+      // console.log("Rendering canvas card for file:", file.path);
+      await obsidianMarkdownRenderer($app, `![[${file.path}]]`, el, "", $view);
     } else if (file instanceof TFolder) {
       // console.log("Rendering folder card for folder:", file.path);
       // el.createEl("div", {

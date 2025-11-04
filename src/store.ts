@@ -231,7 +231,7 @@ export const allAllowedFiles = derived(
           // Helper function to recursively fetch files
           const collectFiles = (currentFolder: TFolder) => {
             currentFolder.children.forEach((child) => {
-              if (child instanceof TFile && child.extension === "md") {
+              if (child instanceof TFile && (child.extension === "md" || child.extension === "canvas")) {
                 allFiles.push(child);
               } else if (child instanceof TFolder) {
                 collectFiles(child); // Recursively process subfolder
@@ -244,13 +244,13 @@ export const allAllowedFiles = derived(
           allFiles = folder.children.filter(
             (child): child is TFile =>
               child instanceof TFolder ||
-              (child instanceof TFile && child.extension === "md")
+              (child instanceof TFile && (child.extension === "md" || child.extension === "canvas"))
           );
         } else {
           // If folder cards are enabled, only fetch files from the current folder
           allFiles = folder.children.filter(
             (child): child is TFile =>
-              child instanceof TFile && child.extension === "md"
+              child instanceof TFile && (child.extension === "md" || child.extension === "canvas")
           );
         }
       }
@@ -260,7 +260,7 @@ export const allAllowedFiles = derived(
       allFiles = rootFolder.children.filter(
         (child): child is TFile | TFolder =>
           child instanceof TFolder ||
-          (child instanceof TFile && child.extension === "md")
+          (child instanceof TFile && (child.extension === "md" || child.extension === "canvas"))
       );
     }
 
