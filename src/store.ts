@@ -68,7 +68,13 @@ function checkFilterForFile(
       const tags = getAllTags(
         get(appCache).getFileCache(file) as CachedMetadata
       );
-      if (tags?.includes(val)) return true;
+      // Normalize # prefix for consistent comparison
+      const normalizedVal = val.replace(/^#/, "");
+      if (tags?.some(tag => {
+        const normalizedTag = tag.replace(/^#/, "");
+        // Support exact match and hierarchical tags (e.g., #project matches #project/subtask)
+        return normalizedTag === normalizedVal || normalizedTag.startsWith(normalizedVal + "/");
+      })) return true;
       break;
     }
 
