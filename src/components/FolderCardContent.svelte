@@ -5,6 +5,10 @@
   import { folderIconSVG } from "../icons";
   import { settings } from "src/store";
 
+  export let openFile: (evt: MouseEvent) => Promise<void>;
+  export let clickHandler: "click" | "dblclick";
+  export let fixedCardHeight: number | null;
+
   let folderIconDiv: HTMLElement;
 
   export const fileIcon = (element: HTMLElement) => {
@@ -33,88 +37,124 @@
   });
 </script>
 
-<div class="folder-card-content">
-  <div class="folder-card-top">
-    <div class="folder-name">
+<div
+  class="folder-card"
+  on:click|preventDefault={clickHandler === "click" ? openFile : null}
+  on:dblclick|preventDefault={clickHandler === "dblclick" ? openFile : null}
+  role="presentation"
+>
+  <div class="folder-card-header">
+    <div class="folder-card-icon" bind:this={folderIconDiv}></div>
+    <h1 class="folder-card-title">
       {folder.name.length > 45 ? folder.name.slice(0, 45) + "..." : folder.name}
-    </div>
-    <div class="folder-icon" bind:this={folderIconDiv}></div>
+    </h1>
   </div>
-  <div class="folder-children">
-    <div class="folder-children-title">Children</div>
-    <ul>
-      {#each folder.children.slice(0, $settings.maxLines ?? folder.children.length) as child}
-        <li class="folder-child">
-          <span class="child-icon">
-            {#if child instanceof TFolder}
-              <div class="child-folder-icon" use:folderIcon></div>
-            {:else}
-              <div class="child-file-icon" use:fileIcon></div>
-            {/if}
-          </span>
-          {child.name.length > Math.floor($settings.minCardWidth / 8)
-            ? child.name.slice(0, Math.floor($settings.minCardWidth / 8)) +
-              "..."
-            : child.name}
-        </li>
-      {/each}
-    </ul>
+  <div class="folder-card-body" style="{fixedCardHeight ? 'flex-grow: 1; overflow-y: auto;' : ''}">
+    {#if folder.children.length === 0}
+      <div class="folder-card-empty">There's nothing here</div>
+    {:else}
+      <ul class="folder-card-list">
+        {#each folder.children.slice(0, $settings.maxLines ?? folder.children.length) as child}
+          <li class="folder-card-item">
+            <span class="folder-card-item-icon">
+              {#if child instanceof TFolder}
+                <div class="folder-card-item-folder" use:folderIcon></div>
+              {:else}
+                <div class="folder-card-item-file" use:fileIcon></div>
+              {/if}
+            </span>
+            {child.name.length > Math.floor($settings.minCardWidth / 8)
+              ? child.name.slice(0, Math.floor($settings.minCardWidth / 8)) +
+                "..."
+              : child.name}
+          </li>
+        {/each}
+      </ul>
+    {/if}
   </div>
 </div>
 
 <style>
-  .folder-card-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    height: 100%;
-    padding: 5px !important;
-    padding-inline: 2px !important;
-  }
-  .folder-card-top {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-    padding: 0.5em;
-    box-sizing: border-box;
-    background: var(--background-modifier-cover);
-    border: 1px solid var(--code-comment);
-    border-radius: 0.5rem;
-  }
-  .folder-name {
-    flex: 1;
-    font-weight: bold;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 1.4rem;
-  }
-  .folder-children {
-    flex: 1;
-    padding: 0.5em;
-  }
-  .folder-children > ul {
-    padding-inline: 20px;
-    margin: 0;
-  }
-  .folder-children-title {
-    font-weight: bold;
-    margin-bottom: 0.25em;
-  }
-  .folder-child {
-    display: flex;
-    flex-direction: row;
-    align-content: center;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .folder-icon {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-start;
-    height: 100%;
-    max-width: 25%;
-  }
+.folder-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  gap: 1.1em;
+}
+
+.folder-card-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  gap: 1em;
+}
+
+.folder-card-icon {
+  width: 30px;
+  height: 30px;
+  min-width: 20px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.folder-card-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.folder-card-title {
+  font-weight: bold;
+  white-space: normal;
+  font-size: 24px;
+  margin: 0 !important;
+  flex: 1;
+  word-break: break-word;
+}
+
+.folder-card-body {
+  border: 1px solid var(--background-modifier-border);
+  background-color: var(--background-modifier-cover);
+  border-radius: 10px;
+  padding: 0.8em;
+  width: 100%;
+  height: 100%;
+}
+
+.folder-card-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2em;
+}
+
+.folder-card-empty {
+  font-style: italic;
+}
+
+.folder-card-item {
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.folder-card-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folder-card-item-folder,
+.folder-card-item-file {
+  width: 18px;
+  height: 18px;
+}
 </style>

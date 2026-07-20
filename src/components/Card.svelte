@@ -219,10 +219,10 @@
       // console.log("Rendering note card for file:", file.path);
       const sanitizedFileContent = await pullContentWithoutFrontmatter(file);
       if (sanitizedFileContent !== "") {
-        const maxLines = $settings.maxLines || 20;
+        const maxLines = $settings.maxLines || 3;
         // const content = await file.vault.cachedRead(file);
         const truncatedContent =
-          sanitizedFileContent.split("\n").length > ($settings.maxLines || 20)
+          sanitizedFileContent.split("\n").length > ($settings.maxLines || 3)
             ? truncateContent(sanitizedFileContent, maxLines) + "\n\n..."
             : sanitizedFileContent + "\n\n";
 
@@ -254,23 +254,6 @@
           cls: "card-content-empty",
         });
       }
-    } else if (file instanceof TFolder) {
-      // console.log("Rendering folder card for folder:", file.path);
-      // el.createEl("div", {
-      //   text: "Folder: " + file.name,
-      //   cls: "card-content-folder",
-      // });
-
-      // Render FolderCardContent component
-      const folderContent = document.createElement("div");
-      folderContent.className = "card-content-folder";
-      el.appendChild(folderContent);
-
-      // Mount Svelte component
-      new FolderCardContent({
-        target: folderContent,
-        props: { folder: file },
-      });
     } else {
       console.warn("Unsupported file type for rendering:", file);
       el.createEl("div", {
@@ -523,7 +506,9 @@
 
   onMount(() => {
     (async () => {
-      await renderNoteCard(contentDiv);
+      if (file instanceof TFile) {
+        await renderNoteCard(contentDiv);
+      }
       updateTagColorIndicator();
       cardStyle = calculateStyle();
       await updateLayoutNextTick();
@@ -545,35 +530,38 @@
   tabindex="0"
 >
   {#if displayFilename && file instanceof TFile}
-    <div class="top-bar">
-      <div class="top-bar-fileName">{file.basename}</div>
+    <div class="card-header">
+      <h1 class="card-label">{file.basename}</h1>
     </div>
   {/if}
 
-  <div
-    class="card-content"
-    style="
-    padding-inline: {$settings.tagColorIndicatorType === 'background'
-      ? '8px'
-      : '4px'};
-    {$settings.fixedCardHeight ? 'overflow-y: clip;' : ''}
-  "
-    on:click|preventDefault={clickHandler === "click" ? openFile : null}
-    on:dblclick|preventDefault={clickHandler === "dblclick" ? openFile : null}
-    bind:this={contentDiv}
-    role="presentation"
-  ></div>
+  {#if file instanceof TFile}
+    <div
+      class="card-content"
+      style="{$settings.fixedCardHeight ? 'overflow-y: clip;' : ($settings.metadataVisibility ? 'padding-bottom: 28px;' : '')}"
+      on:click|preventDefault={clickHandler === "click" ? openFile : null}
+      on:dblclick|preventDefault={clickHandler === "dblclick" ? openFile : null}
+      bind:this={contentDiv}
+      role="presentation"
+    ></div>
+  {:else if file instanceof TFolder}
+    <FolderCardContent
+      folder={file}
+      {openFile}
+      {clickHandler}
+      fixedCardHeight={$settings.fixedCardHeight}
+    />
+  {/if}
 
   {#if file instanceof TFile}
     <div
-      class={$settings.metadataVisibility
-        ? "card-footer-parent-active"
-        : "card-footer-parent"}
+      class="card-footer"
+      class:is-active={$settings.metadataVisibility}
       bind:this={footerDiv}
       on:mouseenter={(event) => parentNoteHoverPreview(event, footerDiv)}
       role="presentation"
     >
-      <div class="card-footer">
+      <div class="card-footer-content">
         {#if pinned}
           <button
             class="clickable-icon"
@@ -597,7 +585,7 @@
             <span use:vaultIcon></span>
           {/if}
           <div
-            class="card-footer-text"
+            class="card-footer-content-text"
             title={file && file.parent ? file.parent.path : ""}
             role="tooltip"
           >
